@@ -9,9 +9,14 @@ static u8 i, ix, iy;
 
 static const u8 PALETTE[] = {
 	0x1D, 0x20, 0x20, 0x20,
+	0x1D, 0x06, 0x16, 0x26,
+	0x1D, 0x01, 0x11, 0x21,
+	0x1D, 0x09, 0x19, 0x29,
+	
 	0x1D, 0x20, 0x20, 0x20,
-	0x1D, 0x20, 0x20, 0x20,
-	0x1D, 0x20, 0x20, 0x20,
+	0x1D, 0x06, 0x16, 0x26,
+	0x1D, 0x01, 0x11, 0x21,
+	0x1D, 0x09, 0x19, 0x29,
 };
 
 GameState loop(){
@@ -62,19 +67,39 @@ static char HEX[] = "0123456789ABCDEF";
 
 GameState debug_chr(){
 	px_inc(PX_INC1);
+	for(i = 0; i < 8; ++i){
+		px_addr(NT0_ADDR(0, i)); px_fill(8, 0x10);
+	}
+	
+	// Top
+	px_inc(PX_INC1);
 	px_addr(NT0_ADDR(8, 6));
 	px_blit(sizeof(HEX), HEX);
 	
+	// Side
 	px_inc(PX_INC32);
 	px_addr(NT0_ADDR(6, 8));
 	px_blit(sizeof(HEX), HEX);
 	
+	// Grid
 	px_inc(PX_INC1);
 	for(iy = 0; iy < 16; ++iy){
 		px_addr(NT0_ADDR(8, 8 + iy));
 		for(ix = 0; ix < 16; ++ix){
 			PPU.vram.data = ix | 16*iy;
 		}
+	}
+	
+	// Set palette
+	// px_addr(NT0_ADDR(0, 30));
+	// px_fill(64, 0xE4);
+	{
+		u8 x = 0;
+		u8 y = 2;
+		u8 pal = 1;
+		u16 addr = 0x23C0 + (x >> 1) + ((y & 0xFE) << 2);
+		px_addr(addr);
+		PPU.vram.data = 0x55;
 	}
 	
 	// Enable rendering.
@@ -88,7 +113,8 @@ GameState main(void){
 	
 	px_inc(PX_INC1);
 	px_addr(0x3F00);
-	px_blit(4, (u8 *)PALETTE);
+	px_blit(32, (u8 *)PALETTE);
 	
+	// return board();
 	return debug_chr();
 }

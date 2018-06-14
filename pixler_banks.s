@@ -2,7 +2,6 @@
 .include "pixler.inc"
 
 .export px_bank_select, _px_bank_select
-.export px_blit_pages, __px_blit_pages = px_blit_pages
 
 .rodata
 	bank_selector: .byte 0, 1, 2, 3, 4, 5, 6, 7
@@ -21,22 +20,6 @@
 	tay
 	
 	jmp px_bank_select
-.endproc
-
-.proc px_blit_pages ; a = base_page, x = count
-	ldy #0
-	sty ptr1 + 0
-	sta ptr1 + 1
-	
-	:	lda (ptr1), y
-		sta PPU_VRAM_IO
-		iny
-		bne :-
-	inc ptr1 + 1
-	dex
-	bne :-
-	
-	rts
 .endproc
 
 .segment "PRG0"

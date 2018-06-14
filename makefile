@@ -12,7 +12,7 @@ INCLUDE = $(CC65_ROOT)/include
 ASMINC = $(CC65_ROOT)/libsrc/nes
 
 SRC = main.c pixler.c
-ASMSRC = pixler_boot.s pixler_zeropage.s pixler_nmi.s pixler_banks.s pixler_buffer.s
+ASMSRC = pixler_boot.s pixler_zeropage.s pixler_nmi.s pixler_banks.s pixler_buffer.s pixler_blit.s
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
 $(ROM): ld65.cfg $(OBJS)

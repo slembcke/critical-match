@@ -1,9 +1,10 @@
 .include "zeropage.inc"
 .include "pixler.inc"
 
-.import incsp1
 .importzp px_ctrl
 .importzp PX_buffer
+
+.import incsp1
 
 .export px_buffer_exec
 .export _px_buffer_inc

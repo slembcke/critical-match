@@ -28,13 +28,13 @@
 	sty ptr1 + 0
 	sta ptr1 + 1
 	
-	:		lda (sreg), y
-			sta PPU_VRAM_IO
-			iny
-			bne :-
-		inc sreg + 1
-		dex
+	:	lda (ptr1), y
+		sta PPU_VRAM_IO
+		iny
 		bne :-
+	inc ptr1 + 1
+	dex
+	bne :-
 	
 	rts
 .endproc

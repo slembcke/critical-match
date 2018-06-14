@@ -19,7 +19,7 @@ void _px_blit_pages(u16 count8_basepage8);
 
 #define PX_CHR_LEFT 0x00
 #define PX_CHR_RIGHT 0x10
-void px_load_chr(u8 table, u8 bank, u8 page);
+void px_load_chr(u8 chr_table, u8 rom_bank, u8 page);
 
 #define PX_INC1 0
 #define PX_INC32 1

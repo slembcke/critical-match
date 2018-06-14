@@ -16,7 +16,7 @@ PPU_NAMETBL0 = $2000
 PPU_PAL0 = $3F00
 
 .macro c_var idx
-	ldy #idx
+	ldy #(idx)
 	lda (sp), y
 .endmacro
 

@@ -4,10 +4,12 @@
 .importzp px_ctrl
 
 .import incsp1
+.import incsp2
 
 .export px_blit_pages, __px_blit_pages = px_blit_pages
 .export _px_inc
 .export _px_fill
+.export _px_blit
 
 .proc px_blit_pages ; a = base_page, x = count
 	ldy #0
@@ -48,8 +50,7 @@
 	
 	pha
 	
-	ldy #_len
-	lda (sp), y
+	c_var _len
 	tay
 	; TODO length high byte is ignored
 	
@@ -59,4 +60,33 @@
 		bne :-
 	
 	jmp incsp1
+.endproc
+
+; static void px_blit(u8 *mem, u16 len){
+; 	for(; len != 0; --len) PPU.vram.data = *(mem++);
+; }
+
+.proc _px_blit ; 16 len, u16 addr
+	_len = 0
+	; _addr = x|a
+	
+	sta ptr1 + 0
+	stx ptr1 + 1
+	
+	c_var _len + 0
+	sta tmp1 + 0
+	; c_var _len + 1
+	; sta tmp1 + 1
+	; TODO high byte is ignored
+	
+	ldy #0
+	:	cpy tmp1 + 0
+		beq :+
+		lda (ptr1), y
+		sta PPU_VRAM_IO
+		iny
+		jmp :-
+	:
+	
+	jmp incsp2
 .endproc

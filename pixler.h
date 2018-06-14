@@ -25,7 +25,8 @@ void px_load_chr(u8 chr_table, u8 rom_bank, u8 page);
 #define PX_INC32 1
 
 void px_inc(u8 direction);
-void px_fill(char chr, u16 len);
+#define px_addr(addr) {	PPU.vram.address = addr >> 8; PPU.vram.address = addr & 0xFF;}
+void px_fill(u16 len, char chr);
 
 void px_buffer_inc(u8 direction);
 

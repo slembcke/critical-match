@@ -42,15 +42,18 @@
 	rts
 .endproc
 
-.proc _px_fill ; u8 chr, u16 len
-	_chr = 0
-	; _len = x|a
+.proc _px_fill ; u16 len, u8 chr
+	_len = 0
+	; _chr = x|a
 	
-	; TODO high byte in x is ignored
-	sta sreg
+	pha
 	
-	c_var _chr
-	ldy sreg
+	ldy #_len
+	lda (sp), y
+	tay
+	; TODO length high byte is ignored
+	
+	pla
 	: sta PPU_VRAM_IO
 		dey
 		bne :-

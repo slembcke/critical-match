@@ -30,7 +30,6 @@ GameState loop(){
 static const char GREET[] = "Hello World! TreasureStack!";
 
 #define NT0_ADDR(x, y) ((y << 5) + x + 0x2000)
-#define px_addr(addr) {	PPU.vram.address = addr >> 8; PPU.vram.address = addr & 0xFF;}
 
 static char *TMP_DATA = "AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 
@@ -43,15 +42,15 @@ GameState main(void){
 	
 	px_inc(PX_INC1);
 	px_addr(NT0_ADDR(9, 4));
-	px_fill('*', 14);
+	px_fill(14, '*');
 	px_addr(NT0_ADDR(9, 25));
-	px_fill('*', 14);
+	px_fill(14, '*');
 	
 	px_inc(PX_INC32);
 	px_addr(NT0_ADDR(9, 5));
-	px_fill('*', 20);
+	px_fill(20, '*');
 	px_addr(NT0_ADDR(22, 5));
-	px_fill('*', 20);
+	px_fill(20, '*');
 	
 	// Enable rendering.
 	PPU.mask = 0x1E;

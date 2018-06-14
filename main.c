@@ -33,11 +33,6 @@ static const char GREET[] = "Hello World! TreasureStack!";
 
 static char *TMP_DATA = "AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 
-px_blit(u16 len, u16 addr);
-// {
-// 	for(; len != 0; --len) PPU.vram.data = *(mem++);
-// }
-
 GameState main(void){
 	px_load_chr(PX_CHR_LEFT, 0, 0x80);
 	
@@ -59,7 +54,7 @@ GameState main(void){
 	
 	px_inc(PX_INC1);
 	for(i = 0; i < 20; i++){
-		px_addr(NT0_ADDR(10, i + 5));
+		px_addr(NT0_ADDR(10, 5) + i*32);
 		px_blit(12, TMP_DATA + ((i >> 1) << 1));
 	}
 	

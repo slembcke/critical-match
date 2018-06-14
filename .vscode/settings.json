@@ -1,0 +1,11 @@
+{
+	"files.associations": {
+		"*.s": "mads",
+		"*.inc": "mads",
+		"nes.h": "c",
+		"pixler.h": "c"
+	},
+	"files.exclude": {
+		"**/*.o" : true
+	}
+}

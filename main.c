@@ -33,13 +33,7 @@ static const char GREET[] = "Hello World! TreasureStack!";
 
 static char *TMP_DATA = "AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 
-GameState main(void){
-	px_load_chr(PX_CHR_LEFT, 0, 0x80);
-	
-	px_inc(PX_INC1);
-	px_addr(0x3F00);
-	px_blit(4, (u8 *)PALETTE);
-	
+GameState board(){
 	px_inc(PX_INC1);
 	px_addr(NT0_ADDR(9, 4));
 	px_fill(14, '*');
@@ -62,4 +56,39 @@ GameState main(void){
 	PPU.mask = 0x1E;
 	
 	return loop();
+}
+
+static char HEX[] = "0123456789ABCDEF";
+
+GameState debug_chr(){
+	px_inc(PX_INC1);
+	px_addr(NT0_ADDR(8, 6));
+	px_blit(sizeof(HEX), HEX);
+	
+	px_inc(PX_INC32);
+	px_addr(NT0_ADDR(6, 8));
+	px_blit(sizeof(HEX), HEX);
+	
+	px_inc(PX_INC1);
+	for(iy = 0; iy < 16; ++iy){
+		px_addr(NT0_ADDR(8, 8 + iy));
+		for(ix = 0; ix < 16; ++ix){
+			PPU.vram.data = ix | 16*iy;
+		}
+	}
+	
+	// Enable rendering.
+	PPU.mask = 0x1E;
+	
+	return loop();
+}
+
+GameState main(void){
+	px_load_chr(PX_CHR_LEFT, 0, 0x80);
+	
+	px_inc(PX_INC1);
+	px_addr(0x3F00);
+	px_blit(4, (u8 *)PALETTE);
+	
+	return debug_chr();
 }

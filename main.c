@@ -55,28 +55,46 @@ static void attr_pal(u8 x, u8 y, u8 pal){
 u8 attributes[64] = {};
 
 static void set_block(u8 x, u8 y, u8 block){
-	const u16 addr = NT_ADDR(0, 10, 5) + (u8)(y << 6) + (u8)(x << 1);
+	{
+		const u16 addr = NT_ADDR(0, 10, 6) + (y << 6) + (u8)(x << 1);
+		
+		px_buffer_inc(PX_INC1);
+		px_buffer_data(2, addr);
+		PX.buffer[0] = 'A';
+		PX.buffer[1] = 'B';
+		px_buffer_data(2, addr + 32);
+		PX.buffer[0] = 'C';
+		PX.buffer[1] = 'D';
+	}
 	
-	px_buffer_inc(PX_INC1);
-	px_buffer_data(2, addr);
-	PX.buffer[0] = 'A';
-	PX.buffer[1] = 'B';
-	px_buffer_data(2, addr + 32);
-	PX.buffer[0] = 'C';
-	PX.buffer[1] = 'D';
+	x += 5;
+	y += 3;
+	{
+		static const u8 SUB_MASK[] = {0x03, 0x0C, 0x30, 0xC0};
+		static const u8 PAL[] = {0x00, 0x55, 0xAA, 0xFF};
+		
+		u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)];
+		u8 offset = ((y & 0xFE) << 2) | (x >> 1);
+		u8 value = (attributes[offset] & ~mask) | (PAL[block] & mask);
+		attributes[offset] = value;
+		
+		px_buffer_data(1, 0x23C0 | offset);
+		PX.buffer[0] = value;
+		// px_wait_nmi();
+	}
 }
 
 static GameState board(){
 	px_inc(PX_INC1);
-	px_addr(NT_ADDR(0, 9, 4));
+	px_addr(NT_ADDR(0, 9, 5));
 	px_fill(14, '*');
-	px_addr(NT_ADDR(0, 9, 25));
+	px_addr(NT_ADDR(0, 9, 26));
 	px_fill(14, '*');
 	
 	px_inc(PX_INC32);
-	px_addr(NT_ADDR(0, 9, 5));
+	px_addr(NT_ADDR(0, 9, 6));
 	px_fill(20, '*');
-	px_addr(NT_ADDR(0, 22, 5));
+	px_addr(NT_ADDR(0, 22, 6));
 	px_fill(20, '*');
 	
 	// Enable rendering.
@@ -84,6 +102,9 @@ static GameState board(){
 	
 	set_block(0, 0, 1);
 	set_block(1, 1, 2);
+	set_block(2, 2, 3);
+	set_block(3, 3, 0);
+	set_block(4, 4, 1);
 	
 	return loop();
 }

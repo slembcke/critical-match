@@ -63,9 +63,26 @@ GameState board(){
 	return loop();
 }
 
-static char HEX[] = "0123456789ABCDEF";
+static void attr_pal(u8 x, u8 y, u8 pal){
+	static const u8 SUB_MASK[] = {0x03, 0x0C, 0x30, 0xC0};
+	static const u8 PAL[] = {0x00, 0x55, 0xAA, 0xFF};
+	
+	register u8 value;
+	register u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)];
+	register u16 addr = 0x23C0 | (u8)((y & 0xFE) << 2) | (u8)(x >> 1);
+	
+	px_addr(addr);
+	// First read resets the IO register and returns garbage.
+	value = PPU.vram.data;
+	value = PPU.vram.data;
+	
+	px_addr(addr);
+	PPU.vram.data = (value & ~mask) | (PAL[pal] & mask);
+}
 
 GameState debug_chr(){
+	static const char HEX[] = "0123456789ABCDEF";
+	
 	px_inc(PX_INC1);
 	for(i = 0; i < 8; ++i){
 		px_addr(NT0_ADDR(0, i)); px_fill(8, 0x10);
@@ -74,12 +91,12 @@ GameState debug_chr(){
 	// Top
 	px_inc(PX_INC1);
 	px_addr(NT0_ADDR(8, 6));
-	px_blit(sizeof(HEX), HEX);
+	px_blit(sizeof(HEX), 16);
 	
 	// Side
 	px_inc(PX_INC32);
 	px_addr(NT0_ADDR(6, 8));
-	px_blit(sizeof(HEX), HEX);
+	px_blit(sizeof(HEX), 16);
 	
 	// Grid
 	px_inc(PX_INC1);
@@ -93,14 +110,10 @@ GameState debug_chr(){
 	// Set palette
 	// px_addr(NT0_ADDR(0, 30));
 	// px_fill(64, 0xE4);
-	{
-		u8 x = 0;
-		u8 y = 2;
-		u8 pal = 1;
-		u16 addr = 0x23C0 + (x >> 1) + ((y & 0xFE) << 2);
-		px_addr(addr);
-		PPU.vram.data = 0x55;
-	}
+	attr_pal(0, 0, 0);
+	attr_pal(1, 0, 1);
+	attr_pal(0, 1, 2);
+	attr_pal(1, 1, 3);
 	
 	// Enable rendering.
 	PPU.mask = 0x1E;

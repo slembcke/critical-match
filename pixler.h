@@ -9,7 +9,7 @@ typedef uint16_t u16;
 extern struct {
 	u16 scroll_x;
 	u16 scroll_y;
-	u8 *buffer;
+	u8 * const buffer;
 } PX;
 #pragma zpsym("PX");
 
@@ -27,7 +27,7 @@ void px_load_chr(u8 chr_table, u8 rom_bank, u8 page);
 #define px_addr(addr) {	PPU.vram.address = addr >> 8; PPU.vram.address = addr & 0xFF;}
 void px_inc(u8 direction);
 void px_fill(u16 len, char chr);
-void px_blit(u16 len, u16 addr);
+void px_blit(u16 len, const u8 *src);
 
 void px_buffer_inc(u8 direction);
 void px_buffer_data(u8 len, u16 addr);

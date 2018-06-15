@@ -19,7 +19,7 @@ static const u8 PALETTE[] = {
 	0x1D, 0x09, 0x19, 0x29,
 };
 
-GameState loop(){
+static GameState loop(){
 	register u8 ticks = 0;
 	
 	while(true){
@@ -32,20 +32,16 @@ GameState loop(){
 	return loop();
 }
 
-static const char GREET[] = "Hello World! TreasureStack!";
-
-static const NT_BASE[] = {0x2000, 0x2400, 0x2800, 0x2C00};
+static const u16 NT_BASE[] = {0x2000, 0x2400, 0x2800, 0x2C00};
 #define NT_ADDR(tbl, x, y) (NT_BASE[tbl] + (y << 5) + x)
-
-static char *TMP_DATA = "AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 
 static void attr_pal(u8 x, u8 y, u8 pal){
 	static const u8 SUB_MASK[] = {0x03, 0x0C, 0x30, 0xC0};
 	static const u8 PAL[] = {0x00, 0x55, 0xAA, 0xFF};
 	
-	register u8 value;
-	register u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)];
-	register u16 addr = 0x23C0 | (u8)((y & 0xFE) << 2) | (u8)(x >> 1);
+	u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)];
+	u16 addr = 0x23C0 | (u8)((y & 0xFE) << 2) | (u8)(x >> 1);
+	u8 value;
 	
 	px_addr(addr);
 	// First read resets the IO register and returns garbage.
@@ -56,7 +52,21 @@ static void attr_pal(u8 x, u8 y, u8 pal){
 	PPU.vram.data = (value & ~mask) | (PAL[pal] & mask);
 }
 
-GameState board(){
+u8 attributes[64] = {};
+
+static void set_block(u8 x, u8 y, u8 block){
+	const u16 addr = NT_ADDR(0, 10, 5) + (u8)(y << 6) + (u8)(x << 1);
+	
+	px_buffer_inc(PX_INC1);
+	px_buffer_data(2, addr);
+	PX.buffer[0] = 'A';
+	PX.buffer[1] = 'B';
+	px_buffer_data(2, addr + 32);
+	PX.buffer[0] = 'C';
+	PX.buffer[1] = 'D';
+}
+
+static GameState board(){
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 9, 4));
 	px_fill(14, '*');
@@ -69,19 +79,16 @@ GameState board(){
 	px_addr(NT_ADDR(0, 22, 5));
 	px_fill(20, '*');
 	
-	px_inc(PX_INC1);
-	for(i = 0; i < 20; i++){
-		px_addr(NT_ADDR(0, 10, 5) + i*32);
-		px_blit(12, TMP_DATA + ((i >> 1) << 1));
-	}
-	
 	// Enable rendering.
 	PPU.mask = 0x1E;
+	
+	set_block(0, 0, 1);
+	set_block(1, 1, 2);
 	
 	return loop();
 }
 
-GameState debug_chr(){
+static GameState debug_chr(){
 	static const char HEX[] = "0123456789ABCDEF";
 	
 	// Top

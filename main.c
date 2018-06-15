@@ -34,8 +34,10 @@ static GameState loop(){
 
 #define NT_ADDR(tbl, x, y) (0x2000 + tbl*0x0400 + (y << 5) + x)
 
-u8 GRID[8*12] = {};
-u8 ATTRIBUTE_TABLE[64] = {};
+static u8 GRID[8*12] = {};
+static u8 ATTRIBUTE_TABLE[64] = {};
+
+#define PX_STA_BUFFER asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer))
 
 static void set_block(u8 x, u8 y, u8 block){
 	{
@@ -44,24 +46,49 @@ static void set_block(u8 x, u8 y, u8 block){
 		
 		px_buffer_inc(PX_INC1);
 		px_buffer_data(2, addr);
-		PX.buffer[0] = 'A';
-		PX.buffer[1] = 'B';
+		asm("lda #'A'");\
+		asm("ldy #0");\
+		PX_STA_BUFFER;\
+		asm("lda #'B'");\
+		asm("ldy #1");\
+		PX_STA_BUFFER;
 		px_buffer_data(2, addr + 32);
-		PX.buffer[0] = 'C';
-		PX.buffer[1] = 'D';
+		asm("lda #'C'");\
+		asm("ldy #0");\
+		PX_STA_BUFFER;\
+		asm("lda #'D'");\
+		asm("ldy #1");\
+		PX_STA_BUFFER;
 		
-		GRID[(u8)(8*y + x + 9)] = block;
+		// GRID[(u8)(8*y + x + 9)] = block;
+		asm("ldy #%o", y);\
+		asm("lda (sp), y");\
+		asm("asl");\
+		asm("asl");\
+		asm("asl");\
+		asm("ldy #%o", x);\
+		asm("clc");\
+		asm("adc (sp), y");\
+		asm("adc #9");\
+		asm("sta tmp1");\
+		asm("ldy #%o", block);\
+		asm("lda (sp), y");\
+		asm("ldy tmp1");\
+		asm("sta %v, y", GRID);
 	}{
 		static const u8 SUB_MASK[] = {0x0C, 0x03, 0xC0, 0x30};
 		static const u8 PAL[] = {0x00, 0x55, 0xAA, 0xFF};
 		
-		u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)];
-		u8 offset = (((12 - y) & 0xFE) << 2) | ((x + 5) >> 1);
+		u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)]; // TODO bad ASM
+		u8 offset = (u8)(((12 - y) & 0xFE) << 2) | ((u8)(x + 5) >> 1);
 		u8 value = (ATTRIBUTE_TABLE[offset] & ~mask) | (PAL[block] & mask);
 		ATTRIBUTE_TABLE[offset] = value;
 		
 		px_buffer_data(1, 0x23C0 | offset);
-		PX.buffer[0] = value;
+		asm("ldy #%o", value);\
+		asm("lda (sp), y");\
+		asm("ldy #0");\
+		PX_STA_BUFFER;
 	}
 }
 

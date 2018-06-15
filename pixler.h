@@ -6,11 +6,13 @@ typedef uint16_t u16;
 
 #include <nes.h>
 
-extern struct {
+typedef struct {
 	u16 scroll_x;
 	u16 scroll_y;
 	u8 * const buffer;
-} PX;
+} PX_t;
+
+extern PX_t PX;
 #pragma zpsym("PX");
 
 void px_bank_select(u8 bank);

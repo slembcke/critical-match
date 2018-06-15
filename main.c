@@ -34,6 +34,8 @@ GameState loop(){
 
 static const char GREET[] = "Hello World! TreasureStack!";
 
+// static const NT_BASE[] = {0x2000, 0x2400, 0x2800, 0x2C00};
+// #define NT_ADDR(tbl, x, y) (NT_BASE[tbl] + (y << 5) + x)
 #define NT0_ADDR(x, y) ((y << 5) + x + 0x2000)
 
 static char *TMP_DATA = "AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
@@ -83,20 +85,15 @@ static void attr_pal(u8 x, u8 y, u8 pal){
 GameState debug_chr(){
 	static const char HEX[] = "0123456789ABCDEF";
 	
-	px_inc(PX_INC1);
-	for(i = 0; i < 8; ++i){
-		px_addr(NT0_ADDR(0, i)); px_fill(8, 0x10);
-	}
-	
 	// Top
 	px_inc(PX_INC1);
 	px_addr(NT0_ADDR(8, 6));
-	px_blit(sizeof(HEX), 16);
+	px_blit(16, HEX);
 	
 	// Side
 	px_inc(PX_INC32);
 	px_addr(NT0_ADDR(6, 8));
-	px_blit(sizeof(HEX), 16);
+	px_blit(16, HEX);
 	
 	// Grid
 	px_inc(PX_INC1);
@@ -109,11 +106,7 @@ GameState debug_chr(){
 	
 	// Set palette
 	// px_addr(NT0_ADDR(0, 30));
-	// px_fill(64, 0xE4);
-	attr_pal(0, 0, 0);
-	attr_pal(1, 0, 1);
-	attr_pal(0, 1, 2);
-	attr_pal(1, 1, 3);
+	// px_fill(64, 0x55);
 	
 	// Enable rendering.
 	PPU.mask = 0x1E;

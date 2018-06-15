@@ -32,31 +32,15 @@ static GameState loop(){
 	return loop();
 }
 
-static const u16 NT_BASE[] = {0x2000, 0x2400, 0x2800, 0x2C00};
-#define NT_ADDR(tbl, x, y) (NT_BASE[tbl] + (y << 5) + x)
+#define NT_ADDR(tbl, x, y) (0x2000 + tbl*0x0400 + (y << 5) + x)
 
-static void attr_pal(u8 x, u8 y, u8 pal){
-	static const u8 SUB_MASK[] = {0x03, 0x0C, 0x30, 0xC0};
-	static const u8 PAL[] = {0x00, 0x55, 0xAA, 0xFF};
-	
-	u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)];
-	u16 addr = 0x23C0 | (u8)((y & 0xFE) << 2) | (u8)(x >> 1);
-	u8 value;
-	
-	px_addr(addr);
-	// First read resets the IO register and returns garbage.
-	value = PPU.vram.data;
-	value = PPU.vram.data;
-	
-	px_addr(addr);
-	PPU.vram.data = (value & ~mask) | (PAL[pal] & mask);
-}
-
-u8 attributes[64] = {};
+u8 GRID[8*12] = {};
+u8 ATTRIBUTE_TABLE[64] = {};
 
 static void set_block(u8 x, u8 y, u8 block){
 	{
-		const u16 addr = NT_ADDR(0, 10, 6) + (y << 6) + (u8)(x << 1);
+		static const u16 BOARD_ORIGIN = NT_ADDR(0, 10, 24);
+		const u16 addr = BOARD_ORIGIN - (y << 6) + (u8)(x << 1);
 		
 		px_buffer_inc(PX_INC1);
 		px_buffer_data(2, addr);
@@ -65,22 +49,19 @@ static void set_block(u8 x, u8 y, u8 block){
 		px_buffer_data(2, addr + 32);
 		PX.buffer[0] = 'C';
 		PX.buffer[1] = 'D';
-	}
-	
-	x += 5;
-	y += 3;
-	{
-		static const u8 SUB_MASK[] = {0x03, 0x0C, 0x30, 0xC0};
+		
+		GRID[(u8)(8*y + x + 9)] = block;
+	}{
+		static const u8 SUB_MASK[] = {0x0C, 0x03, 0xC0, 0x30};
 		static const u8 PAL[] = {0x00, 0x55, 0xAA, 0xFF};
 		
 		u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)];
-		u8 offset = ((y & 0xFE) << 2) | (x >> 1);
-		u8 value = (attributes[offset] & ~mask) | (PAL[block] & mask);
-		attributes[offset] = value;
+		u8 offset = (((12 - y) & 0xFE) << 2) | ((x + 5) >> 1);
+		u8 value = (ATTRIBUTE_TABLE[offset] & ~mask) | (PAL[block] & mask);
+		ATTRIBUTE_TABLE[offset] = value;
 		
 		px_buffer_data(1, 0x23C0 | offset);
 		PX.buffer[0] = value;
-		// px_wait_nmi();
 	}
 }
 
@@ -105,6 +86,11 @@ static GameState board(){
 	set_block(2, 2, 3);
 	set_block(3, 3, 0);
 	set_block(4, 4, 1);
+	set_block(5, 5, 2);
+	set_block(0, 6, 3);
+	set_block(1, 7, 0);
+	set_block(2, 8, 1);
+	set_block(3, 9, 2);
 	
 	return loop();
 }

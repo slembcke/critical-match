@@ -39,9 +39,16 @@ static u8 ATTRIBUTE_TABLE[64] = {};
 
 #define PX_STA_BUFFER asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer))
 
-static const u8 BLOCK[] = "ABCD";
+static const u8 BLOCK[][4] = {
+	{0x94, 0x92, 0x91, 0x88},
+	{0x94, 0x92, 0x91, 0x88},
+	{0x14, 0x12, 0x11, 0x08},
+	{0x14, 0x12, 0x11, 0x08},
+};
 
 static void set_block(u8 x, u8 y, u8 block){
+	register const u8 *ptr = BLOCK[block];
+	
 	{
 		static const u16 BOARD_ORIGIN = NT_ADDR(0, 10, 24);
 		const u16 addr = BOARD_ORIGIN - (y << 6) + (u8)(x << 1);
@@ -49,18 +56,18 @@ static void set_block(u8 x, u8 y, u8 block){
 		px_buffer_inc(PX_INC1);
 		px_buffer_data(2, addr);
 		asm("ldy #0");\
-		asm("lda %v, y", BLOCK);\
+		asm("lda (%v), y", ptr);\
 		PX_STA_BUFFER;\
 		asm("ldy #1");\
-		asm("lda %v, y", BLOCK);\
+		asm("lda (%v), y", ptr);\
 		PX_STA_BUFFER;
 		px_buffer_data(2, addr + 32);
 		asm("ldy #2");\
-		asm("lda %v, y", BLOCK);\
+		asm("lda (%v), y", ptr);\
 		asm("ldy #0");\
 		PX_STA_BUFFER;\
 		asm("ldy #3");\
-		asm("lda %v, y", BLOCK);\
+		asm("lda (%v), y", ptr);\
 		asm("ldy #1");\
 		PX_STA_BUFFER;
 		
@@ -165,6 +172,6 @@ GameState main(void){
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	return board();
 	// return debug_chr();
+	return board();
 }

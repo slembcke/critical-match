@@ -39,6 +39,8 @@ static u8 ATTRIBUTE_TABLE[64] = {};
 
 #define PX_STA_BUFFER asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer))
 
+static const u8 BLOCK[] = "ABCD";
+
 static void set_block(u8 x, u8 y, u8 block){
 	{
 		static const u16 BOARD_ORIGIN = NT_ADDR(0, 10, 24);
@@ -46,17 +48,19 @@ static void set_block(u8 x, u8 y, u8 block){
 		
 		px_buffer_inc(PX_INC1);
 		px_buffer_data(2, addr);
-		asm("lda #'A'");\
 		asm("ldy #0");\
+		asm("lda %v, y", BLOCK);\
 		PX_STA_BUFFER;\
-		asm("lda #'B'");\
 		asm("ldy #1");\
+		asm("lda %v, y", BLOCK);\
 		PX_STA_BUFFER;
 		px_buffer_data(2, addr + 32);
-		asm("lda #'C'");\
+		asm("ldy #2");\
+		asm("lda %v, y", BLOCK);\
 		asm("ldy #0");\
 		PX_STA_BUFFER;\
-		asm("lda #'D'");\
+		asm("ldy #3");\
+		asm("lda %v, y", BLOCK);\
 		asm("ldy #1");\
 		PX_STA_BUFFER;
 		

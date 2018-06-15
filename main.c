@@ -34,36 +34,10 @@ GameState loop(){
 
 static const char GREET[] = "Hello World! TreasureStack!";
 
-// static const NT_BASE[] = {0x2000, 0x2400, 0x2800, 0x2C00};
-// #define NT_ADDR(tbl, x, y) (NT_BASE[tbl] + (y << 5) + x)
-#define NT0_ADDR(x, y) ((y << 5) + x + 0x2000)
+static const NT_BASE[] = {0x2000, 0x2400, 0x2800, 0x2C00};
+#define NT_ADDR(tbl, x, y) (NT_BASE[tbl] + (y << 5) + x)
 
 static char *TMP_DATA = "AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
-
-GameState board(){
-	px_inc(PX_INC1);
-	px_addr(NT0_ADDR(9, 4));
-	px_fill(14, '*');
-	px_addr(NT0_ADDR(9, 25));
-	px_fill(14, '*');
-	
-	px_inc(PX_INC32);
-	px_addr(NT0_ADDR(9, 5));
-	px_fill(20, '*');
-	px_addr(NT0_ADDR(22, 5));
-	px_fill(20, '*');
-	
-	px_inc(PX_INC1);
-	for(i = 0; i < 20; i++){
-		px_addr(NT0_ADDR(10, 5) + i*32);
-		px_blit(12, TMP_DATA + ((i >> 1) << 1));
-	}
-	
-	// Enable rendering.
-	PPU.mask = 0x1E;
-	
-	return loop();
-}
 
 static void attr_pal(u8 x, u8 y, u8 pal){
 	static const u8 SUB_MASK[] = {0x03, 0x0C, 0x30, 0xC0};
@@ -82,30 +56,55 @@ static void attr_pal(u8 x, u8 y, u8 pal){
 	PPU.vram.data = (value & ~mask) | (PAL[pal] & mask);
 }
 
+GameState board(){
+	px_inc(PX_INC1);
+	px_addr(NT_ADDR(0, 9, 4));
+	px_fill(14, '*');
+	px_addr(NT_ADDR(0, 9, 25));
+	px_fill(14, '*');
+	
+	px_inc(PX_INC32);
+	px_addr(NT_ADDR(0, 9, 5));
+	px_fill(20, '*');
+	px_addr(NT_ADDR(0, 22, 5));
+	px_fill(20, '*');
+	
+	px_inc(PX_INC1);
+	for(i = 0; i < 20; i++){
+		px_addr(NT_ADDR(0, 10, 5) + i*32);
+		px_blit(12, TMP_DATA + ((i >> 1) << 1));
+	}
+	
+	// Enable rendering.
+	PPU.mask = 0x1E;
+	
+	return loop();
+}
+
 GameState debug_chr(){
 	static const char HEX[] = "0123456789ABCDEF";
 	
 	// Top
 	px_inc(PX_INC1);
-	px_addr(NT0_ADDR(8, 6));
+	px_addr(NT_ADDR(0, 8, 6));
 	px_blit(16, HEX);
 	
 	// Side
 	px_inc(PX_INC32);
-	px_addr(NT0_ADDR(6, 8));
+	px_addr(NT_ADDR(0, 6, 8));
 	px_blit(16, HEX);
 	
 	// Grid
 	px_inc(PX_INC1);
 	for(iy = 0; iy < 16; ++iy){
-		px_addr(NT0_ADDR(8, 8 + iy));
+		px_addr(NT_ADDR(0, 8, 8 + iy));
 		for(ix = 0; ix < 16; ++ix){
 			PPU.vram.data = ix | 16*iy;
 		}
 	}
 	
 	// Set palette
-	// px_addr(NT0_ADDR(0, 30));
+	// px_addr(NT_ADDR(0, 0, 30));
 	// px_fill(64, 0x55);
 	
 	// Enable rendering.
@@ -121,6 +120,6 @@ GameState main(void){
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	// return board();
-	return debug_chr();
+	return board();
+	// return debug_chr();
 }

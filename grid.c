@@ -2,21 +2,30 @@
 #include <stddef.h>
 
 #include "pixler.h"
+#include "grid.h"
 
-static u8 GRID[8*12] = {};
+u8 GRID[GRID_W*GRID_H] = {};
 static u8 ATTRIBUTE_TABLE[64] = {};
 
 #define STA_BUFFER asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer))
 
-static const u8 BLOCK[][4] = {
+// Palette value repeated for all four quadrants.
+#define PAL0 0x00
+#define PAL1 0x55
+#define PAL2 0xAA
+#define PAL3 0xFF
+
+static const u8 BLOCKS[][4] = {
 	{0x94, 0x92, 0x91, 0x88},
 	{0x94, 0x92, 0x91, 0x88},
 	{0x14, 0x12, 0x11, 0x08},
 	{0x14, 0x12, 0x11, 0x08},
 };
 
+static const u8 BLOCK_PAL[] = {PAL0, PAL1, PAL2, PAL3};
+
 void grid_set_block(u8 x, u8 y, u8 block){
-	register const u8 *ptr = BLOCK[block];
+	register const u8 *ptr = BLOCKS[block];
 	
 	{
 		static const u8 BOARD_ORIGIN_X = 10;
@@ -58,11 +67,10 @@ void grid_set_block(u8 x, u8 y, u8 block){
 		asm("sta %v, y", GRID);
 	}{
 		static const u8 SUB_MASK[] = {0x0C, 0x03, 0xC0, 0x30};
-		static const u8 PAL[] = {0x00, 0x55, 0xAA, 0xFF};
 		
 		u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)]; // TODO bad ASM
 		u8 offset = (u8)(((12 - y) & 0xFE) << 2) | ((u8)(x + 5) >> 1);
-		u8 value = (ATTRIBUTE_TABLE[offset] & ~mask) | (PAL[block] & mask);
+		u8 value = (ATTRIBUTE_TABLE[offset] & ~mask) | (BLOCK_PAL[block] & mask);
 		ATTRIBUTE_TABLE[offset] = value;
 		
 		px_buffer_data(1, AT_ADDR(0) | offset);

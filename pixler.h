@@ -1,3 +1,6 @@
+#ifndef _PIXLER_H
+#define _PIXLER_H
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -39,3 +42,5 @@ void px_buffer_data(u8 len, u16 addr);
 void px_set_color(u8 idx, u8 color);
 
 void px_wait_nmi();
+
+#endif

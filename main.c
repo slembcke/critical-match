@@ -2,10 +2,10 @@
 #include <string.h>
 
 #include "pixler.h"
+#include "shared.h"
+#include "grid.h"
 
 typedef struct {} GameState;
-
-static u8 i, ix, iy;
 
 static const u8 PALETTE[] = {
 	0x1D, 0x20, 0x20, 0x20,
@@ -31,8 +31,6 @@ static GameState loop(){
 	
 	return loop();
 }
-
-void grid_set_block(u8 x, u8 y, u8 block);
 
 static GameState board(){
 	px_inc(PX_INC1);

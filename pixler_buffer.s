@@ -16,7 +16,7 @@
 .zeropage
 
 px_buffer_cursor: .byte 0
-ptr: .addr $0000
+px_ptr: .addr $0000
 
 .code
 
@@ -211,11 +211,10 @@ METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 	
 	; Pop and set address.
 	pla
-	sta ptr + 0
+	sta px_ptr + 1
 	sta PPU_VRAM_ADDR
-	
 	pla
-	sta ptr + 1
+	sta px_ptr + 0
 	sta PPU_VRAM_ADDR
 	
 	; Write top half of block.
@@ -225,11 +224,11 @@ METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 	sta PPU_VRAM_IO
 	
 	; Increment addr to bottom half.
-	lda ptr + 1
+	lda px_ptr + 0
 	clc
 	adc #$20
 	tay
-	lda ptr + 0
+	lda px_ptr + 1
 	adc #0
 	
 	sta PPU_VRAM_ADDR
@@ -242,26 +241,15 @@ METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 	lda METATILE3, x
 	sta PPU_VRAM_IO
 	
-	; Calculate attribute byte address
-	lda ptr + 0
-	and #$24
-	ora #$03
+	pla
 	sta PPU_VRAM_ADDR
-	lda ptr + 1
-	ror ptr + 0
-	ror a
-	ror ptr + 0
-	ror a
-	tax
-	and #$07
-	sta ptr + 1
-	txa
-	lsr
-	lsr
-	ora ptr + 1
-	ora #$C0
+	pla
+	; lda px_ptr + 0
+	; lsr a
+	; lsr a
+	; and #$07
+	; ora #$C0
 	sta PPU_VRAM_ADDR
-	
 	pla
 	sta PPU_VRAM_IO
 	
@@ -270,19 +258,49 @@ METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 
 .export _px_buffer_set_metatile
 .proc _px_buffer_set_metatile
-	cmd_bytes = (2 + 4)
-
+	cmd_bytes = (2 + 6)
+	
+	; Save tile address.
+	sta ptr1 + 0
+	stx ptr1 + 1
+	
+	; Write tile address.
 	ldy px_buffer_cursor
 	buffer_write_ax 1
 	
-	ldx px_buffer_cursor
-	
-	; Write tile
+	; Write tile index.
 	lda #2
+	ldx px_buffer_cursor
 	buffer_write_arg 0
 	
-	lda #$FF
+	; Write attribute byte address high byte.
+	ldx px_buffer_cursor
+	lda ptr1 + 1
+	and #$2C ; Mask table address.
+	ora #$03 ; Attribute memory start high bits.
 	buffer_write_arg 3
+	
+	; Calculate attribute byte offset.
+	lda ptr1 + 0
+	ror ptr1 + 1
+	ror a
+	ror ptr1 + 1
+	ror a
+	tay
+	and #$07
+	sta ptr1 + 0
+	tya
+	lsr
+	lsr
+	ora ptr1 + 0
+	
+	; Write attribute byte 
+	ora #$C0 ; Attribute memory start low bits.
+	buffer_write_arg 4
+	
+	; Write attribute byte..
+	lda #$FF
+	buffer_write_arg 5
 	
 	buffer_write_func exec_set_metatile
 	

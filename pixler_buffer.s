@@ -9,7 +9,7 @@
 .export px_buffer_exec
 .export _px_buffer_inc
 .export _px_buffer_data
-.export _px_set_color
+.export _px_buffer_set_color
 
 .macpack generic
 
@@ -91,12 +91,9 @@ px_buffer_cursor: .byte 0
 
 .macro buffer_write_ax idx
 	.scope
-		addr_a = $0103 + idx
-		addr_x = $0102 + idx
-		
-		sta addr_a, y
+		sta $0103 + idx, y
 		txa
-		sta addr_x, y
+		sta $0102 + idx, y
 	.endscope
 .endmacro
 
@@ -170,7 +167,7 @@ px_buffer_cursor: .byte 0
 	jmp incsp1
 .endproc
 
-.proc _px_set_color ; u8 idx, u8 color
+.proc _px_buffer_set_color ; u8 idx, u8 color
 	_idx = 0
 	; _color = a
 	cmd_bytes = (2 + 2)

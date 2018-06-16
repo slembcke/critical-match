@@ -46,15 +46,27 @@
 
 .proc _px_fill ; u16 len, u8 chr
 	_len = 0
-	; _chr = x|a
+	; _chr = a
 	
-	pha
-	
+	tax
+	c_var _len + 1
+	beq @remainder
+
+	tay
+	txa
+	ldx #0
+	:
+		:	sta PPU_VRAM_IO
+			inx
+			bne :-
+		dey
+		bne :--
+	tax
+
+	@remainder:
 	c_var _len
 	tay
-	; TODO length high byte is ignored
-	
-	pla
+	txa
 	: sta PPU_VRAM_IO
 		dey
 		bne :-

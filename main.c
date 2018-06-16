@@ -7,6 +7,11 @@
 
 typedef struct {} GameState;
 
+GameState Freeze(){
+	px_wait_nmi();
+	return Freeze();
+}
+
 static const u8 PALETTE[] = {
 	0x1D, 0x20, 0x20, 0x20,
 	0x1D, 0x06, 0x16, 0x26,
@@ -32,7 +37,19 @@ static GameState loop(){
 	return loop();
 }
 
+static GameState debug_display(){
+	PPU.mask = 0x1E;
+	return Freeze();
+}
+
 static GameState board(){
+	px_inc(PX_INC1);
+	px_addr(NT_ADDR(0, 0, 0));
+	px_fill(5, '.');
+	px_addr(NT_ADDR(0, 0, 16));
+	px_fill(256+5, '.');
+	return debug_display();
+
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 9, 5));
 	px_fill(14, '*');

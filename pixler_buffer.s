@@ -192,17 +192,17 @@ px_ptr: .addr $0000
 
 .rodata ; TODO move this somewhere else.
 
-PAL0 = $00
-PAL1 = $55
-PAL2 = $AA
-PAL3 = $FF
+PAL0 = %00000000
+PAL1 = %01010101
+PAL2 = %10101010
+PAL3 = %11111111
 METATILE0: .byte  $00,  $94,  $94,  $14,  $14
 METATILE1: .byte  $00,  $92,  $92,  $12,  $12
 METATILE2: .byte  $00,  $91,  $91,  $11,  $11
 METATILE3: .byte  $00,  $88,  $88,  $08,  $08
 METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 
-QUAD_MASK: .byte $03, $0C, $30, $C0
+QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 
 .code
 
@@ -273,17 +273,31 @@ QUAD_MASK: .byte $03, $0C, $30, $C0
 	ldx px_buffer_cursor
 	buffer_write_arg 0
 	
-	; Calculate quad index.
+	; Calculate quadrant index.
 	lda _addr + 0
 	lsr a
 	and #1
+	; ; Set bit two on odd rows by checking bit 7.
+	; bit _addr + 0
+	; bmi :+
+	; 	ora #2
+	; :
+	sta _qidx
+	lda _addr + 0
+	lsr a
+	lsr a
+	lsr a
+	lsr a
+	lsr a
+	and #2
+	ora _qidx
 	sta _qidx
 	
 	; Write attribute byte address high byte.
 	ldx px_buffer_cursor
 	lda _addr + 1
-	and #$2C ; Mask table address.
-	ora #$03 ; Attribute memory start high bits.
+	and #%11111100 ; Mask table address.
+	ora #%00000011 ; Attribute memory start high bits.
 	buffer_write_arg 3
 	
 	; Calculate attribute byte offset.
@@ -293,15 +307,16 @@ QUAD_MASK: .byte $03, $0C, $30, $C0
 	ror _addr + 1
 	ror a
 	tay
-	and #$07
+	and #%00000111
 	sta _addr + 0
 	tya
 	lsr a
 	lsr a
+	and #%00111000
 	ora _addr + 0
 	
 	; Write attribute byte address low byte.
-	ora #$C0 ; Attribute memory start low bits.
+	ora #%11000000 ; Attribute memory start low bits.
 	buffer_write_arg 4
 	
 	; Write attribute byte.
@@ -309,7 +324,7 @@ QUAD_MASK: .byte $03, $0C, $30, $C0
 	tay
 	lda METATILE4, y
 	ldy _qidx
-	and QUAD_MASK, y
+	and QUADRANT_MASK, y
 	buffer_write_arg 5
 	
 	buffer_write_func exec_set_metatile

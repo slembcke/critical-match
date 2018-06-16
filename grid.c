@@ -15,18 +15,25 @@ static u8 ATTRIBUTE_TABLE[64] = {};
 #define PAL2 0xAA
 #define PAL3 0xFF
 
-static const u8 BLOCKS[][4] = {
-	{0x94, 0x92, 0x91, 0x88},
-	{0x94, 0x92, 0x91, 0x88},
-	{0x14, 0x12, 0x11, 0x08},
-	{0x14, 0x12, 0x11, 0x08},
+// static const u8 BLOCKS[][4] = {
+// 	{0x94, 0x92, 0x91, 0x88},
+// 	{0x94, 0x92, 0x91, 0x88},
+// 	{0x14, 0x12, 0x11, 0x08},
+// 	{0x14, 0x12, 0x11, 0x08},
+// };
+
+// static const u8 BLOCK_PAL[] = {PAL0, PAL1, PAL2, PAL3};
+
+#define BLOCK_COUNT 5
+static u8 BLOCKS[5][BLOCK_COUNT] = {
+	{0x00, 0x94, 0x94, 0x14, 0x14},
+	{0x00, 0x92, 0x92, 0x12, 0x12},
+	{0x00, 0x91, 0x91, 0x11, 0x11},
+	{0x00, 0x88, 0x88, 0x08, 0x08},
+	{PAL0, PAL0, PAL1, PAL2, PAL3}
 };
 
-static const u8 BLOCK_PAL[] = {PAL0, PAL1, PAL2, PAL3};
-
 void grid_set_block(u8 x, u8 y, u8 block){
-	register const u8 *ptr = BLOCKS[block];
-	
 	{
 		static const u8 BOARD_ORIGIN_X = 10;
 		static const u16 BOARD_ORIGIN = NT_ADDR(0, 10, 24);
@@ -34,21 +41,27 @@ void grid_set_block(u8 x, u8 y, u8 block){
 		
 		px_buffer_inc(PX_INC1);
 		px_buffer_data(2, addr);
+		asm("ldy #%o", block);\
+		asm("lda (sp), y");\
+		asm("tax");\
 		asm("ldy #0");\
-		asm("lda (%v), y", ptr);\
-		STA_BUFFER;\
+		asm("lda %v + 0*%b, x", BLOCKS, BLOCK_COUNT);\
+		asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer));\
 		asm("ldy #1");\
-		asm("lda (%v), y", ptr);\
-		STA_BUFFER;
+		asm("lda %v + 1*%b, x", BLOCKS, BLOCK_COUNT);\
+		asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer));
 		px_buffer_data(2, addr + 32);
+		asm("ldy #%o", block);\
+		asm("lda (sp), y");\
+		asm("tax");\
 		asm("ldy #2");\
-		asm("lda (%v), y", ptr);\
+		asm("lda %v + 2*%b, x", BLOCKS, BLOCK_COUNT);\
 		asm("ldy #0");\
-		STA_BUFFER;\
+		asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer));\
 		asm("ldy #3");\
-		asm("lda (%v), y", ptr);\
+		asm("lda %v + 3*%b, x", BLOCKS, BLOCK_COUNT);\
 		asm("ldy #1");\
-		STA_BUFFER;
+		asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer));
 		
 		// GRID[(u8)(8*y + x + 9)] = block;
 		asm("ldy #%o", y);\
@@ -70,7 +83,7 @@ void grid_set_block(u8 x, u8 y, u8 block){
 		
 		u8 mask = SUB_MASK[(x & 1) | ((y & 1) << 1)]; // TODO bad ASM
 		u8 offset = (u8)(((12 - y) & 0xFE) << 2) | ((u8)(x + 5) >> 1);
-		u8 value = (ATTRIBUTE_TABLE[offset] & ~mask) | (BLOCK_PAL[block] & mask);
+		u8 value = (ATTRIBUTE_TABLE[offset] & ~mask) | (BLOCKS[4][block] & mask);
 		ATTRIBUTE_TABLE[offset] = value;
 		
 		px_buffer_data(1, AT_ADDR(0) | offset);

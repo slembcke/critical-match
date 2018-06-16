@@ -48,16 +48,17 @@ static GameState board(){
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	
-	grid_set_block(0, 0, 1);
-	grid_set_block(1, 1, 2);
-	grid_set_block(2, 2, 3);
-	grid_set_block(3, 3, 0);
-	grid_set_block(4, 4, 1);
-	grid_set_block(5, 5, 2);
-	grid_set_block(0, 6, 3);
-	grid_set_block(1, 7, 0);
-	grid_set_block(2, 8, 1);
-	grid_set_block(3, 9, 2);
+	// grid_set_block(0, 0, 2);
+	// grid_set_block(0, 0, 0);
+	// grid_set_block(1, 1, 3);
+	// grid_set_block(2, 2, 4);
+	// grid_set_block(3, 3, 1);
+	// grid_set_block(4, 4, 2);
+	// grid_set_block(5, 5, 3);
+	// grid_set_block(0, 6, 4);
+	// grid_set_block(1, 7, 1);
+	// grid_set_block(2, 8, 2);
+	grid_set_block(3, 9, 3);
 	
 	return loop();
 }

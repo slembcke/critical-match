@@ -110,12 +110,14 @@ static GameState debug_chr(){
 }
 
 GameState main(void){
-	px_load_chr(PX_CHR_LEFT, 0, 0x80);
+	px_bank_select(0);
+	px_addr(CHR_ADDR(0, 2));
+	px_blit_chr(256, 0x8000);
 	
 	px_inc(PX_INC1);
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	// return debug_chr();
+	return debug_chr();
 	return board();
 }

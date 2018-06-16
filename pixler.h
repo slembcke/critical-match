@@ -23,6 +23,9 @@ void _px_blit_pages(u16 count8_basepage8);
 #define PX_CHR_RIGHT 0x10
 void px_load_chr(u8 chr_table, u8 rom_bank, u8 page);
 
+#define NT_ADDR(tbl, x, y) (0x2000 + tbl*0x0400 + (y << 5) + x)
+#define AT_ADDR(tbl) (0x23C0 + tbl*0x0400)
+
 #define PX_INC1 0
 #define PX_INC32 1
 

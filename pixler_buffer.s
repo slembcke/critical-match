@@ -16,7 +16,7 @@
 .zeropage
 
 px_buffer_cursor: .byte 0
-px_ptr: .addr $0000
+nmi_tmp: .res 4
 
 .code
 
@@ -207,16 +207,19 @@ QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 .code
 
 .proc exec_set_metatile
+	_addr = nmi_tmp + 0
+	_attr = nmi_tmp + 2
+	
 	; Pop metatile index.
 	pla
 	tax
 	
 	; Pop and set address.
 	pla
-	sta px_ptr + 1
+	sta _addr + 1
 	sta PPU_VRAM_ADDR
 	pla
-	sta px_ptr + 0
+	sta _addr + 0
 	sta PPU_VRAM_ADDR
 	
 	; Write top half of block.
@@ -225,16 +228,12 @@ QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 	lda METATILE1, x
 	sta PPU_VRAM_IO
 	
-	; Increment addr to bottom half.
-	lda px_ptr + 0
+	; Increment address to the next row.
+	lda _addr + 1
+	sta PPU_VRAM_ADDR
+	lda _addr + 0
 	clc
 	adc #$20
-	tay
-	lda px_ptr + 1
-	adc #0
-	
-	sta PPU_VRAM_ADDR
-	tya
 	sta PPU_VRAM_ADDR
 	
 	; Write bottom half.
@@ -243,11 +242,31 @@ QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 	lda METATILE3, x
 	sta PPU_VRAM_IO
 	
+	; Read back the attribute byte
 	pla
+	tax
 	sta PPU_VRAM_ADDR
 	pla
+	tay
 	sta PPU_VRAM_ADDR
+	
+	lda PPU_VRAM_IO
+	lda PPU_VRAM_IO
+	sta _attr
+	
+	; Apply the quadrant mask.
 	pla
+	and _attr
+	sta _attr
+	
+	; Write back the attribute byte with the new quadrant.
+	txa
+	sta PPU_VRAM_ADDR
+	tya
+	sta PPU_VRAM_ADDR
+	
+	pla
+	ora _attr
 	sta PPU_VRAM_IO
 	
 	rts
@@ -257,8 +276,8 @@ QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 .proc _px_buffer_set_metatile
 	_index = 0
 	_addr = ptr1
-	_qidx = tmp1
-	cmd_bytes = (2 + 6)
+	_qmask = tmp1
+	cmd_bytes = (2 + 7)
 	
 	; Save tile address.
 	sta _addr + 0
@@ -269,20 +288,24 @@ QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 	buffer_write_ax 1
 	
 	; Write tile index.
-	c_var _index
 	ldx px_buffer_cursor
+	c_var _index
 	buffer_write_arg 0
 	
 	; Calculate quadrant index.
 	lda _addr + 0
 	lsr a
 	and #1
-	; Set bit two on odd rows by checking bit 6.
+	; Set bit two on odd rows by checking bit 6 of the address byte.
 	bit _addr + 0
 	bvc :+
 		ora #2
 	:
-	sta _qidx
+	
+	; Load the quadrant mask.
+	tay
+	lda QUADRANT_MASK, y
+	sta _qmask
 	
 	; Write attribute byte address high byte.
 	ldx px_buffer_cursor
@@ -310,13 +333,17 @@ QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 	ora #%11000000 ; Attribute memory start low bits.
 	buffer_write_arg 4
 	
+	; Write quadrant mask.
+	lda _qmask
+	eor #$FF
+	buffer_write_arg 5
+	
 	; Write attribute byte.
 	c_var _index
 	tay
 	lda METATILE4, y
-	ldy _qidx
-	and QUADRANT_MASK, y
-	buffer_write_arg 5
+	and _qmask
+	buffer_write_arg 6
 	
 	buffer_write_func exec_set_metatile
 	

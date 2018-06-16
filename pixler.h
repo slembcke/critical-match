@@ -21,8 +21,8 @@ extern PX_t PX;
 void px_bank_select(u8 bank);
 
 #define CHR_ADDR(bank, chr) (bank*0x1000 | chr*0x10)
-#define NT_ADDR(tbl, x, y) (0x2000 + tbl*0x0400 + (y << 5) + x)
-#define AT_ADDR(tbl) (0x23C0 + tbl*0x0400)
+#define NT_ADDR(tbl, x, y) (0x2000 | tbl*0x400 | (y << 5) | x)
+#define AT_ADDR(tbl) (0x23C0 + tbl*0x400)
 
 #define PX_INC1 0
 #define PX_INC32 1

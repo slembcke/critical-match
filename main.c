@@ -99,10 +99,6 @@ static GameState debug_chr(){
 		}
 	}
 	
-	// Set palette
-	// px_addr(NT_ADDR(0, 0, 30));
-	// px_fill(64, 0x55);
-	
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	
@@ -111,13 +107,13 @@ static GameState debug_chr(){
 
 GameState main(void){
 	px_bank_select(0);
-	px_addr(CHR_ADDR(0, 2));
+	px_addr(CHR_ADDR(0, 0));
 	px_blit_chr(256, 0x8000);
 	
 	px_inc(PX_INC1);
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	return debug_chr();
+	// return debug_chr();
 	return board();
 }

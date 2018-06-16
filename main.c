@@ -45,10 +45,7 @@ static GameState debug_display(){
 static GameState board(){
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 0, 0));
-	px_fill(5, '.');
-	px_addr(NT_ADDR(0, 0, 16));
-	px_fill(256+5, '.');
-	return debug_display();
+	px_fill(32*30, 0x01);
 
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 9, 5));

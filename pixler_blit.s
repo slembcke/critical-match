@@ -64,7 +64,7 @@
 	tax
 
 	@remainder:
-	c_var _len
+	c_var _len + 0
 	tay
 	txa
 	: sta PPU_VRAM_IO
@@ -74,22 +74,29 @@
 	jmp incsp1
 .endproc
 
-; static void px_blit(u8 *mem, u16 len){
-; 	for(; len != 0; --len) PPU.vram.data = *(mem++);
-; }
-
-.proc _px_blit ; 16 len, u16 addr
+.proc _px_blit ; u16 len, u16 addr
 	_len = 0
 	; _addr = x|a
 	
 	sta ptr1 + 0
 	stx ptr1 + 1
 	
+	c_var _len + 1
+	beq @remainder
+
+	tax
+	ldy #0
+	:
+		:	lda (ptr1), y
+			sta PPU_VRAM_IO
+			iny
+			bne :-
+		dex
+		bne :--
+
+	@remainder:
 	c_var _len + 0
 	sta tmp1 + 0
-	; c_var _len + 1
-	; sta tmp1 + 1
-	; TODO high byte is ignored
 	
 	ldy #0
 	:	cpy tmp1 + 0

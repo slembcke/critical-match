@@ -277,20 +277,11 @@ QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 	lda _addr + 0
 	lsr a
 	and #1
-	; ; Set bit two on odd rows by checking bit 7.
-	; bit _addr + 0
-	; bmi :+
-	; 	ora #2
-	; :
-	sta _qidx
-	lda _addr + 0
-	lsr a
-	lsr a
-	lsr a
-	lsr a
-	lsr a
-	and #2
-	ora _qidx
+	; Set bit two on odd rows by checking bit 6.
+	bit _addr + 0
+	bvc :+
+		ora #2
+	:
 	sta _qidx
 	
 	; Write attribute byte address high byte.

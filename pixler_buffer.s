@@ -16,6 +16,7 @@
 .zeropage
 
 px_buffer_cursor: .byte 0
+ptr: .addr $0000
 
 .code
 
@@ -187,4 +188,107 @@ px_buffer_cursor: .byte 0
 	sta px_buffer_cursor
 	
 	jmp incsp1
+.endproc
+
+.rodata ; TODO move this somewhere else.
+
+PAL0 = $00
+PAL1 = $55
+PAL2 = $AA
+PAL3 = $FF
+METATILE0: .byte  $00,  $94,  $94,  $14,  $14
+METATILE1: .byte  $00,  $92,  $92,  $12,  $12
+METATILE2: .byte  $00,  $91,  $91,  $11,  $11
+METATILE3: .byte  $00,  $88,  $88,  $08,  $08
+METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
+
+.code
+
+.proc exec_set_metatile
+	; Pop metatile index.
+	pla
+	tax
+	
+	; Pop and set address.
+	pla
+	sta ptr + 0
+	sta PPU_VRAM_ADDR
+	
+	pla
+	sta ptr + 1
+	sta PPU_VRAM_ADDR
+	
+	; Write top half of block.
+	lda METATILE0, x
+	sta PPU_VRAM_IO
+	lda METATILE1, x
+	sta PPU_VRAM_IO
+	
+	; Increment addr to bottom half.
+	lda ptr + 1
+	clc
+	adc #$20
+	tay
+	lda ptr + 0
+	adc #0
+	
+	sta PPU_VRAM_ADDR
+	tya
+	sta PPU_VRAM_ADDR
+	
+	; Write bottom half.
+	lda METATILE2, x
+	sta PPU_VRAM_IO
+	lda METATILE3, x
+	sta PPU_VRAM_IO
+	
+	; Calculate attribute byte address
+	lda ptr + 0
+	and #$24
+	ora #$03
+	sta PPU_VRAM_ADDR
+	lda ptr + 1
+	ror ptr + 0
+	ror a
+	ror ptr + 0
+	ror a
+	tax
+	and #$07
+	sta ptr + 1
+	txa
+	lsr
+	lsr
+	ora ptr + 1
+	ora #$C0
+	sta PPU_VRAM_ADDR
+	
+	pla
+	sta PPU_VRAM_IO
+	
+	rts
+.endproc
+
+.export _px_buffer_set_metatile
+.proc _px_buffer_set_metatile
+	cmd_bytes = (2 + 4)
+
+	ldy px_buffer_cursor
+	buffer_write_ax 1
+	
+	ldx px_buffer_cursor
+	
+	; Write tile
+	lda #2
+	buffer_write_arg 0
+	
+	lda #$FF
+	buffer_write_arg 3
+	
+	buffer_write_func exec_set_metatile
+	
+	lda px_buffer_cursor
+	add #cmd_bytes
+	sta px_buffer_cursor
+
+	rts
 .endproc

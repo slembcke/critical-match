@@ -42,7 +42,7 @@ static GameState debug_display(){
 	return Freeze();
 }
 
-void px_buffer_set_metatile(u16 addr);
+void px_buffer_set_metatile(u8 index, u16 addr);
 
 static GameState board(){
 	px_inc(PX_INC1);
@@ -77,8 +77,8 @@ static GameState board(){
 	// grid_set_block(3, 9, 3);
 
 	px_buffer_inc(PX_INC1);
-	px_buffer_set_metatile(NT_ADDR(0, 12, 0));
-	px_buffer_set_metatile(NT_ADDR(0, 8, 20));
+	px_buffer_set_metatile(2, NT_ADDR(0, 14, 0));
+	px_buffer_set_metatile(3, NT_ADDR(0, 8, 20));
 	// for(iy = 0; iy < 8; iy += 2){
 	// 	for(ix = 0; ix < 8; ix += 2){
 	// 		px_buffer_set_metatile(NT_ADDR(0, ix, iy));

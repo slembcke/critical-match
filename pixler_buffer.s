@@ -202,6 +202,8 @@ METATILE2: .byte  $00,  $91,  $91,  $11,  $11
 METATILE3: .byte  $00,  $88,  $88,  $08,  $08
 METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 
+QUAD_MASK: .byte $03, $0C, $30, $C0
+
 .code
 
 .proc exec_set_metatile
@@ -244,11 +246,6 @@ METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 	pla
 	sta PPU_VRAM_ADDR
 	pla
-	; lda px_ptr + 0
-	; lsr a
-	; lsr a
-	; and #$07
-	; ora #$C0
 	sta PPU_VRAM_ADDR
 	pla
 	sta PPU_VRAM_IO
@@ -258,48 +255,61 @@ METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 
 .export _px_buffer_set_metatile
 .proc _px_buffer_set_metatile
+	_index = 0
+	_addr = ptr1
+	_qidx = tmp1
 	cmd_bytes = (2 + 6)
 	
 	; Save tile address.
-	sta ptr1 + 0
-	stx ptr1 + 1
+	sta _addr + 0
+	stx _addr + 1
 	
 	; Write tile address.
 	ldy px_buffer_cursor
 	buffer_write_ax 1
 	
 	; Write tile index.
-	lda #2
+	c_var _index
 	ldx px_buffer_cursor
 	buffer_write_arg 0
 	
+	; Calculate quad index.
+	lda _addr + 0
+	lsr a
+	and #1
+	sta _qidx
+	
 	; Write attribute byte address high byte.
 	ldx px_buffer_cursor
-	lda ptr1 + 1
+	lda _addr + 1
 	and #$2C ; Mask table address.
 	ora #$03 ; Attribute memory start high bits.
 	buffer_write_arg 3
 	
 	; Calculate attribute byte offset.
-	lda ptr1 + 0
-	ror ptr1 + 1
+	lda _addr + 0
+	ror _addr + 1
 	ror a
-	ror ptr1 + 1
+	ror _addr + 1
 	ror a
 	tay
 	and #$07
-	sta ptr1 + 0
+	sta _addr + 0
 	tya
-	lsr
-	lsr
-	ora ptr1 + 0
+	lsr a
+	lsr a
+	ora _addr + 0
 	
-	; Write attribute byte 
+	; Write attribute byte address low byte.
 	ora #$C0 ; Attribute memory start low bits.
 	buffer_write_arg 4
 	
-	; Write attribute byte..
-	lda #$FF
+	; Write attribute byte.
+	c_var _index
+	tay
+	lda METATILE4, y
+	ldy _qidx
+	and QUAD_MASK, y
 	buffer_write_arg 5
 	
 	buffer_write_func exec_set_metatile
@@ -308,5 +318,5 @@ METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3
 	add #cmd_bytes
 	sta px_buffer_cursor
 
-	rts
+	jmp incsp1
 .endproc

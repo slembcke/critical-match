@@ -64,39 +64,22 @@ static GameState board(){
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	
-	// grid_set_block(0, 0, 2);
-	// grid_set_block(0, 0, 0);
-	// grid_set_block(1, 1, 3);
-	// grid_set_block(2, 2, 4);
-	// grid_set_block(3, 3, 1);
-	// grid_set_block(4, 4, 2);
-	// grid_set_block(5, 5, 3);
-	// grid_set_block(0, 6, 4);
-	// grid_set_block(1, 7, 1);
-	// grid_set_block(2, 8, 2);
-	// grid_set_block(3, 9, 3);
-
 	px_buffer_inc(PX_INC1);
-	// px_buffer_set_metatile(2, NT_ADDR(0, 0, 0));
-	// px_buffer_set_metatile(2, NT_ADDR(0, 6, 0));
-	// px_buffer_set_metatile(2, NT_ADDR(0, 0, 6));
-	// px_buffer_set_metatile(2, NT_ADDR(0, 6, 6));
-	
-	// px_buffer_set_metatile(2, NT_ADDR(0, 2, 2));
-	// px_buffer_set_metatile(2, NT_ADDR(0, 4, 2));
-	// px_buffer_set_metatile(2, NT_ADDR(0, 2, 4));
-	// px_buffer_set_metatile(2, NT_ADDR(0, 4, 4));
-	
-	for(iy = 0; iy < 16; iy += 4){
-		for(ix = 0; ix < 16; ix += 4){
-			px_buffer_set_metatile(2, NT_ADDR(0, ix, iy));
+	for(iy = 0; iy < 8; iy += 2){
+		for(ix = 0; ix < 8; ix += 2){
+			px_buffer_set_metatile((ix/2 & 3) + 1, NT_ADDR(0, ix, iy));
 		}
 	}
 	
 	// while(true){
 	// 	if((i & 2) == 0){
-	// 		for(iy = 0; iy < 30; iy += 2){
-	// 			px_buffer_set_metatile(2, NT_ADDR(0, (i >> 1) & 0x1F, iy));
+	// 		for(iy = 0; iy < 16; iy += 2){
+	// 			px_buffer_set_metatile(iy/2 & 7, NT_ADDR(0, (i >> 1) & 0x1F, iy));
+	// 		}
+	// 		px_wait_nmi();
+			
+	// 		for(; iy < 30; iy += 2){
+	// 			px_buffer_set_metatile(iy/2 & 7, NT_ADDR(0, (i >> 1) & 0x1F, iy));
 	// 		}
 	// 	}
 		

@@ -4,16 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "../cc65/asminc"
-		},
-		{
-			"path": "../cc65/libsrc/common"
-		},
-		{
-			"path": "../cc65/libsrc/joystick"
-		},
-		{
-			"path": "../cc65/libsrc/nes"
+			"path": "../cc65"
 		}
 	],
 	"settings": {

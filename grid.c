@@ -53,6 +53,7 @@ void grid_update(void){
 			
 			idx -= GRID_W;
 			if(GRID[idx] == 0 && above != 0){
+				// TODO split this across frames to avoid using so much buffer memory?
 				grid_set_block(ix, frames, above);
 				grid_set_block(ix, frames + 1, 0);
 			}

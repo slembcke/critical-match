@@ -73,10 +73,10 @@ static GameState board(void){
 	grid_set_block(1,  8, 3);
 	grid_set_block(2, 10, 4);
 	grid_set_block(2,  8, 5);
-	grid_set_block(3,  8, 5);
-	grid_set_block(4,  6, 6);
-	grid_set_block(5,  7, 7);
-	grid_set_block(6,  8, 8);
+	grid_set_block(3,  8, 9);
+	grid_set_block(4,  6, 10);
+	grid_set_block(5,  7, 11);
+	grid_set_block(6,  8, 12);
 	
 	return loop();
 }
@@ -130,6 +130,6 @@ GameState main(void){
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	// return debug_chr();
+	return debug_chr();
 	return board();
 }

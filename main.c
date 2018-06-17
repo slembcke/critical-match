@@ -37,32 +37,57 @@ static void grid_set_block(u8 x, u8 y, u8 block){
 	GRID[idx] = block;
 }
 
-static void grid_tick_fall(){
-	static u8 ticks = 1;
+static u8 GRID_HEIGHT[GRID_W] = {};
+static void grid_tick(){
+	for(ix = 1; ix < GRID_W - 1; ++ix){
+		for(iy = 1; iy < GRID_H - 1; ++iy){
+			idx = grid_block_idx(ix, iy);
+			if(GRID[idx] == 0) break;
+		}
+		
+		GRID_HEIGHT[ix] = iy;
+	}
+	
+	px_buffer_inc(PX_INC1);
+	px_buffer_data(6, NT_ADDR(0, 0, 1));
+	PX.buffer[0] = '0' - 1 + GRID_HEIGHT[1];
+	PX.buffer[1] = '0' - 1 + GRID_HEIGHT[2];
+	PX.buffer[2] = '0' - 1 + GRID_HEIGHT[3];
+	PX.buffer[3] = '0' - 1 + GRID_HEIGHT[4];
+	PX.buffer[4] = '0' - 1 + GRID_HEIGHT[5];
+	PX.buffer[5] = '0' - 1 + GRID_HEIGHT[6];
+}
+
+static void grid_update(){
+	static u8 frames = 1;
 	u8 above;
 	
-	if(ticks < GRID_H - 1){
+	if(frames < GRID_H - 1){
 		px_buffer_inc(PX_INC1);
 		
 		for(ix = 1; ix < GRID_W - 1; ++ix){
-			idx = grid_block_idx(ix, ticks + 1);
+			idx = grid_block_idx(ix, frames + 1);
 			above = GRID[idx];
 			
-			idx = grid_block_idx(ix, ticks);
+			idx -= GRID_W;
 			if(GRID[idx] == 0 && above != 0){
-				grid_set_block(ix, ticks, above);
-				grid_set_block(ix, ticks + 1, 0);
+				grid_set_block(ix, frames, above);
+				grid_set_block(ix, frames + 1, 0);
 			}
 		}
 	}
 	
-	++ticks;
-	if(ticks >= 32) ticks = 1;
+	++frames;
+	if(frames >= 32){
+		frames = 1;
+		grid_tick();
+	}
 }
 
 static GameState loop(){
 	while(true){
-		grid_tick_fall();
+		grid_update();
+		
 		px_wait_nmi();
 	}
 	

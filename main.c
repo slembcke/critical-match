@@ -27,64 +27,7 @@ static const u8 PALETTE[] = {
 	0x1D, 0x09, 0x19, 0x29,
 };
 
-#define grid_block_idx(x, y) (GRID_W*(y) + (x))
-
-static void grid_set_block(u8 x, u8 y, u8 block){
-	px_buffer_inc(PX_INC1);
-	px_buffer_set_metatile(block, NT_ADDR(0, 8 + 2*x, 26 - 2*y));
-	
-	idx = grid_block_idx(x, y);
-	GRID[idx] = block;
-}
-
-static u8 GRID_HEIGHT[GRID_W] = {};
-static void grid_tick(){
-	for(ix = 1; ix < GRID_W - 1; ++ix){
-		for(iy = 1; iy < GRID_H - 1; ++iy){
-			idx = grid_block_idx(ix, iy);
-			if(GRID[idx] == 0) break;
-		}
-		
-		GRID_HEIGHT[ix] = iy;
-	}
-	
-	px_buffer_inc(PX_INC1);
-	px_buffer_data(6, NT_ADDR(0, 0, 1));
-	PX.buffer[0] = '0' - 1 + GRID_HEIGHT[1];
-	PX.buffer[1] = '0' - 1 + GRID_HEIGHT[2];
-	PX.buffer[2] = '0' - 1 + GRID_HEIGHT[3];
-	PX.buffer[3] = '0' - 1 + GRID_HEIGHT[4];
-	PX.buffer[4] = '0' - 1 + GRID_HEIGHT[5];
-	PX.buffer[5] = '0' - 1 + GRID_HEIGHT[6];
-}
-
-static void grid_update(){
-	static u8 frames = 1;
-	u8 above;
-	
-	if(frames < GRID_H - 1){
-		px_buffer_inc(PX_INC1);
-		
-		for(ix = 1; ix < GRID_W - 1; ++ix){
-			idx = grid_block_idx(ix, frames + 1);
-			above = GRID[idx];
-			
-			idx -= GRID_W;
-			if(GRID[idx] == 0 && above != 0){
-				grid_set_block(ix, frames, above);
-				grid_set_block(ix, frames + 1, 0);
-			}
-		}
-	}
-	
-	++frames;
-	if(frames >= 32){
-		frames = 1;
-		grid_tick();
-	}
-}
-
-static GameState loop(){
+static GameState loop(void){
 	while(true){
 		grid_update();
 		
@@ -94,12 +37,12 @@ static GameState loop(){
 	return loop();
 }
 
-static GameState debug_display(){
+static GameState debug_display(void){
 	PPU.mask = 0x1E;
 	return Freeze();
 }
 
-static GameState board(){
+static GameState board(void){
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 0, 0));
 	px_fill(32*30, 0x00);
@@ -138,7 +81,7 @@ static GameState board(){
 	return loop();
 }
 
-static GameState debug_chr(){
+static GameState debug_chr(void){
 	static const char HEX[] = "0123456789ABCDEF";
 	
 	// Top

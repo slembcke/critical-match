@@ -27,13 +27,25 @@ static const u8 PALETTE[] = {
 	0x1D, 0x09, 0x19, 0x29,
 };
 
-static GameState loop(){
-	register u8 ticks = 0;
+static void grid_set_block(u8 x, u8 y, u8 idx){
+	px_buffer_inc(PX_INC1);
+	px_buffer_set_metatile(idx, NT_ADDR(0, 8 + 2*x, 26 - 2*y));
 	
+	GRID[y][x] = idx;
+}
+
+static GameState loop(){
 	while(true){
-		// PX.scroll_y = (ticks >> 3) & 0x03;
+		for(i = 0; i < 64; ++i) px_wait_nmi();
 		
-		++ticks;
+		px_buffer_inc(PX_INC1);
+		for(iy = 1; iy < GRID_H - 1; ++iy){
+			for(ix = 1; ix < GRID_W - 1; ++ix){
+				grid_set_block(ix, iy, GRID[iy + 1][ix]);
+				px_wait_nmi();
+			}
+		}
+		
 		px_wait_nmi();
 	}
 	
@@ -44,8 +56,6 @@ static GameState debug_display(){
 	PPU.mask = 0x1E;
 	return Freeze();
 }
-
-void px_buffer_set_metatile(u8 index, u16 addr);
 
 static GameState board(){
 	px_inc(PX_INC1);
@@ -73,17 +83,14 @@ static GameState board(){
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	
-	px_buffer_inc(PX_INC1);
-	i = 1;
-	for(iy = 24; iy >= 6; iy -= 2){
-		for(ix = 10; ix < 22; ix += 2){
-			px_buffer_set_metatile(i, NT_ADDR(0, ix, iy));
-			px_wait_nmi();
-			
-			++i;
-			if(i >= 9) i = 1;
-		}
-	}
+	grid_set_block(1, 10, 1);
+	grid_set_block(1,  9, 2);
+	grid_set_block(1,  8, 3);
+	grid_set_block(2, 10, 4);
+	grid_set_block(2,  8, 5);
+	grid_set_block(4,  6, 6);
+	grid_set_block(5,  7, 7);
+	grid_set_block(6,  8, 8);
 	
 	return loop();
 }

@@ -36,6 +36,7 @@ void px_blit(u16 len, const u8 *src);
 void px_buffer_inc(u8 direction);
 void px_buffer_data(u8 len, u16 addr);
 void px_buffer_set_color(u8 idx, u8 color);
+void px_buffer_set_metatile(u8 index, u16 addr);
 
 void px_wait_nmi();
 

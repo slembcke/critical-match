@@ -34,18 +34,28 @@ static void grid_set_block(u8 x, u8 y, u8 idx){
 	GRID[y][x] = idx;
 }
 
-static GameState loop(){
-	while(true){
-		for(i = 0; i < 64; ++i) px_wait_nmi();
-		
+static void grid_tick_fall(){
+	static ticks = 1;
+	
+	if(ticks < GRID_H - 1){
 		px_buffer_inc(PX_INC1);
-		for(iy = 1; iy < GRID_H - 1; ++iy){
-			for(ix = 1; ix < GRID_W - 1; ++ix){
-				grid_set_block(ix, iy, GRID[iy + 1][ix]);
-				px_wait_nmi();
+		
+		for(ix = 1; ix < GRID_W - 1; ++ix){
+			u8 above = GRID[ticks + 1][ix];
+			if(GRID[ticks][ix] == 0 && above != 0){
+				grid_set_block(ix, ticks, above);
+				grid_set_block(ix, ticks + 1, 0);
 			}
 		}
-		
+	}
+	
+	++ticks;
+	if(ticks >= 32) ticks = 1;
+}
+
+static GameState loop(){
+	while(true){
+		grid_tick_fall();
 		px_wait_nmi();
 	}
 	
@@ -88,6 +98,7 @@ static GameState board(){
 	grid_set_block(1,  8, 3);
 	grid_set_block(2, 10, 4);
 	grid_set_block(2,  8, 5);
+	grid_set_block(3,  8, 5);
 	grid_set_block(4,  6, 6);
 	grid_set_block(5,  7, 7);
 	grid_set_block(6,  8, 8);

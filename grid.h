@@ -4,6 +4,6 @@
 #define GRID_W 8
 #define GRID_H 12
 
-extern u8 GRID[][GRID_W];
+extern u8 GRID[];
 
 #endif

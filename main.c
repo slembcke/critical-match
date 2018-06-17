@@ -27,22 +27,29 @@ static const u8 PALETTE[] = {
 	0x1D, 0x09, 0x19, 0x29,
 };
 
-static void grid_set_block(u8 x, u8 y, u8 idx){
+#define grid_block_idx(x, y) (GRID_W*(y) + (x))
+
+static void grid_set_block(u8 x, u8 y, u8 block){
 	px_buffer_inc(PX_INC1);
-	px_buffer_set_metatile(idx, NT_ADDR(0, 8 + 2*x, 26 - 2*y));
+	px_buffer_set_metatile(block, NT_ADDR(0, 8 + 2*x, 26 - 2*y));
 	
-	GRID[y][x] = idx;
+	idx = grid_block_idx(x, y);
+	GRID[idx] = block;
 }
 
 static void grid_tick_fall(){
-	static ticks = 1;
+	static u8 ticks = 1;
+	u8 above;
 	
 	if(ticks < GRID_H - 1){
 		px_buffer_inc(PX_INC1);
 		
 		for(ix = 1; ix < GRID_W - 1; ++ix){
-			u8 above = GRID[ticks + 1][ix];
-			if(GRID[ticks][ix] == 0 && above != 0){
+			idx = grid_block_idx(ix, ticks + 1);
+			above = GRID[idx];
+			
+			idx = grid_block_idx(ix, ticks);
+			if(GRID[idx] == 0 && above != 0){
 				grid_set_block(ix, ticks, above);
 				grid_set_block(ix, ticks + 1, 0);
 			}
@@ -155,6 +162,6 @@ GameState main(void){
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	return debug_chr();
+	// return debug_chr();
 	return board();
 }

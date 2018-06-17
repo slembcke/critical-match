@@ -13,10 +13,10 @@ GameState Freeze(){
 }
 
 static const u8 PALETTE[] = {
-	0x1D, 0x1D, 0x28, 0x1A,
-	0x1D, 0x1D, 0x28, 0x12,
-	0x1D, 0x1D, 0x28, 0x14,
-	0x1D, 0x1D, 0x28, 0x16,
+	0x1D, 0x1D, 0x28, 0x12, // blue
+	0x1D, 0x1D, 0x28, 0x06, // red
+	0x1D, 0x1D, 0x28, 0x19, // green
+	0x1D, 0x1D, 0x28, 0x13, // purple
 	
 	0x1D, 0x20, 0x20, 0x20,
 	0x1D, 0x06, 0x16, 0x26,
@@ -47,45 +47,40 @@ void px_buffer_set_metatile(u8 index, u16 addr);
 static GameState board(){
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 0, 0));
-	px_fill(32*30, 0x01);
-
-	px_inc(PX_INC1);
-	px_addr(NT_ADDR(0, 9, 5));
-	px_fill(14, '*');
-	px_addr(NT_ADDR(0, 9, 26));
-	px_fill(14, '*');
+	px_fill(32*30, 0x00);
+	
+	// Top edge.
+	px_addr(NT_ADDR(0, 10, 5));
+	px_fill(12, 0x0B);
+	
+	// Bottom edge.
+	px_addr(NT_ADDR(0, 10, 26));
+	px_fill(12, 0x0B);
 	
 	px_inc(PX_INC32);
+	
+	// Left edge.
 	px_addr(NT_ADDR(0, 9, 6));
-	px_fill(20, '*');
+	px_fill(20, 0x0E);
+	
+	// Right edge.
 	px_addr(NT_ADDR(0, 22, 6));
-	px_fill(20, '*');
+	px_fill(20, 0x0E);
 	
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	
 	px_buffer_inc(PX_INC1);
-	for(iy = 0; iy < 8; iy += 2){
-		for(ix = 0; ix < 8; ix += 2){
-			px_buffer_set_metatile((ix/2 & 3) + 1, NT_ADDR(0, ix, iy));
+	i = 1;
+	for(iy = 24; iy >= 6; iy -= 2){
+		for(ix = 10; ix < 22; ix += 2){
+			px_buffer_set_metatile(i, NT_ADDR(0, ix, iy));
+			px_wait_nmi();
+			
+			++i;
+			if(i >= 5) i = 1;
 		}
 	}
-	
-	// while(true){
-	// 	if((i & 2) == 0){
-	// 		for(iy = 0; iy < 16; iy += 2){
-	// 			px_buffer_set_metatile(iy/2 & 7, NT_ADDR(0, (i >> 1) & 0x1F, iy));
-	// 		}
-	// 		px_wait_nmi();
-			
-	// 		for(; iy < 30; iy += 2){
-	// 			px_buffer_set_metatile(iy/2 & 7, NT_ADDR(0, (i >> 1) & 0x1F, iy));
-	// 		}
-	// 	}
-		
-	// 	++i;
-	// 	px_wait_nmi();
-	// }
 	
 	return loop();
 }
@@ -132,6 +127,6 @@ GameState main(void){
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	return debug_chr();
+	// return debug_chr();
 	return board();
 }

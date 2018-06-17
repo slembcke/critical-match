@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <nes.h>
+#include <joystick.h>
+
 #include "pixler.h"
 #include "shared.h"
 #include "grid.h"
@@ -109,14 +112,21 @@ static GameState debug_chr(){
 	
 	// Enable rendering.
 	PPU.mask = 0x1E;
+	px_wait_nmi();
 	
-	return loop();
+	while(!JOY_START(joy_read(0))){}
+	while(JOY_START(joy_read(0))){}
+	
+	PPU.mask = 0x0;
+	return board();
 }
 
 extern u8 neschar_inc[];
 extern u8 gfx_sheet1_chr[];
 
 GameState main(void){
+	joy_install(joy_static_stddrv);
+	
 	px_bank_select(0);
 	px_addr(CHR_ADDR(0, 0));
 	px_blit_chr(256, neschar_inc);
@@ -127,6 +137,6 @@ GameState main(void){
 	px_addr(0x3F00);
 	px_blit(32, (u8 *)PALETTE);
 	
-	// return debug_chr();
+	return debug_chr();
 	return board();
 }

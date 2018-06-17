@@ -10,7 +10,7 @@
 .import px_nmi
 .import px_bank_select
 
-.export start
+.export start, _exit = start
 .export __STARTUP__:absolute = 1
 
 .segment "HEADER"

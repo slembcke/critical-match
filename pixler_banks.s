@@ -23,8 +23,14 @@
 .endproc
 
 .segment "PRG0"
-	.align $100
+
+.export _neschar_inc
+_neschar_inc:
 	.include "neschar.inc"
+
+.export _gfx_sheet1_chr
+_gfx_sheet1_chr:
+	.incbin "gfx/sheet1.chr"
 
 .segment "PRG1"
 .segment "PRG2"

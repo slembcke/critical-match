@@ -3,3 +3,7 @@
 *.o
 *.d
 link.log
+gfx/*.chr
+
+tools/png2chr
+tools/chr2png

@@ -24,6 +24,7 @@ clean:
 	rm -rf $(ROM)
 	rm -rf $(SRC:.c=.s)
 	rm -rf $(OBJS)
+	rm -rf gfx/*.chr
 	rm -rf link.log
 
 run-mac: $(ROM)
@@ -37,6 +38,11 @@ run-linux: $(ROM)
 
 %.o: %.s
 	$(AS) $< -I $(ASMINC) -o $@
+
+pixler_banks.s: gfx/sheet1.chr
+
+%.chr: %.png
+	tools/png2chr $< $@
 
 # Cancel built in rule for .c files.
 %.o: %.c

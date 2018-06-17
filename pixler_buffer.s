@@ -196,11 +196,11 @@ PAL0 = %00000000
 PAL1 = %01010101
 PAL2 = %10101010
 PAL3 = %11111111
-METATILE0: .byte  $00,  $80,  $82,  $84,  $86,  $14,  $14,  $14,  $14
-METATILE1: .byte  $00,  $81,  $83,  $85,  $87,  $12,  $12,  $12,  $12
-METATILE2: .byte  $00,  $90,  $92,  $94,  $96,  $11,  $11,  $11,  $11
-METATILE3: .byte  $00,  $91,  $93,  $95,  $97,  $08,  $08,  $08,  $08
-METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3, PAL2, PAL3, PAL2, PAL3
+METATILE0: .byte  $00,  $80,  $82,  $84,  $86,  $88,  $8A,  $8C,  $8E
+METATILE1: .byte  $00,  $81,  $83,  $85,  $87,  $89,  $8B,  $8D,  $8F
+METATILE2: .byte  $00,  $90,  $92,  $94,  $96,  $98,  $9A,  $9C,  $9E
+METATILE3: .byte  $00,  $91,  $93,  $95,  $97,  $99,  $9B,  $9D,  $9F
+METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL2, PAL3
 
 QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
 

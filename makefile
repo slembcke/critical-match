@@ -11,8 +11,18 @@ CFLAGS = -t nes -Oirs
 INCLUDE = $(CC65_ROOT)/include
 ASMINC = $(CC65_ROOT)/libsrc/nes
 
-SRC = main.c pixler.c grid.c
-ASMSRC = pixler_boot.s pixler_zeropage.s pixler_nmi.s pixler_banks.s pixler_buffer.s pixler_blit.s zeropage.s
+SRC = \
+	main.c \
+	grid.c \
+	pixler.c
+ASMSRC = \
+	zeropage.s \
+	pixler_boot.s \
+	pixler_zeropage.s \
+	pixler_nmi.s \
+	pixler_banks.s \
+	pixler_buffer.s \
+	pixler_blit.s
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
 rom: $(ROM)
@@ -39,10 +49,10 @@ run-linux: $(ROM)
 %.o: %.s
 	$(AS) $< -I $(ASMINC) -o $@
 
-pixler_banks.s: gfx/sheet1.chr
-
 %.chr: %.png
 	tools/png2chr $< $@
+
+pixler_banks.s: gfx/sheet1.chr
 
 # Cancel built in rule for .c files.
 %.o: %.c

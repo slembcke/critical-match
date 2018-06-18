@@ -8,21 +8,21 @@ LD = $(CC65_ROOT)/bin/ld65
 
 CFLAGS = -t nes -Oirs
 
-INCLUDE = $(CC65_ROOT)/include
+INCLUDE = -I $(CC65_ROOT)/include -I pixler
 ASMINC = $(CC65_ROOT)/libsrc/nes
 
 SRC = \
-	main.c \
-	grid.c \
-	pixler.c
+	src/main.c \
+	src/grid.c \
+	pixler/pixler.c
 ASMSRC = \
-	zeropage.s \
-	pixler_boot.s \
-	pixler_zeropage.s \
-	pixler_nmi.s \
-	pixler_banks.s \
-	pixler_buffer.s \
-	pixler_blit.s
+	src/zeropage.s \
+	pixler/pixler_boot.s \
+	pixler/pixler_zeropage.s \
+	pixler/pixler_nmi.s \
+	pixler/pixler_banks.s \
+	pixler/pixler_buffer.s \
+	pixler/pixler_blit.s
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
 rom: $(ROM)
@@ -44,7 +44,7 @@ run-linux: $(ROM)
 	nestopia -d -w -l 1 -n -s 4 -t $(ROM)
 
 %.s: %.c
-	$(CC) $(CFLAGS) $< --add-source -I $(INCLUDE) -o $@
+	$(CC) $(CFLAGS) $< --add-source $(INCLUDE) -o $@
 
 %.o: %.s
 	$(AS) $< -I $(ASMINC) -o $@
@@ -52,7 +52,7 @@ run-linux: $(ROM)
 %.chr: %.png
 	tools/png2chr $< $@
 
-pixler_banks.s: gfx/sheet1.chr
+pixler/pixler_banks.s: gfx/sheet1.chr
 
 # Cancel built in rule for .c files.
 %.o: %.c

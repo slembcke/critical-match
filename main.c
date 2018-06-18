@@ -8,6 +8,10 @@
 #include "shared.h"
 #include "grid.h"
 
+#define PAL_ADDR 0x3F00
+
+static u8 joy0, joy1;
+
 typedef struct {} GameState;
 
 GameState Freeze(){
@@ -43,6 +47,11 @@ static GameState debug_display(void){
 }
 
 static GameState board(void){
+	// Set the palette.
+	px_inc(PX_INC1);
+	px_addr(PAL_ADDR);
+	px_blit(32, (u8 *)PALETTE);
+	
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 0, 0));
 	px_fill(32*30, 0x00);
@@ -83,6 +92,7 @@ static GameState board(void){
 
 static GameState debug_chr(void){
 	static const char HEX[] = "0123456789ABCDEF";
+	u8 pal = 0;
 	
 	// Top
 	px_inc(PX_INC1);
@@ -107,8 +117,24 @@ static GameState debug_chr(void){
 	PPU.mask = 0x1E;
 	px_wait_nmi();
 	
-	while(!JOY_START(joy_read(0))){}
-	while(JOY_START(joy_read(0))){}
+	while(true){
+		joy0 = joy_read(0);
+		
+		if(JOY_START(joy0)) break;
+		
+		if(JOY_LEFT(joy0)) pal = (pal - 1) & 3;
+		if(JOY_RIGHT(joy0)) pal = (pal + 1) & 3;
+		
+		px_inc(PX_INC1);
+		px_buffer_data(4, PAL_ADDR);
+		memcpy(PX.buffer, PALETTE + 4*pal, 4);
+		// memset(PX.buffer, 0x18, 4);
+		
+		// Wait until button up.
+		while(joy_read(0)) px_wait_nmi();
+		
+		px_wait_nmi();
+	}
 	
 	PPU.mask = 0x0;
 	return board();
@@ -127,7 +153,7 @@ GameState main(void){
 	px_blit_chr(128, gfx_sheet1_chr);
 	
 	px_inc(PX_INC1);
-	px_addr(0x3F00);
+	px_addr(PAL_ADDR);
 	px_blit(32, (u8 *)PALETTE);
 	
 	return debug_chr();

@@ -32,6 +32,10 @@ _neschar_inc:
 _gfx_sheet1_chr:
 	.incbin "gfx/sheet1.chr"
 
+.export _gfx_squidman_chr
+_gfx_squidman_chr:
+	.incbin "gfx/squidman.chr"
+
 .segment "PRG1"
 .segment "PRG2"
 .segment "PRG3"

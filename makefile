@@ -15,6 +15,7 @@ SRC = \
 	src/main.c \
 	src/grid.c \
 	pixler/pixler.c
+
 ASMSRC = \
 	src/zeropage.s \
 	pixler/pixler_boot.s \
@@ -23,6 +24,11 @@ ASMSRC = \
 	pixler/pixler_banks.s \
 	pixler/pixler_buffer.s \
 	pixler/pixler_blit.s
+
+GFX = \
+	gfx/sheet1.chr \
+	gfx/squidman.chr
+
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
 rom: $(ROM)
@@ -52,7 +58,7 @@ run-linux: $(ROM)
 %.chr: %.png
 	tools/png2chr $< $@
 
-pixler/pixler_banks.s: gfx/sheet1.chr
+pixler/pixler_banks.o: $(GFX)
 
 # Cancel built in rule for .c files.
 %.o: %.c

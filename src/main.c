@@ -144,6 +144,7 @@ static GameState debug_chr(void){
 
 extern u8 neschar_inc[];
 extern u8 gfx_sheet1_chr[];
+extern u8 gfx_squidman_chr[];
 
 GameState main(void){
 	joy_install(joy_static_stddrv);
@@ -153,6 +154,8 @@ GameState main(void){
 	px_blit_chr(256, neschar_inc);
 	px_addr(CHR_ADDR(0, 0x80));
 	px_blit_chr(128, gfx_sheet1_chr);
+	px_addr(CHR_ADDR(0, 0xA0));
+	px_blit_chr(128, gfx_squidman_chr);
 	
 	px_inc(PX_INC1);
 	px_addr(PAL_ADDR);

@@ -40,22 +40,27 @@ PAL = 2
 
 .rodata
 
-.export _animation
-_animation:
+oam_data_r:
 	.repeat FRAME_COUNT, i
 		right_frame i
 	.endrepeat
+
+frame_addrs_r:
+	.repeat FRAME_COUNT, i
+		.addr oam_data_r + STRIDE*i
+	.endrepeat
+
+.zeropage
+
+sprite_x: .byte 0
+sprite_y: .byte 0
+sprite_pal: .byte 0
 
 .code
 
 .export _debug_sprite
 .proc _debug_sprite
-	.zeropage
-	sprite_x: .byte 0
-	sprite_y: .byte 0
-	sprite_pal: .byte 0
-	
-	.code
+	; TODO temp
 	lda #24
 	sta sprite_x
 	lda #64
@@ -63,11 +68,14 @@ _animation:
 	lda #2
 	sta sprite_pal
 	
-	lda #<_animation
+	; Load metsprite address.
+	ldx #8
+	lda frame_addrs_r+0, x
 	sta ptr1+0
-	lda #>_animation
+	lda frame_addrs_r+1, x
 	sta ptr1+1
 	
+	; Hardcode or no?
 	lda #6
 	sta sreg
 	

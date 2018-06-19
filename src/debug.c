@@ -16,7 +16,6 @@ GameState debug_display(void){
 	return Freeze();
 }
 
-extern u8 animation[];
 void debug_sprite();
 
 GameState debug_chr(void){
@@ -63,9 +62,6 @@ GameState debug_chr(void){
 		while(joy_read(0)) px_wait_nmi();
 		
 		debug_sprite();
-		// memcpy(OAM, animation + 24*(idx/4), 24);
-		// ++idx;
-		// if(idx/4 == 14) idx = 0;
 	
 		px_wait_nmi();
 	}

@@ -4,6 +4,8 @@
             "name": "cc65",
             "includePath": [
                 "../cc65/include",
+                "pixler",
+                "src",
                 "${workspaceRoot}"
             ],
             "defines": [],
@@ -11,6 +13,8 @@
             "browse": {
                 "path": [
                     "../cc65/include",
+                    "pixler",
+                    "src",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,

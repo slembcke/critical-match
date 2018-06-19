@@ -9,4 +9,13 @@ extern u8 i, ix, iy, idx;
 #pragma zpsym("iy");
 #pragma zpsym("idx");
 
+extern u8 joy0, joy1;
+extern const u8 PALETTE[];
+
+typedef struct {} GameState;
+
+GameState board(void);
+
+GameState debug_chr(void);
+
 #endif

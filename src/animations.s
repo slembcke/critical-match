@@ -16,12 +16,12 @@ PAL = 2
 	.scope
 		attr = $00
 		chr = BASE_CHR + 2*n
-		.byte  0, chr + 0 + 0*STRIDE, attr,  0
-		.byte  0, chr + 1 + 0*STRIDE, attr,  8
-		.byte  8, chr + 0 + 1*STRIDE, attr,  0
-		.byte  8, chr + 1 + 1*STRIDE, attr,  8
-		.byte 16, chr + 0 + 2*STRIDE, attr,  0
-		.byte 16, chr + 1 + 2*STRIDE, attr,  8
+		.byte 0,  0, chr + 0 + 0*STRIDE, attr
+		.byte 8,  0, chr + 1 + 0*STRIDE, attr
+		.byte 0,  8, chr + 0 + 1*STRIDE, attr
+		.byte 8,  8, chr + 1 + 1*STRIDE, attr
+		.byte 0, 16, chr + 0 + 2*STRIDE, attr
+		.byte 8, 16, chr + 1 + 2*STRIDE, attr
 	.endscope
 .endmacro
 
@@ -68,31 +68,44 @@ _animation:
 	lda #>_animation
 	sta ptr1+1
 	
+	lda #6
+	sta sreg
+	
 	ldx #0
-	ldy #(0*STRIDE)
+	ldy #0
 	:
-		lda _animation+0, y
-		clc
-		adc sprite_y
-		sta OAM+0, y
-		lda _animation+1, y
-		sta OAM+1, y
-		lda _animation+2, y
-		ora sprite_pal
-		sta OAM+2, y
-		lda _animation+3, y
+		; x-pos
+		lda (ptr1), y
+		iny
 		clc
 		adc sprite_x
-		sta OAM+3, y
+		sta OAM+3, x
 		
+		; y-pos
+		lda (ptr1), y
 		iny
+		clc
+		adc sprite_y
+		sta OAM+0, x
+		
+		; chr
+		lda (ptr1), y
 		iny
+		sta OAM+1, x
+		
+		; attr
+		lda (ptr1), y
 		iny
-		iny
+		ora sprite_pal
+		sta OAM+2, x
 		
 		inx
-		cpx #OBJ_COUNT
-		blt :-
+		inx
+		inx
+		inx
+		
+		dec sreg
+		bne :-
 	
 	rts
 .endproc

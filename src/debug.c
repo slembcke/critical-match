@@ -16,11 +16,12 @@ GameState debug_display(void){
 	return Freeze();
 }
 
-void debug_sprite();
+void debug_sprite(u8 x, u8 y, u8 frame);
 
 GameState debug_chr(void){
 	static const char HEX[] = "0123456789ABCDEF";
-	u8 pal = 0;
+	register u8 pal = 0;
+	register u8 ticks = 0;
 	
 	// Top
 	px_inc(PX_INC1);
@@ -58,11 +59,14 @@ GameState debug_chr(void){
 		px_buffer_data(4, PAL_ADDR);
 		memcpy(PX.buffer, PALETTE + 4*pal, 4);
 		
+		debug_sprite(128, 32, idx);
+		if((ticks & 7) == 0) ++idx;
+		if(idx > 11) idx = 8;
+		
 		// Wait until button up.
 		while(joy_read(0)) px_wait_nmi();
 		
-		debug_sprite();
-	
+		++ticks;
 		px_wait_nmi();
 	}
 	

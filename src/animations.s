@@ -2,7 +2,7 @@
 
 .macpack generic
 
-.import incsp1
+.import incsp2
 .import OAM
 
 BASE_CHR = $A0
@@ -16,25 +16,12 @@ PAL = 2
 	.scope
 		attr = $00
 		chr = BASE_CHR + 2*n
-		.byte 0,  0, chr + 0 + 0*STRIDE, attr
-		.byte 8,  0, chr + 1 + 0*STRIDE, attr
-		.byte 0,  8, chr + 0 + 1*STRIDE, attr
-		.byte 8,  8, chr + 1 + 1*STRIDE, attr
-		.byte 0, 16, chr + 0 + 2*STRIDE, attr
-		.byte 8, 16, chr + 1 + 2*STRIDE, attr
-	.endscope
-.endmacro
-
-.macro left_frame n
-	.scope
-		attr = $70
-		chr = BASE_CHR + 2*n
-		.byte  0, chr + 1 + 0*STRIDE, attr,  0
-		.byte  0, chr + 0 + 0*STRIDE, attr,  8
-		.byte  8, chr + 1 + 1*STRIDE, attr,  0
-		.byte  8, chr + 0 + 1*STRIDE, attr,  8
-		.byte 16, chr + 1 + 2*STRIDE, attr,  0
-		.byte 16, chr + 0 + 2*STRIDE, attr,  8
+		.byte 248, 231, chr+0 + 0*STRIDE, attr
+		.byte   0, 231, chr+1 + 0*STRIDE, attr
+		.byte 248, 239, chr+0 + 1*STRIDE, attr
+		.byte   0, 239, chr+1 + 1*STRIDE, attr
+		.byte 248, 247, chr+0 + 2*STRIDE, attr
+		.byte   0, 247, chr+1 + 2*STRIDE, attr
 	.endscope
 .endmacro
 
@@ -47,7 +34,7 @@ oam_data_r:
 
 frame_addrs_r:
 	.repeat FRAME_COUNT, i
-		.addr oam_data_r + STRIDE*i
+		.addr oam_data_r + 24*i
 	.endrepeat
 
 .zeropage
@@ -59,28 +46,32 @@ sprite_pal: .byte 0
 .code
 
 .export _debug_sprite
-.proc _debug_sprite
-	; TODO temp
-	lda #24
-	sta sprite_x
-	lda #64
-	sta sprite_y
-	lda #2
-	sta sprite_pal
-	
+.proc _debug_sprite ; u8 x, u8 y, u8 frame
 	; Load metsprite address.
-	ldx #8
+	asl
+	tax
 	lda frame_addrs_r+0, x
 	sta ptr1+0
 	lda frame_addrs_r+1, x
 	sta ptr1+1
 	
+	; TODO temp
+	ldy #1
+	lda (sp), y
+	sta sprite_x
+	dey
+	lda (sp), y
+	sta sprite_y
+	lda #2
+	sta sprite_pal
+	
 	; Hardcode or no?
 	lda #6
 	sta sreg
 	
-	ldx #0
-	ldy #0
+	lda #0
+	tax
+	tay
 	:
 		; x-pos
 		lda (ptr1), y
@@ -115,5 +106,5 @@ sprite_pal: .byte 0
 		dec sreg
 		bne :-
 	
-	rts
+	jmp incsp2
 .endproc

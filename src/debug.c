@@ -16,6 +16,15 @@ GameState debug_display(void){
 	return Freeze();
 }
 
+static u8 meta_sprite[] = {
+	  0, 0xA0 + 0*28,  0x00, 0,
+	  0, 0xA1 + 0*28,  0x00, 8,
+	  8, 0xA0 + 1*28,  0x00, 0,
+	  8, 0xA1 + 1*28,  0x00, 8,
+	 16, 0xA0 + 2*28,  0x00, 0,
+	 16, 0xA1 + 2*28,  0x00, 8,
+};
+
 GameState debug_chr(void){
 	static const char HEX[] = "0123456789ABCDEF";
 	u8 pal = 0;
@@ -39,6 +48,8 @@ GameState debug_chr(void){
 		}
 	}
 	
+	memcpy(OAM, meta_sprite, 24);
+	
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	px_wait_nmi();
@@ -54,7 +65,6 @@ GameState debug_chr(void){
 		px_inc(PX_INC1);
 		px_buffer_data(4, PAL_ADDR);
 		memcpy(PX.buffer, PALETTE + 4*pal, 4);
-		// memset(PX.buffer, 0x18, 4);
 		
 		// Wait until button up.
 		while(joy_read(0)) px_wait_nmi();

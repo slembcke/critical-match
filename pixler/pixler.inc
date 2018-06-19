@@ -1,7 +1,7 @@
 .include "nes.inc"
 
-; Config
-OAM = $0200
+.import __OAM_START__
+OAM = __OAM_START__
 
 ; Some more descriptive aliases for the cc65 defines.
 APU_FRAME_COUNTER = APU_PAD2

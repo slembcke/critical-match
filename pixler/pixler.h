@@ -9,6 +9,8 @@ typedef uint16_t u16;
 
 #include <nes.h>
 
+extern u8 OAM[];
+
 typedef struct {
 	u16 scroll_x;
 	u16 scroll_y;

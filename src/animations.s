@@ -6,7 +6,7 @@ PAL = 2
 
 .macro right_frame n
 	.scope
-		attr = $00
+		attr = $02
 		chr = BASE_CHR + 2*n
 		.byte  0, chr + 0 + 0*STRIDE, attr,  0
 		.byte  0, chr + 1 + 0*STRIDE, attr,  8

@@ -54,7 +54,7 @@ sprite_pal: .byte 0
 	lda player_frames+1, x
 	sta ptr1+1
 	
-	; TODO temp
+	; Set x/y offsets.
 	ldy #1
 	lda (sp), y
 	sta sprite_x
@@ -64,7 +64,7 @@ sprite_pal: .byte 0
 	lda #2
 	sta sprite_pal
 	
-	; Hardcode or no?
+	; TODO: Hardcode or no?
 	lda #6
 	sta sreg
 	

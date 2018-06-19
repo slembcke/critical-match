@@ -17,6 +17,7 @@ GameState debug_display(void){
 }
 
 extern u8 animation[];
+void debug_sprite();
 
 GameState debug_chr(void){
 	static const char HEX[] = "0123456789ABCDEF";
@@ -61,9 +62,10 @@ GameState debug_chr(void){
 		// Wait until button up.
 		while(joy_read(0)) px_wait_nmi();
 		
-		memcpy(OAM, animation + 24*(idx/4), 24);
-		++idx;
-		if(idx/4 == 14) idx = 0;
+		debug_sprite();
+		// memcpy(OAM, animation + 24*(idx/4), 24);
+		// ++idx;
+		// if(idx/4 == 14) idx = 0;
 	
 		px_wait_nmi();
 	}

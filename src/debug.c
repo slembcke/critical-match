@@ -17,7 +17,8 @@ GameState debug_display(void){
 	return Freeze();
 }
 
-void debug_sprite(u8 x, u8 y, u8 frame);
+void player_right_sprite(u8 x, u8 y, u8 frame);
+void player_left_sprite(u8 x, u8 y, u8 frame);
 
 GameState debug_palette(){
 	register u8 pal = 0;
@@ -58,7 +59,12 @@ GameState debug_palette(){
 struct Player {
 	u16 pos_x;
 	s16 vel_x;
+	
+	// Desired movement.
 	s16 move;
+	
+	bool facingRight;
+	bool grounded;
 } Player;
 
 GameState debug_player(){
@@ -79,13 +85,28 @@ GameState debug_player(){
 		player.vel_x += CLAMP(player.move - player.vel_x, -PLAYER_ACCEL, PLAYER_ACCEL);
 		player.pos_x += player.vel_x;
 		
+		// Update the facing direction.
+		if(player.vel_x > 0){
+			player.facingRight = true;
+		} else if(player.vel_x < 0){
+			player.facingRight = false;
+		}
+		
 		ix = player.pos_x >> 8;
 		if((player.vel_x >> 8) == 0){
 			// Idle
-			debug_sprite(ix, 220, ((ticks >> 3) & 3) + 8);
+			if(player.facingRight){
+				player_right_sprite(ix, 220, ((ticks >> 3) & 3) + 8);
+			} else {
+				player_left_sprite(ix, 220, ((ticks >> 3) & 3) + 8);
+			}
 		} else {
 			// Run
-			debug_sprite(ix, 220, (ix >> 2) & 7);
+			if(player.facingRight){
+				player_right_sprite(ix, 220, (ix >> 2) & 7);
+			} else {
+				player_left_sprite(ix, 220, (ix >> 2) & 7);
+			}
 		}
 		
 		++ticks;

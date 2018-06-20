@@ -26,7 +26,7 @@ ROW_STRIDE = FRAME_COUNT*2
 
 .macro player_left_metasprite n
 	.scope
-		attr = $70
+		attr = $40
 		chr = $A0 + 2*n
 		.byte 248, 231, chr+1 + 0*ROW_STRIDE, attr
 		.byte   0, 231, chr+0 + 0*ROW_STRIDE, attr

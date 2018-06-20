@@ -2,9 +2,10 @@
 
 .macpack generic
 
+.importzp px_sprite_cursor
+
 .import incsp2
 .import OAM
-
 
 OBJ_COUNT = 6
 FRAME_COUNT = 14
@@ -82,9 +83,8 @@ sprite_pal: .byte 0
 	lda #6
 	sta sreg
 	
-	lda #0
-	tax
-	tay
+	ldx px_sprite_cursor
+	ldy #0
 	:
 		; x-pos
 		lda (ptr1), y
@@ -119,5 +119,24 @@ sprite_pal: .byte 0
 		dec sreg
 		bne :-
 	
+	stx px_sprite_cursor
 	jmp incsp2
+.endproc
+
+.export _px_spr_end
+.proc _px_spr_end
+	; TODO Infinite loop if cursor is not aligned!
+	lda #240 ; y positions past 240 are offscreen.
+	; Move sprites offscreen.
+	ldx px_sprite_cursor
+	:	sta OAM, x ; Store y position;
+		; Skip 4 bytes to the next sprite.
+		inx
+		inx
+		inx
+		inx
+		bne :-
+	
+	stx px_sprite_cursor
+	rts
 .endproc

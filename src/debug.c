@@ -68,6 +68,8 @@ GameState debug_player(){
 		if(JOY_START(joy0)) break;
 		
 		player_tick(joy0);
+		
+		px_spr_end();
 		px_wait_nmi();
 	}
 	

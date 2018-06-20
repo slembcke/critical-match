@@ -34,6 +34,7 @@ static GameState loop(void){
 		grid_update();
 		player_tick(joy0);
 		
+		px_spr_end();
 		px_profile_disable();
 		px_wait_nmi();
 	}

@@ -52,7 +52,8 @@ void player_tick(u8 joy){
 	}
 	
 	// TODO Collision detection
-	if(player.pos_y < 16*0x100){
+	player.grounded = false;
+	if(player.pos_y <= 16*0x100){
 		player.pos_y = 16*0x100;
 		player.vel_y = MAX(0, player.vel_y);
 		
@@ -83,7 +84,7 @@ void player_tick(u8 joy){
 			idx = 24 + player.facingRight;
 		} else {
 			// Fall
-			idx = 24 + player.facingRight;
+			idx = 26 + player.facingRight;
 		}
 	}
 	

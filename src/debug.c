@@ -7,9 +7,18 @@
 #include "pixler.h"
 #include "shared.h"
 
+static const char HEX[] = "0123456789ABCDEF";
+
 GameState Freeze(){
 	px_wait_nmi();
 	return Freeze();
+}
+
+void debug_hex(u8 value){
+	px_buffer_inc(PX_INC1);
+	px_buffer_data(2, NT_ADDR(0, 2, 2));
+	PX.buffer[1] = HEX[(value >> 0) & 0xF];
+	PX.buffer[0] = HEX[(value >> 4) & 0xF];
 }
 
 GameState debug_display(void){
@@ -47,6 +56,9 @@ GameState debug_palette(){
 }
 
 GameState debug_player(){
+	grid_init();
+	player_init();
+	
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	px_wait_nmi();
@@ -64,8 +76,6 @@ GameState debug_player(){
 }
 
 GameState debug_chr(void){
-	static const char HEX[] = "0123456789ABCDEF";
-	
 	// Top
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 8, 6));

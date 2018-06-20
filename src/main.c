@@ -24,8 +24,6 @@ const u8 PALETTE[] = {
 };
 
 static GameState loop(void){
-	player_init();
-	
 	while(true){
 		joy0 = joy_read(0);
 		
@@ -39,6 +37,9 @@ static GameState loop(void){
 }
 
 GameState board(void){
+	player_init();
+	grid_init();
+	
 	// Set the palette.
 	px_inc(PX_INC1);
 	px_addr(PAL_ADDR);

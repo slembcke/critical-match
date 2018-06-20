@@ -35,6 +35,8 @@ void player_init(void){
 	player.facingRight = true;
 }
 
+static u16 bx, by;
+
 void player_tick(u8 joy){
 	player.move = 0;
 	if(JOY_LEFT(joy)) player.move -= PLAYER_MAX_SPEED;
@@ -51,10 +53,16 @@ void player_tick(u8 joy){
 		--player.jump_ticks;
 	}
 	
-	// TODO Collision detection
+	// Collision detection
 	player.grounded = false;
-	if(player.pos_y <= 16*0x100){
-		player.pos_y = 16*0x100;
+	
+	ix = (player.pos_x >> 8);
+	iy = (player.pos_y >> 8) - 1;
+	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	
+	by = ((iy << 8) & 0xF000) + 0x1000;
+	if(idx && player.pos_y <= by){
+		player.pos_y = by;
 		player.vel_y = MAX(0, player.vel_y);
 		
 		player.grounded = true;

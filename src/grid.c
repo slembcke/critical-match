@@ -1,12 +1,10 @@
 #include <stdlib.h>
-#include <stddef.h>
+#include <string.h>
 
 #include "pixler.h"
 #include "shared.h"
 
 u8 GRID[GRID_W*GRID_H] = {};
-
-#define grid_block_idx(x, y) (GRID_W*(y) + (x))
 
 // #define PX_WRITE_IDX_TO_BUFFER(i) {asm("lda %v", idx); asm("ldy #%b", i); asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer));}
 
@@ -29,14 +27,32 @@ static void grid_tick(void){
 		GRID_HEIGHT[ix] = iy;
 	}
 	
-	px_buffer_inc(PX_INC1);
-	px_buffer_data(6, NT_ADDR(0, 0, 1));
-	PX.buffer[0] = '0' - 1 + GRID_HEIGHT[1];
-	PX.buffer[1] = '0' - 1 + GRID_HEIGHT[2];
-	PX.buffer[2] = '0' - 1 + GRID_HEIGHT[3];
-	PX.buffer[3] = '0' - 1 + GRID_HEIGHT[4];
-	PX.buffer[4] = '0' - 1 + GRID_HEIGHT[5];
-	PX.buffer[5] = '0' - 1 + GRID_HEIGHT[6];
+	// px_buffer_inc(PX_INC1);
+	// px_buffer_data(6, NT_ADDR(0, 0, 1));
+	// PX.buffer[0] = '0' - 1 + GRID_HEIGHT[1];
+	// PX.buffer[1] = '0' - 1 + GRID_HEIGHT[2];
+	// PX.buffer[2] = '0' - 1 + GRID_HEIGHT[3];
+	// PX.buffer[3] = '0' - 1 + GRID_HEIGHT[4];
+	// PX.buffer[4] = '0' - 1 + GRID_HEIGHT[5];
+	// PX.buffer[5] = '0' - 1 + GRID_HEIGHT[6];
+}
+
+// TODO Is this code bigger than a table? LOL
+void grid_init(void){
+	static const u8 row[] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
+	
+	memset(GRID, 0xFF, 1*GRID_W);
+	memcpy(GRID +  1*GRID_W, row, GRID_W);
+	memcpy(GRID +  2*GRID_W, row, GRID_W);
+	memcpy(GRID +  3*GRID_W, row, GRID_W);
+	memcpy(GRID +  4*GRID_W, row, GRID_W);
+	memcpy(GRID +  5*GRID_W, row, GRID_W);
+	memcpy(GRID +  6*GRID_W, row, GRID_W);
+	memcpy(GRID +  7*GRID_W, row, GRID_W);
+	memcpy(GRID +  8*GRID_W, row, GRID_W);
+	memcpy(GRID +  9*GRID_W, row, GRID_W);
+	memcpy(GRID + 10*GRID_W, row, GRID_W);
+	memcpy(GRID + 11*GRID_W, row, GRID_W);
 }
 
 void grid_update(void){

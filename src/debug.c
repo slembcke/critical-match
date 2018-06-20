@@ -17,8 +17,7 @@ GameState debug_display(void){
 	return Freeze();
 }
 
-void player_right_sprite(u8 x, u8 y, u8 frame);
-void player_left_sprite(u8 x, u8 y, u8 frame);
+void player_sprite(u8 x, u8 y, u8 frame);
 
 GameState debug_palette(){
 	register u8 pal = 0;
@@ -95,18 +94,10 @@ GameState debug_player(){
 		ix = player.pos_x >> 8;
 		if((player.vel_x >> 8) == 0){
 			// Idle
-			if(player.facingRight){
-				player_right_sprite(ix, 220, ((ticks >> 3) & 3) + 8);
-			} else {
-				player_left_sprite(ix, 220, ((ticks >> 3) & 3) + 8);
-			}
+			player_sprite(ix, 220, ((ticks >> 2) & 0x6) + 16 + player.facingRight);
 		} else {
 			// Run
-			if(player.facingRight){
-				player_right_sprite(ix, 220, (ix >> 2) & 7);
-			} else {
-				player_left_sprite(ix, 220, (ix >> 2) & 7);
-			}
+			player_sprite(ix, 220, ((ix >> 1) & 14) + player.facingRight);
 		}
 		
 		++ticks;

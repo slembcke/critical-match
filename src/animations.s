@@ -39,24 +39,15 @@ ROW_STRIDE = FRAME_COUNT*2
 
 .rodata
 
-player_right_frame_data:
+player_frame_data:
 	.repeat FRAME_COUNT, i
+		player_left_metasprite i
 		player_right_metasprite i
 	.endrepeat
 
-player_left_frame_data:
-	.repeat FRAME_COUNT, i
-		player_left_metasprite i
-	.endrepeat
-
-player_right_frames:
-	.repeat FRAME_COUNT, i
-		.addr player_right_frame_data + i*FRAME_SIZE
-	.endrepeat
-
-player_left_frames:
-	.repeat FRAME_COUNT, i
-		.addr player_left_frame_data + i*FRAME_SIZE
+player_frames:
+	.repeat 2*FRAME_COUNT, i
+		.addr player_frame_data + i*FRAME_SIZE
 	.endrepeat
 
 .zeropage
@@ -67,33 +58,16 @@ sprite_pal: .byte 0
 
 .code
 
-.export _player_right_sprite
-.proc _player_right_sprite ; u8 x, u8 y, u8 frame
+.export _player_sprite
+.proc _player_sprite ; u8 x, u8 y, u8 frame
 	; Load metsprite address.
 	asl
 	tax
-	lda player_right_frames+0, x
+	lda player_frames+0, x
 	sta ptr1+0
-	lda player_right_frames+1, x
+	lda player_frames+1, x
 	sta ptr1+1
 	
-	jmp player_sprite
-.endproc
-
-.export _player_left_sprite
-.proc _player_left_sprite ; u8 x, u8 y, u8 frame
-	; Load metsprite address.
-	asl
-	tax
-	lda player_left_frames+0, x
-	sta ptr1+0
-	lda player_left_frames+1, x
-	sta ptr1+1
-	
-	jmp player_sprite
-.endproc
-
-.proc player_sprite
 	; Set x/y offsets.
 	ldy #1
 	lda (sp), y

@@ -22,7 +22,7 @@ void debug_hex(u8 value){
 }
 
 GameState debug_display(void){
-	PPU.mask = 0x1E;
+	px_ppu_enable();
 	return Freeze();
 }
 
@@ -30,7 +30,7 @@ GameState debug_palette(){
 	register u8 pal = 0;
 	
 	// Enable rendering.
-	PPU.mask = 0x1E;
+	px_ppu_enable();
 	px_wait_nmi();
 	
 	idx = 0;
@@ -51,7 +51,7 @@ GameState debug_palette(){
 		px_wait_nmi();
 	}
 	
-	PPU.mask = 0x0;
+	px_ppu_disable();
 	return board();
 }
 
@@ -60,7 +60,7 @@ GameState debug_player(){
 	player_init();
 	
 	// Enable rendering.
-	PPU.mask = 0x1E;
+	px_ppu_enable();
 	px_wait_nmi();
 	
 	while(true){
@@ -71,7 +71,7 @@ GameState debug_player(){
 		px_wait_nmi();
 	}
 	
-	PPU.mask = 0x0;
+	px_ppu_disable();
 	return board();
 }
 

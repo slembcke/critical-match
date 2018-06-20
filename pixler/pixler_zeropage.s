@@ -1,4 +1,5 @@
-.exportzp px_ctrl
+.exportzp px_mask, _px_mask = px_mask
+.exportzp px_ctrl, _px_ctrl = px_ctrl
 .exportzp px_ticks, _px_ticks = px_ticks
 .exportzp _PX = PX
 .exportzp PX_scroll_x
@@ -7,6 +8,7 @@
 
 .zeropage
 
+px_mask: .byte 0
 px_ctrl: .byte 0
 
 px_ticks: .byte 0

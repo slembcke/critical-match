@@ -24,15 +24,17 @@ const u8 PALETTE[] = {
 };
 
 static GameState loop(void){
+	px_ppu_enable();
+	
 	while(true){
-		PPU.mask = 0x1E | 1;
-
+		px_profile_enable();
+		
 		joy0 = joy_read(0);
 
 		grid_update();
 		player_tick(joy0);
 		
-		PPU.mask = 0x1E;
+		px_profile_disable();
 		px_wait_nmi();
 	}
 
@@ -71,7 +73,7 @@ GameState board(void){
 	px_fill(20, 0x09);
 
 	// Enable rendering.
-	PPU.mask = 0x1E;
+	px_ppu_enable();
 
 	grid_set_block(1, 10, 1);
 	grid_set_block(1,  9, 2);

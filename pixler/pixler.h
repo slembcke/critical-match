@@ -14,6 +14,22 @@ typedef uint16_t u16;
 #define MAX(a, b) (a > b ? a : b)
 #define CLAMP(x, min, max) MAX(min, MIN(x, max))
 
+extern u8 px_mask;
+#pragma zpsym("px_mask");
+extern u8 px_ctrl;
+#pragma zpsym("px_ctrl");
+
+#define PX_MASK_GRAY 0x01
+#define PX_MASK_BG_ENABLE 0x0E
+#define PX_MASK_SPRITE_ENABLE 0x10
+#define PX_MASK_RENDER_ENABLE (PX_MASK_SPRITE_ENABLE | PX_MASK_BG_ENABLE)
+
+#define px_profile_enable() {px_mask |= PX_MASK_GRAY; PPU.mask = px_mask;}
+#define px_profile_disable() {px_mask &= ~PX_MASK_GRAY; PPU.mask = px_mask;}
+
+#define px_ppu_enable() {px_mask |= PX_MASK_RENDER_ENABLE; PPU.mask = px_mask;}
+#define px_ppu_disable() {px_mask &= ~PX_MASK_RENDER_ENABLE; PPU.mask = px_mask;}
+
 extern u8 OAM[];
 
 extern u8 px_ticks;

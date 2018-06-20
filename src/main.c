@@ -78,7 +78,7 @@ GameState board(void){
 	grid_set_block(3,  8, 9);
 	grid_set_block(4,  6, 10);
 	grid_set_block(5,  7, 11);
-	grid_set_block(3,  4, 12);
+	grid_set_block(3,  3, 12);
 	
 	return loop();
 }

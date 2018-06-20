@@ -53,13 +53,12 @@ void player_tick(u8 joy){
 		--player.jump_ticks;
 	}
 	
-	// Ground collision detection.
+	// Ground detection.
 	player.grounded = false;
 	
 	ix = (player.pos_x >> 8);
 	iy = (player.pos_y >> 8) - 1;
 	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
-	
 	by = ((iy << 8) & 0xF000) + 0x1000;
 	if(idx && player.pos_y <= by){
 		player.pos_y = by;
@@ -67,6 +66,16 @@ void player_tick(u8 joy){
 		
 		player.grounded = true;
 		if(!JOY_BTN_1(joy)) player.jump_ticks = PLAYER_JUMP_TICKS;
+	}
+	
+	// Head collision.
+	ix = (player.pos_x >> 8);
+	iy = (player.pos_y >> 8) + 16;
+	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	by = ((iy << 8) & 0xF000);
+	if(idx && player.pos_y <= by){
+		// player.pos_y = by;
+		player.vel_y = MIN(0, player.vel_y);
 	}
 	
 	// Left collision.

@@ -10,9 +10,14 @@ typedef int16_t s16;
 typedef uint8_t u8;
 typedef uint16_t u16;
 
-#include <nes.h>
+#define MIN(a, b) (a < b ? a : b)
+#define MAX(a, b) (a > b ? a : b)
+#define CLAMP(x, min, max) MAX(min, MIN(x, max))
 
 extern u8 OAM[];
+
+extern u8 px_ticks;
+#pragma zpsym("px_ticks");
 
 typedef struct {
 	u16 scroll_x;

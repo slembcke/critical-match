@@ -14,6 +14,7 @@ ASMINC = $(CC65_ROOT)/libsrc/nes
 SRC = \
 	src/main.c \
 	src/grid.c \
+	src/player.c \
 	src/debug.c \
 	pixler/pixler.c
 

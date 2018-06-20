@@ -17,8 +17,6 @@ GameState debug_display(void){
 	return Freeze();
 }
 
-void player_sprite(u8 x, u8 y, u8 frame);
-
 GameState debug_palette(){
 	register u8 pal = 0;
 	
@@ -48,99 +46,15 @@ GameState debug_palette(){
 	return board();
 }
 
-#define MIN(a, b) (a < b ? a : b)
-#define MAX(a, b) (a > b ? a : b)
-#define CLAMP(x, min, max) MAX(min, MIN(x, max))
-
-#define PLAYER_MAX_SPEED 0x0300
-#define PLAYER_ACCEL 0x0060
-#define PLAYER_GRAVITY 0x00C0
-#define PLAYER_MAX_FALL (5*PLAYER_MAX_SPEED/2)
-#define PLAYER_JUMP 0x0500
-#define PLAYER_JUMP_TICKS 5
-
-struct Player {
-	u16 pos_x, pos_y;
-	s16 vel_x, vel_y;
-	
-	// Desired movement.
-	s16 move;
-	
-	bool facingRight;
-	bool grounded;
-	
-	// Remaining ticks of jump power.
-	u8 jump_ticks;
-} Player;
-
 GameState debug_player(){
-	register u8 ticks = 0;
-	struct Player player = {
-		0x8000, 0,
-		0, 5*0x100,
-	};
-	
 	// Enable rendering.
 	PPU.mask = 0x1E;
 	px_wait_nmi();
 	
 	while(true){
 		joy0 = joy_read(0);
+		player_tick(joy0);
 		
-		player.move = 0;
-		if(JOY_LEFT(joy0)) player.move -= PLAYER_MAX_SPEED;
-		if(JOY_RIGHT(joy0)) player.move += PLAYER_MAX_SPEED;
-		
-		player.pos_x += player.vel_x;
-		player.pos_y += player.vel_y;
-		
-		player.vel_x += CLAMP(player.move - player.vel_x, -PLAYER_ACCEL, PLAYER_ACCEL);
-		player.vel_y = MAX(-PLAYER_MAX_FALL, player.vel_y - PLAYER_GRAVITY);
-		
-		if(JOY_BTN_1(joy0) && player.jump_ticks > 0){
-			player.vel_y = PLAYER_JUMP;
-			--player.jump_ticks;
-		}
-		
-		// TODO Collision detection
-		if(player.pos_y < 8*0x100){
-			player.pos_y = 8*0x100;
-			player.vel_y = MAX(0, player.vel_y);
-			
-			player.grounded = true;
-			if(!JOY_BTN_1(joy0)) player.jump_ticks = PLAYER_JUMP_TICKS;
-		}
-		
-		// Update the facing direction.
-		if(player.vel_x > 0){
-			player.facingRight = true;
-		} else if(player.vel_x < 0){
-			player.facingRight = false;
-		}
-		
-		ix = player.pos_x >> 8;
-		iy = player.pos_y >> 8;
-		if(player.grounded){
-			if((player.vel_x >> 8) == 0){
-				// Idle
-				idx = ((ticks >> 2) & 0x6) + 16 + player.facingRight;
-			} else {
-				// Run
-				idx =((ix >> 1) & 14) + player.facingRight;
-			}
-		} else {
-			if(player.vel_y > 0){
-				// Jump
-				idx = 24 + player.facingRight;
-			} else {
-				// Fall
-				idx = 24 + player.facingRight;
-			}
-		}
-		
-		player_sprite(ix, 128 - iy, idx);
-		
-		++ticks;
 		px_wait_nmi();
 	}
 	

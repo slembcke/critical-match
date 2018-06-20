@@ -14,6 +14,8 @@ extern const u8 PALETTE[];
 
 typedef struct {} GameState;
 
+void player_tick(u8 joy);
+
 GameState board(void);
 
 GameState debug_chr(void);

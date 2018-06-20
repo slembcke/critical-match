@@ -1,5 +1,6 @@
 .include "pixler.inc"
 
+.importzp px_ticks
 .importzp PX_scroll_x
 .importzp PX_scroll_y
 .import px_buffer_exec
@@ -50,5 +51,7 @@ px_nmi_ready: .byte 0
 	sta px_nmi_ready
 	:	lda px_nmi_ready
 		bne :-
+	
+	inc px_ticks
 	rts
 .endproc

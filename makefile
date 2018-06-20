@@ -6,7 +6,7 @@ CC = $(CC65_ROOT)/bin/cc65
 AS = $(CC65_ROOT)/bin/ca65
 LD = $(CC65_ROOT)/bin/ld65
 
-CFLAGS = -t nes -Oirs
+CFLAGS = -t nes -Oirs --register-space 16
 
 INCLUDE = -I $(CC65_ROOT)/include -I pixler
 ASMINC = $(CC65_ROOT)/libsrc/nes

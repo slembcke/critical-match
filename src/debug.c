@@ -53,13 +53,14 @@ GameState debug_player(){
 	
 	while(true){
 		joy0 = joy_read(0);
-		player_tick(joy0);
+		if(JOY_START(joy0)) break;
 		
+		player_tick(joy0);
 		px_wait_nmi();
 	}
 	
-	exit(0);
-	// return Freeze();
+	PPU.mask = 0x0;
+	return board();
 }
 
 GameState debug_chr(void){

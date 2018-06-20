@@ -3,7 +3,6 @@
 
 #include "pixler.h"
 #include "shared.h"
-#include "grid.h"
 
 u8 GRID[GRID_W*GRID_H] = {};
 

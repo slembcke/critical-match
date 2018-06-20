@@ -27,10 +27,13 @@ typedef struct {
 	u8 jump_ticks;
 } Player;
 
-Player player = {
-	0x8000, 0,
-	0, 5*0x100,
-};
+static const Player INIT = {64 << 8, 16 << 8, 0, 0};
+static Player player = {};
+
+void player_init(void){
+	player = INIT;
+	player.facingRight = true;
+}
 
 void player_tick(u8 joy){
 	player.move = 0;
@@ -49,8 +52,8 @@ void player_tick(u8 joy){
 	}
 	
 	// TODO Collision detection
-	if(player.pos_y < 8*0x100){
-		player.pos_y = 8*0x100;
+	if(player.pos_y < 16*0x100){
+		player.pos_y = 16*0x100;
 		player.vel_y = MAX(0, player.vel_y);
 		
 		player.grounded = true;
@@ -84,5 +87,5 @@ void player_tick(u8 joy){
 		}
 	}
 	
-	player_sprite(ix, 128 - iy, idx);
+	player_sprite(64 + ix, 224 - iy, idx);
 }

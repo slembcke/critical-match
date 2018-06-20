@@ -14,10 +14,16 @@ extern const u8 PALETTE[];
 
 typedef struct {} GameState;
 
+#define GRID_W 8
+#define GRID_H 12
+
+void grid_set_block(u8 x, u8 y, u8 block);
+void grid_update(void);
+
+void player_init(void);
 void player_tick(u8 joy);
 
 GameState board(void);
-
 GameState debug_chr(void);
 
 #endif

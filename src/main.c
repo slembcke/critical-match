@@ -6,7 +6,6 @@
 
 #include "pixler.h"
 #include "shared.h"
-#include "grid.h"
 
 u8 joy0, joy1;
 
@@ -25,8 +24,13 @@ const u8 PALETTE[] = {
 };
 
 static GameState loop(void){
+	player_init();
+	
 	while(true){
+		joy0 = joy_read(0);
+		
 		grid_update();
+		player_tick(joy0);
 		
 		px_wait_nmi();
 	}
@@ -45,22 +49,22 @@ GameState board(void){
 	px_fill(32*30, 0x00);
 	
 	// Top edge.
-	px_addr(NT_ADDR(0, 10, 5));
-	px_fill(12, 0x0B);
+	px_addr(NT_ADDR(0, 9, 5));
+	px_fill(14, 0x09);
 	
 	// Bottom edge.
-	px_addr(NT_ADDR(0, 10, 26));
-	px_fill(12, 0x0B);
+	px_addr(NT_ADDR(0, 9, 26));
+	px_fill(14, 0x09);
 	
 	px_inc(PX_INC32);
 	
 	// Left edge.
 	px_addr(NT_ADDR(0, 9, 6));
-	px_fill(20, 0x0E);
+	px_fill(20, 0x09);
 	
 	// Right edge.
 	px_addr(NT_ADDR(0, 22, 6));
-	px_fill(20, 0x0E);
+	px_fill(20, 0x09);
 	
 	// Enable rendering.
 	PPU.mask = 0x1E;
@@ -73,7 +77,7 @@ GameState board(void){
 	grid_set_block(3,  8, 9);
 	grid_set_block(4,  6, 10);
 	grid_set_block(5,  7, 11);
-	grid_set_block(6,  8, 12);
+	grid_set_block(3,  4, 12);
 	
 	return loop();
 }

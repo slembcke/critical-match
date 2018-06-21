@@ -55,7 +55,9 @@ GameState debug_palette(){
 	return board();
 }
 
-GameState debug_player(){
+void cursor_sprite();
+
+static GameState debug_sprites(){
 	grid_init();
 	player_init();
 	
@@ -67,7 +69,8 @@ GameState debug_player(){
 		joy0 = joy_read(0);
 		if(JOY_START(joy0)) break;
 		
-		player_tick(joy0);
+		// player_tick(joy0);
+		cursor_sprite();
 		
 		px_spr_end();
 		px_wait_nmi();
@@ -97,5 +100,5 @@ GameState debug_chr(void){
 		}
 	}
 	
-	return debug_player();
+	return debug_sprites();
 }

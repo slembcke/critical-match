@@ -2,6 +2,7 @@
 
 .macpack generic
 
+.importzp px_ticks
 .importzp px_sprite_cursor
 
 .import incsp2
@@ -76,7 +77,7 @@ sprite_pal: .byte 0
 	dey
 	lda (sp), y
 	sta sprite_y
-	lda #2
+	lda #2 ; TODO
 	sta sprite_pal
 	
 	; TODO: Hardcode or no?
@@ -85,8 +86,7 @@ sprite_pal: .byte 0
 	
 	ldx px_sprite_cursor
 	ldy #0
-	:
-		; x-pos
+	:	; x-pos
 		lda (ptr1), y
 		iny
 		clc
@@ -135,6 +135,65 @@ sprite_pal: .byte 0
 		inx
 		inx
 		inx
+		bne :-
+	
+	stx px_sprite_cursor
+	rts
+.endproc
+
+cursor_metasprite:
+	.byte 0, 0, $14, 0
+	.byte 8, 0, $12, 0
+	.byte 0, 8, $11, 0
+	.byte 8, 8, $08, 0
+
+.export _cursor_sprite
+.proc _cursor_sprite
+	; Set x/y offsets.
+	lda #32
+	sta sprite_x
+	lda #32
+	sta sprite_y
+	
+	; TODO: Hardcode or no?
+	lda #4
+	sta sreg
+	
+	ldx px_sprite_cursor
+	ldy #0
+	:	; x-pos
+		lda cursor_metasprite, y
+		iny
+		clc
+		adc sprite_x
+		sta OAM+3, x
+		
+		; y-pos
+		lda cursor_metasprite, y
+		iny
+		clc
+		adc sprite_y
+		sta OAM+0, x
+		
+		; chr
+		lda cursor_metasprite, y
+		iny
+		sta OAM+1, x
+		
+		; attr
+		lda px_ticks
+		lsr
+		and #$03
+		ora cursor_metasprite, y
+		iny
+		sta OAM+2, x
+		
+		inx
+		inx
+		inx
+		inx
+		
+		dec sreg
 		bne :-
 	
 	stx px_sprite_cursor

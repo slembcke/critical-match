@@ -11,6 +11,16 @@ FT_SFX_STREAMS = 4
 .define FT_NTSC_SUPPORT 1
 .define FT_PITCH_FIX 0
 
+.export FamiToneInit
+.export FamiToneUpdate
+.export FamiToneMusicPlay
+.export FamiToneMusicPause
+.export FamiToneMusicStop
+
+.if FT_SFX_ENABLE
+	.export FamiToneSfxInit
+	.export FamiToneSfxPlay
+.endif
 
 ;internal defines
 

@@ -5,6 +5,7 @@
 .importzp px_ticks
 .importzp px_sprite_cursor
 
+.import incsp1
 .import incsp2
 .import OAM
 
@@ -142,18 +143,18 @@ sprite_pal: .byte 0
 .endproc
 
 cursor_metasprite:
-	.byte 0, 0, $14, 0
-	.byte 8, 0, $12, 0
-	.byte 0, 8, $11, 0
-	.byte 8, 8, $08, 0
+	.byte 253, 252, $14, $00
+	.byte  11, 252, $14, $40
+	.byte 253,  10, $14, $80
+	.byte  11,  10, $14, $C0
 
 .export _cursor_sprite
-.proc _cursor_sprite
+.proc _cursor_sprite ; u8 x, u8 y
 	; Set x/y offsets.
-	lda #32
-	sta sprite_x
-	lda #32
 	sta sprite_y
+	ldy #0
+	lda (sp), y
+	sta sprite_x
 	
 	; TODO: Hardcode or no?
 	lda #4
@@ -197,5 +198,5 @@ cursor_metasprite:
 		bne :-
 	
 	stx px_sprite_cursor
-	rts
+	jmp incsp1
 .endproc

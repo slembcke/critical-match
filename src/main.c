@@ -7,9 +7,6 @@
 #include "pixler.h"
 #include "shared.h"
 
-void music_init(void);
-void music_play(u8 song);
-
 u8 joy0, joy1;
 
 #define BG_COLOR 0x1D
@@ -108,7 +105,7 @@ GameState main(void){
 	px_addr(PAL_ADDR);
 	px_blit(32, (u8 *)PALETTE);
 	
-	music_init();
+	music_init(MUSIC);
 	music_play(0);
 
 	return debug_chr();

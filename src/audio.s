@@ -8,9 +8,13 @@
 
 .export _music_init
 .proc _music_init ; u16 addr
+	; ax -> xy
+	pha
+	txa
+	tay
+	pla
+	tax
 	lda #1 ; TODO Hardcoded NTSC
-	ldx #<_MUSIC
-	ldy #>_MUSIC
 	jsr FamiToneInit
 	
 	lda #0

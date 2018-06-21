@@ -9,6 +9,14 @@ extern u8 i, ix, iy, idx;
 #pragma zpsym("iy");
 #pragma zpsym("idx");
 
+typedef struct {} Music;
+extern const Music MUSIC[];
+
+void music_init(const Music *music);
+void music_play(u8 song);
+void music_pause();
+void music_stop();
+
 extern u8 joy0, joy1;
 extern const u8 PALETTE[];
 

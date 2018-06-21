@@ -36,6 +36,7 @@ void player_init(void){
 	player.facingRight = true;
 }
 
+#define grid_block_at(ix, iy) (((iy >> 1) & 0xF8) | ((ix >> 4)))
 static u16 bx, by;
 
 void player_tick(u8 joy){
@@ -59,7 +60,8 @@ void player_tick(u8 joy){
 	
 	ix = (player.pos_x >> 8);
 	iy = (player.pos_y >> 8) - 1;
-	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	idx = grid_block_at(ix, iy);
+	idx = GRID[idx];
 	by = ((iy << 8) & 0xF000) + 0x1000;
 	if(idx && player.pos_y <= by){
 		player.pos_y = by;
@@ -72,7 +74,8 @@ void player_tick(u8 joy){
 	// Head collision.
 	ix = (player.pos_x >> 8);
 	iy = (player.pos_y >> 8) + 16;
-	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	idx = grid_block_at(ix, iy);
+	idx = GRID[idx];
 	by = ((iy << 8) & 0xF000);
 	if(idx && player.pos_y <= by){
 		// player.pos_y = by;
@@ -82,7 +85,8 @@ void player_tick(u8 joy){
 	// Left collision.
 	ix = (player.pos_x >> 8) - 5;
 	iy = (player.pos_y >> 8) + 4;
-	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	idx = grid_block_at(ix, iy);
+	idx = GRID[idx];
 	bx = ((ix << 8) & 0xF000) + 0x1000;
 	if(idx && player.pos_x <= bx + 1024){
 		player.pos_x = bx + 1024;
@@ -92,7 +96,8 @@ void player_tick(u8 joy){
 	// Right collision.
 	ix = (player.pos_x >> 8) + 5;
 	iy = (player.pos_y >> 8) + 4;
-	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	idx = grid_block_at(ix, iy);
+	idx = GRID[idx];
 	bx = ((ix << 8) & 0xF000);
 	if(idx && player.pos_x >= bx - 1024){
 		player.pos_x = bx - 1024;
@@ -130,7 +135,8 @@ void player_tick(u8 joy){
 	
 	// Cursor position.
 	ix = (ix + (player.facingRight ? 16 : -16)) & 0xF0;
-	iy = (iy + 0) & 0xF0;
-	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	iy = (iy + 8) & 0xF0;
+	idx = grid_block_at(ix, iy);
+	idx = GRID[idx];
 	if(idx > 0 && idx != 0xFF) cursor_sprite(64 + ix, 208 - iy);
 }

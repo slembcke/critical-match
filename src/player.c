@@ -130,6 +130,7 @@ void player_tick(u8 joy){
 	
 	// Cursor position.
 	ix = (ix + (player.facingRight ? 16 : -16)) & 0xF0;
-	iy = (iy + 16) & 0xF0;
-	cursor_sprite(64 + ix, 224 - iy);
+	iy = (iy + 0) & 0xF0;
+	idx = GRID[grid_block_idx(ix >> 4, iy >> 4)];
+	if(idx > 0 && idx != 0xFF) cursor_sprite(64 + ix, 208 - iy);
 }

@@ -1,30 +1,24 @@
 ;FamiTone2 v1.12
 
+.define FT_DPCM_ENABLE 0
+FT_DPCM_OFF = $c000 ; $c000..$ffc0, 64-byte steps
 
+.define FT_SFX_ENABLE 0
+FT_SFX_STREAMS = 4
 
-;settings, uncomment or put them into your main program; the latter makes possible updates easier
-
-; FT_BASE_ADR		= $0300	;page in the RAM used for FT2 variables, should be $xx00
-; FT_TEMP			= $00	;3 bytes in zeropage used by the library as a scratchpad
-; FT_DPCM_OFF		= $c000	;$c000..$ffc0, 64-byte steps
-; FT_SFX_STREAMS	= 4		;number of sound effects played at once, 1..4
-
-; FT_DPCM_ENABLE			;undefine to exclude all DMC code
-; FT_SFX_ENABLE			;undefine to exclude all sound effects code
-; FT_THREAD				;undefine if you are calling sound effects from the same thread as the sound update call
-
-; FT_PAL_SUPPORT			;undefine to exclude PAL support
-; FT_NTSC_SUPPORT			;undefine to exclude NTSC support
-
+.define FT_THREAD 1
+.define FT_PAL_SUPPORT 0
+.define FT_NTSC_SUPPORT 1
+.define FT_PITCH_FIX 0
 
 
 ;internal defines
 
-	.if(FT_PAL_SUPPORT)
-	.if(FT_NTSC_SUPPORT)
-FT_PITCH_FIX = (FT_PAL_SUPPORT|FT_NTSC_SUPPORT)			;add PAL/NTSC pitch correction code only when both modes are enabled
-	.endif
-	.endif
+; .if(FT_PAL_SUPPORT)
+; 	.if(FT_NTSC_SUPPORT)
+; 		FT_PITCH_FIX = (FT_PAL_SUPPORT|FT_NTSC_SUPPORT)			;add PAL/NTSC pitch correction code only when both modes are enabled
+; 	.endif
+; .endif
 
 FT_DPCM_PTR		= (FT_DPCM_OFF&$3fff)>>6
 
@@ -36,6 +30,11 @@ FT_TEMP_PTR_L		= FT_TEMP_PTR+0
 FT_TEMP_PTR_H		= FT_TEMP_PTR+1
 FT_TEMP_VAR1		= FT_TEMP+2
 FT_TEMP_SIZE        = 3
+
+.zeropage
+
+FT_TEMP:
+	.res FT_TEMP_SIZE
 
 ;envelope structure offsets, 5 bytes per envelope, grouped by variable type
 
@@ -150,6 +149,10 @@ FT_SFX_BUF			= FT_SFX_BASE_ADR+4	;11 bytes
 
 FT_BASE_SIZE 		= FT_SFX_BUF+11-FT_BASE_ADR
 
+.segment "FAMITONE"
+FT_BASE_ADR:
+	.res FT_BASE_SIZE
+
 ;aliases for sound effect channels to use in user calls
 
 FT_SFX_CH0			= FT_SFX_STRUCT_SIZE*0
@@ -210,6 +213,7 @@ FT_MR_NOISE_F		= FT_OUT_BUF+10
 	.endif
 
 
+.code
 
 ;------------------------------------------------------------------------------
 ; reset APU, initialize FamiTone

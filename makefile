@@ -8,7 +8,7 @@ LD = $(CC65_ROOT)/bin/ld65
 
 CFLAGS = -t nes -Oirs --register-space 16
 
-INCLUDE = -I $(CC65_ROOT)/include -I pixler
+INCLUDE = -I $(CC65_ROOT)/include -I pixler -I famitone2
 ASMINC = $(CC65_ROOT)/libsrc/nes
 
 SRC = \
@@ -26,7 +26,8 @@ ASMSRC = \
 	pixler/pixler_nmi.s \
 	pixler/pixler_banks.s \
 	pixler/pixler_buffer.s \
-	pixler/pixler_blit.s
+	pixler/pixler_blit.s \
+	famitone2/famitone2.s
 
 GFX = \
 	gfx/sheet1.chr \

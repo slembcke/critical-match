@@ -12,6 +12,7 @@
 #define PLAYER_JUMP_TICKS 5
 
 void player_sprite(u8 x, u8 y, u8 frame);
+void cursor_sprite(u8 x, u8 y);
 
 typedef struct {
 	u16 pos_x, pos_y;
@@ -126,4 +127,9 @@ void player_tick(u8 joy){
 	}
 	
 	player_sprite(64 + ix, 224 - iy, idx);
+	
+	// Cursor position.
+	ix = (ix + (player.facingRight ? 16 : -16)) & 0xF0;
+	iy = (iy + 16) & 0xF0;
+	cursor_sprite(64 + ix, 224 - iy);
 }

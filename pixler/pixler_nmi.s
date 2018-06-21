@@ -4,6 +4,7 @@
 .importzp PX_scroll_x
 .importzp PX_scroll_y
 .import px_buffer_exec
+.import FamiToneUpdate
 
 .export px_nmi
 .export _px_wait_nmi = px_wait_nmi
@@ -42,6 +43,9 @@ px_nmi_ready: .byte 0
 	sta PPU_SCROLL
 	
 	@skip_frame:
+	
+	jsr FamiToneUpdate
+	
 	interrupt_exit
 	rti
 .endproc

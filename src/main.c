@@ -107,6 +107,9 @@ GameState main(void){
 	px_inc(PX_INC1);
 	px_addr(PAL_ADDR);
 	px_blit(32, (u8 *)PALETTE);
+	
+	music_init(MUSIC);
+	music_play(0);
 
 	return debug_chr();
 	return board();

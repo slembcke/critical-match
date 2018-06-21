@@ -9,7 +9,7 @@ LD = $(CC65_ROOT)/bin/ld65
 CFLAGS = -t nes -Oirs --register-space 16
 
 INCLUDE = -I $(CC65_ROOT)/include -I pixler
-ASMINC = $(CC65_ROOT)/libsrc/nes
+ASMINC = -I . -I $(CC65_ROOT)/libsrc/nes
 
 SRC = \
 	src/main.c \
@@ -21,12 +21,14 @@ SRC = \
 ASMSRC = \
 	src/zeropage.s \
 	src/animations.s \
+	src/audio.s \
 	pixler/pixler_boot.s \
 	pixler/pixler_zeropage.s \
 	pixler/pixler_nmi.s \
 	pixler/pixler_banks.s \
 	pixler/pixler_buffer.s \
-	pixler/pixler_blit.s
+	pixler/pixler_blit.s \
+	famitone2/famitone2.s
 
 GFX = \
 	gfx/sheet1.chr \
@@ -56,7 +58,7 @@ run-linux: $(ROM)
 	$(CC) $(CFLAGS) $< --add-source $(INCLUDE) -o $@
 
 %.o: %.s
-	$(AS) $< -I $(ASMINC) -o $@
+	$(AS) $< $(ASMINC) -o $@
 
 %.chr: %.png
 	tools/png2chr $< $@

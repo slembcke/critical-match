@@ -8,24 +8,25 @@
 			"type": "shell",
 			"command": "make run-mac",
 			"group": "build",
+			"problemMatcher": []
 		},
 		{
 			"label": "run-linux",
 			"type": "shell",
 			"command": "make run-linux",
-			"group": "build",
+			"group": "build"
 		},
 		{
 			"label": "rom",
 			"type": "shell",
 			"command": "make rom",
-			"group": "build",
+			"group": "build"
 		},
 		{
 			"label": "clean",
 			"type": "shell",
 			"command": "make clean",
-			"group": "build",
-		},
+			"group": "build"
+		}
 	]
 }

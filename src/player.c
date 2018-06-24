@@ -37,7 +37,7 @@ void player_init(void){
 }
 
 #define grid_block_at(ix, iy) (((iy >> 1) & 0xF8) | ((ix >> 4)))
-static u16 bx, by;
+static u16 bx, by, block;
 
 void player_tick(u8 joy){
 	player.move = 0;
@@ -61,9 +61,9 @@ void player_tick(u8 joy){
 	ix = (player.pos_x >> 8);
 	iy = (player.pos_y >> 8) - 1;
 	idx = grid_block_at(ix, iy);
-	idx = GRID[idx];
+	block = GRID[idx];
 	by = ((iy << 8) & 0xF000) + 0x1000;
-	if(idx && player.pos_y <= by){
+	if(block && player.pos_y <= by){
 		player.pos_y = by;
 		player.vel_y = MAX(0, player.vel_y);
 		
@@ -75,9 +75,9 @@ void player_tick(u8 joy){
 	ix = (player.pos_x >> 8);
 	iy = (player.pos_y >> 8) + 16;
 	idx = grid_block_at(ix, iy);
-	idx = GRID[idx];
+	block = GRID[idx];
 	by = ((iy << 8) & 0xF000);
-	if(idx && player.pos_y <= by){
+	if(block && player.pos_y <= by){
 		// player.pos_y = by;
 		player.vel_y = MIN(0, player.vel_y);
 	}
@@ -86,9 +86,9 @@ void player_tick(u8 joy){
 	ix = (player.pos_x >> 8) - 5;
 	iy = (player.pos_y >> 8) + 4;
 	idx = grid_block_at(ix, iy);
-	idx = GRID[idx];
+	block = GRID[idx];
 	bx = ((ix << 8) & 0xF000) + 0x1000;
-	if(idx && player.pos_x <= bx + 1024){
+	if(block && player.pos_x <= bx + 1024){
 		player.pos_x = bx + 1024;
 		player.vel_x = MAX(0, player.vel_x);
 	}
@@ -97,9 +97,9 @@ void player_tick(u8 joy){
 	ix = (player.pos_x >> 8) + 5;
 	iy = (player.pos_y >> 8) + 4;
 	idx = grid_block_at(ix, iy);
-	idx = GRID[idx];
+	block = GRID[idx];
 	bx = ((ix << 8) & 0xF000);
-	if(idx && player.pos_x >= bx - 1024){
+	if(block && player.pos_x >= bx - 1024){
 		player.pos_x = bx - 1024;
 		player.vel_x = MIN(0, player.vel_x);
 	}
@@ -137,6 +137,12 @@ void player_tick(u8 joy){
 	ix = (ix + (player.facingRight ? 16 : -16)) & 0xF0;
 	iy = (iy + 8) & 0xF0;
 	idx = grid_block_at(ix, iy);
-	idx = GRID[idx];
-	if(idx > 0 && idx != 0xFF) cursor_sprite(64 + ix, 208 - iy);
+	block = GRID[idx];
+	if(block > 0 && block != 0xFF){
+		cursor_sprite(64 + ix, 208 - iy);
+		
+		if(JOY_BTN_2(joy)){
+			grid_set_block(idx, 0);
+		}
+	}
 }

@@ -125,12 +125,11 @@ static void player_cursor_update(){
 	if(player.blocks_held[0]){
 		// TODO placement cursor
 	} else {
-		ix = 0;
-		iy = 0;
-		
 		if(JOY_UP(player.joy)){
 			// TODO up cursor.
+			return;
 		} else if(JOY_DOWN(player.joy)){
+			ix = 0;
 			iy = -8;
 		} else {
 			// Left or right.

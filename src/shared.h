@@ -28,7 +28,7 @@ extern u8 GRID[];
 
 #define grid_block_idx(x, y) (u8)(GRID_W*(y) | (x))
 
-void grid_set_block(u8 x, u8 y, u8 block);
+void grid_set_block(u8 index, u8 block);
 void grid_init(void);
 void grid_update(void);
 

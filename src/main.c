@@ -27,7 +27,7 @@ static GameState loop(void){
 	px_ppu_enable();
 	
 	while(true){
-		px_profile_enable();
+		// px_profile_enable();
 		
 		joy0 = joy_read(0);
 
@@ -76,15 +76,15 @@ GameState board(void){
 	// Enable rendering.
 	px_ppu_enable();
 
-	grid_set_block(1, 10, 1);
-	grid_set_block(1,  9, 2);
-	grid_set_block(1,  8, 3);
-	grid_set_block(2, 10, 4);
-	grid_set_block(2,  8, 5);
-	grid_set_block(3,  8, 9);
-	grid_set_block(4,  6, 10);
-	grid_set_block(5,  7, 11);
-	grid_set_block(3,  3, 12);
+	grid_set_block(grid_block_idx(1, 10), 1);
+	grid_set_block(grid_block_idx(1,  9), 2);
+	grid_set_block(grid_block_idx(1,  8), 3);
+	grid_set_block(grid_block_idx(2, 10), 4);
+	grid_set_block(grid_block_idx(2,  8), 5);
+	grid_set_block(grid_block_idx(3,  8), 9);
+	grid_set_block(grid_block_idx(4,  6), 10);
+	grid_set_block(grid_block_idx(5,  7), 11);
+	grid_set_block(grid_block_idx(5,  3), 12);
 
 	return loop();
 }
@@ -111,6 +111,6 @@ GameState main(void){
 	// music_init(MUSIC);
 	// music_play(0);
 
-	return debug_chr();
+	// return debug_chr();
 	return board();
 }

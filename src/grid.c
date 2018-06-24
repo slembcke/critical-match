@@ -8,12 +8,27 @@ u8 GRID[GRID_W*GRID_H] = {};
 
 // #define PX_WRITE_IDX_TO_BUFFER(i) {asm("lda %v", idx); asm("ldy #%b", i); asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer));}
 
-void grid_set_block(u8 x, u8 y, u8 block){
+static const u16 ROW_ADDRS[] = {
+	NT_ADDR(0, 8, 26 - 2* 0),
+	NT_ADDR(0, 8, 26 - 2* 1),
+	NT_ADDR(0, 8, 26 - 2* 2),
+	NT_ADDR(0, 8, 26 - 2* 3),
+	NT_ADDR(0, 8, 26 - 2* 4),
+	NT_ADDR(0, 8, 26 - 2* 5),
+	NT_ADDR(0, 8, 26 - 2* 6),
+	NT_ADDR(0, 8, 26 - 2* 7),
+	NT_ADDR(0, 8, 26 - 2* 8),
+	NT_ADDR(0, 8, 26 - 2* 9),
+	NT_ADDR(0, 8, 26 - 2*10),
+	NT_ADDR(0, 8, 26 - 2*11),
+};
+
+void grid_set_block(u8 index, u8 block){
 	px_buffer_inc(PX_INC1);
-	px_buffer_set_metatile(block, NT_ADDR(0, 8 + 2*x, 26 - 2*y));
+	px_buffer_set_metatile(block, ROW_ADDRS[index >> 3] + (((index & 0x7) << 1)));
 	
-	idx = grid_block_idx(x, y);
-	GRID[idx] = block;
+	// idx = grid_block_idx(x, y);
+	GRID[index] = block;
 }
 
 static u8 GRID_HEIGHT[GRID_W] = {};
@@ -63,14 +78,15 @@ void grid_update(void){
 		px_buffer_inc(PX_INC1);
 		
 		for(ix = 1; ix < GRID_W - 1; ++ix){
-			idx = grid_block_idx(ix, frames + 1);
-			above = GRID[idx];
+			idx = grid_block_idx(ix, frames);
 			
-			idx -= GRID_W;
-			if(GRID[idx] == 0 && above != 0){
-				// TODO split this across frames to avoid using so much buffer memory?
-				grid_set_block(ix, frames, above);
-				grid_set_block(ix, frames + 1, 0);
+			if(GRID[idx] == 0){
+				above = GRID[idx + GRID_W];
+				if(above != 0){
+					// TODO split this across frames to avoid using so much buffer memory?
+					grid_set_block(idx, above);
+					grid_set_block(idx + GRID_W, 0);
+				}
 			}
 		}
 	}

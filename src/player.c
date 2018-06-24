@@ -26,6 +26,15 @@ typedef struct {
 	
 	// Remaining ticks of jump power.
 	u8 jump_ticks;
+	
+	u8 cursor_x, cursor_y;
+	// Selected block under the cursor.
+	u8 cursor_idx;
+	
+	u8 blocks_held[10];
+	
+	// Previous joystick value.
+	u8 last_joy;
 } Player;
 
 static const Player INIT = {64 << 8, 16 << 8, 0, 0};
@@ -36,10 +45,10 @@ void player_init(void){
 	player.facingRight = true;
 }
 
-#define grid_block_at(ix, iy) (((iy >> 1) & 0xF8) | ((ix >> 4)))
+#define grid_block_at(x, y) (((y >> 1) & 0xF8) | ((x >> 4)))
 static u16 bx, by, block;
 
-void player_tick(u8 joy){
+static void player_update_motion(u8 joy){
 	player.move = 0;
 	if(JOY_LEFT(joy)) player.move -= PLAYER_MAX_SPEED;
 	if(JOY_RIGHT(joy)) player.move += PLAYER_MAX_SPEED;
@@ -50,11 +59,17 @@ void player_tick(u8 joy){
 	player.vel_x += CLAMP(player.move - player.vel_x, -PLAYER_ACCEL, PLAYER_ACCEL);
 	player.vel_y = MAX(-PLAYER_MAX_FALL, player.vel_y - PLAYER_GRAVITY);
 	
-	if(JOY_BTN_1(joy) && player.jump_ticks > 0){
-		player.vel_y = PLAYER_JUMP;
-		--player.jump_ticks;
+	if(JOY_BTN_1(joy)){
+		if(player.jump_ticks > 0){
+			player.vel_y = PLAYER_JUMP;
+			--player.jump_ticks;
+		}
+	} else if(player.grounded){
+		player.jump_ticks = PLAYER_JUMP_TICKS;
 	}
-	
+}
+
+static void player_collide(){
 	// Ground detection.
 	player.grounded = false;
 	
@@ -68,7 +83,6 @@ void player_tick(u8 joy){
 		player.vel_y = MAX(0, player.vel_y);
 		
 		player.grounded = true;
-		if(!JOY_BTN_1(joy)) player.jump_ticks = PLAYER_JUMP_TICKS;
 	}
 	
 	// Head collision.
@@ -103,16 +117,59 @@ void player_tick(u8 joy){
 		player.pos_x = bx - 1024;
 		player.vel_x = MIN(0, player.vel_x);
 	}
-	
-	// Update the facing direction.
+}
+
+static void player_cursor_update(){
+	// TODO up, down, place held blocks
+	// Cursor position.
+	ix = (ix + (player.facingRight ? 16 : -16)) & 0xF0;
+	iy = (iy + 8) & 0xF0;
+	idx = grid_block_at(ix, iy);
+	block = GRID[idx];
+	if(block > 0 && block != 0xFF){
+		player.cursor_x =  64 + ix;
+		player.cursor_y = 208 - iy;
+		player.cursor_idx = idx;
+	} else {
+		player.cursor_idx = 0;
+	}
+}
+
+static void player_facing_update(){
 	if(player.vel_x > 0){
 		player.facingRight = true;
 	} else if(player.vel_x < 0){
 		player.facingRight = false;
+	} else if(JOY_RIGHT(player.last_joy)){
+		player.facingRight = true;
+	} else if(JOY_LEFT(player.last_joy)){
+		player.facingRight = false;
 	}
-	
+}
+
+static void player_draw(){
 	ix = player.pos_x >> 8;
 	iy = player.pos_y >> 8;
+	
+	// Select frame index.
+	if(player.grounded){
+		if((player.vel_x >> 8) == 0){
+			// Idle
+			idx = ((px_ticks >> 2) & 0x6) + 16 + player.facingRight;
+		} else {
+			// Run
+			idx =((ix >> 1) & 14) + player.facingRight;
+		}
+	} else {
+		if(player.vel_y > 0){
+			// Jump
+			idx = 24 + player.facingRight;
+		} else {
+			// Fall
+			idx = 26 + player.facingRight;
+		}
+	}
+	
 	if(player.grounded){
 		if((player.vel_x >> 8) == 0){
 			// Idle
@@ -132,17 +189,28 @@ void player_tick(u8 joy){
 	}
 	
 	player_sprite(64 + ix, 224 - iy, idx);
+}
+
+void player_tick(u8 joy){
+	// Update player state.
+	player_update_motion(joy);
+	player_collide();
+	player_facing_update();
 	
-	// Cursor position.
-	ix = (ix + (player.facingRight ? 16 : -16)) & 0xF0;
-	iy = (iy + 8) & 0xF0;
-	idx = grid_block_at(ix, iy);
-	block = GRID[idx];
-	if(block > 0 && block != 0xFF){
-		cursor_sprite(64 + ix, 208 - iy);
-		
-		if(JOY_BTN_2(joy)){
-			grid_set_block(idx, 0);
-		}
+	// Update action.
+	player_cursor_update();
+	if(JOY_BTN_2(player.last_joy) && !JOY_BTN_2(joy) && player.cursor_idx){
+		// TODO pick up stack.
+		player.blocks_held[0] = GRID[player.cursor_idx];
+		grid_set_block(idx, 0);
 	}
+	
+	// Draw
+	player_draw();
+	if(player.cursor_idx){
+		// TODO cursor height?
+		cursor_sprite(player.cursor_x, player.cursor_y);
+	}
+	
+	player.last_joy = joy;
 }

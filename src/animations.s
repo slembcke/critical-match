@@ -9,6 +9,8 @@
 .import incsp2
 .import OAM
 
+.import METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
+
 OBJ_COUNT = 6
 FRAME_COUNT = 14
 FRAME_SIZE = 4*OBJ_COUNT
@@ -122,6 +124,56 @@ sprite_pal: .byte 0
 	
 	stx px_sprite_cursor
 	jmp incsp2
+.endproc
+
+.export _block_sprite
+.proc _block_sprite ; u8 x, u8 y, u8 frame
+	ldx px_sprite_cursor
+	
+	; Store metatile index in y
+	tay
+	
+	; Store chr.
+	lda METATILE0, y
+	sta OAM+1, x
+	lda METATILE1, y
+	sta OAM+5, x
+	lda METATILE2, y
+	sta OAM+9, x
+	lda METATILE3, y
+	sta OAM+13, x
+	
+	; Store attr.
+	lda METATILE4, y
+	and #$03
+	sta OAM+2, x
+	sta OAM+6, x
+	sta OAM+10, x
+	sta OAM+14, x
+	
+	; Store x-values.
+	lda #8
+	sta OAM+3, x
+	sta OAM+11, x
+	lda #16
+	sta OAM+7, x
+	sta OAM+15, x
+	
+	; Store y-values.
+	lda #8
+	sta OAM+0, x
+	sta OAM+4, x
+	lda #16
+	sta OAM+8, x
+	sta OAM+12, x
+	
+	; Increment sprite cursor.
+	txa
+	clc
+	adc #16
+	sta px_sprite_cursor
+	
+	rts
 .endproc
 
 .export _px_spr_end

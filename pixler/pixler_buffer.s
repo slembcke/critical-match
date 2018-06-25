@@ -11,6 +11,9 @@
 .export _px_buffer_data
 .export _px_buffer_set_color
 
+; TODO these really need to be moved...
+.export METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
+
 .macpack generic
 
 .zeropage

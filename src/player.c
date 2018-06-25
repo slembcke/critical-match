@@ -12,6 +12,7 @@
 #define PLAYER_JUMP_TICKS 5
 
 void player_sprite(u8 x, u8 y, u8 frame);
+void block_sprite(u8 block);
 void cursor_sprite(u8 x, u8 y);
 
 typedef struct {
@@ -161,7 +162,7 @@ static void player_facing_update(){
 	}
 }
 
-static void player_draw(){
+static void player_sprite_draw(){
 	ix = player.pos_x >> 8;
 	iy = player.pos_y >> 8;
 	
@@ -222,11 +223,16 @@ void player_tick(u8 joy){
 	}
 	
 	// Draw
-	player_draw();
 	if(player.cursor_idx){
 		// TODO cursor height?
 		cursor_sprite(player.cursor_x, player.cursor_y);
 	}
+	
+	for(idx = 0; player.blocks_held[idx]; ++idx){
+		block_sprite(player.blocks_held[idx]);
+	}
+	
+	player_sprite_draw();
 	
 	player.prev_joy = player.joy;
 }

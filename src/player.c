@@ -228,8 +228,8 @@ void player_tick(u8 joy){
 		cursor_sprite(player.cursor_x, player.cursor_y);
 	}
 	
-	ix = (player.pos_x >> 8);
-	iy = (player.pos_y >> 8);
+	ix = ( 64 -  8) + (player.pos_x >> 8);
+	iy = (224 - 32) - (player.pos_y >> 8);
 	for(idx = 0; player.blocks_held[idx]; ++idx){
 		block_sprite(ix, iy, player.blocks_held[idx]);
 	}

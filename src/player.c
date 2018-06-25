@@ -49,7 +49,7 @@ void player_init(void){
 #define grid_block_at(x, y) (((y >> 1) & 0xF8) | ((x >> 4)))
 static u16 bx, by, block;
 
-static void player_update_motion(){
+static void player_update_motion(void){
 	player.move = 0;
 	if(JOY_LEFT(player.joy)) player.move -= PLAYER_MAX_SPEED;
 	if(JOY_RIGHT(player.joy)) player.move += PLAYER_MAX_SPEED;
@@ -70,7 +70,7 @@ static void player_update_motion(){
 	}
 }
 
-static void player_collide(){
+static void player_collide(void){
 	// Ground detection.
 	player.grounded = false;
 	
@@ -120,7 +120,7 @@ static void player_collide(){
 	}
 }
 
-static void player_cursor_update(){
+static void player_cursor_update(void){
 	player.cursor_idx = 0;
 	
 	if(player.blocks_held[0]){
@@ -150,7 +150,7 @@ static void player_cursor_update(){
 	}
 }
 
-static void player_facing_update(){
+static void player_facing_update(void){
 	if(player.vel_x > 0){
 		player.facingRight = true;
 	} else if(player.vel_x < 0){
@@ -162,7 +162,7 @@ static void player_facing_update(){
 	}
 }
 
-static void player_sprite_draw(){
+static void player_sprite_draw(void){
 	ix = player.pos_x >> 8;
 	iy = player.pos_y >> 8;
 	
@@ -206,6 +206,13 @@ static void player_sprite_draw(){
 	player_sprite(64 + ix, 224 - iy, idx);
 }
 
+void player_pick_up(void){
+	for(idx = player.cursor_idx, iy = 0; GRID[idx]; idx += GRID_W, ++iy){
+		player.blocks_held[iy] = GRID[idx];
+		grid_set_block(idx, 0);
+	}
+}
+
 void player_tick(u8 joy){
 	player.joy = joy;
 	
@@ -217,9 +224,7 @@ void player_tick(u8 joy){
 	// Update action.
 	player_cursor_update();
 	if(!JOY_BTN_2(player.joy) && JOY_BTN_2(player.prev_joy) && player.cursor_idx){
-		// TODO pick up stack.
-		player.blocks_held[0] = GRID[player.cursor_idx];
-		grid_set_block(idx, 0);
+		player_pick_up();
 	}
 	
 	// Draw
@@ -232,6 +237,7 @@ void player_tick(u8 joy){
 	iy = (224 - 32) - (player.pos_y >> 8);
 	for(idx = 0; player.blocks_held[idx]; ++idx){
 		block_sprite(ix, iy, player.blocks_held[idx]);
+		iy -= 16;
 	}
 	
 	player_sprite_draw();

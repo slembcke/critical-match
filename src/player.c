@@ -124,7 +124,28 @@ static void player_cursor_update(void){
 	player.cursor_idx = 0;
 	
 	if(player.blocks_held[0]){
-		// TODO placement cursor
+		ix = 0;
+		iy = 0;
+		
+		if(JOY_UP(player.joy)){
+			// Cannot drop blocks upwards.
+			return;
+		} else if(JOY_DOWN(player.joy)){
+			// Place blocks in the character's current square, do nothing.
+		} else {
+			ix = (player.facingRight ? 16 : -16);
+			iy = 8;
+		}
+		
+		ix = (ix + (player.pos_x >> 8)) & 0xF0;
+		iy = (iy + (player.pos_y >> 8)) & 0xF0;
+		idx = grid_block_at(ix, iy);
+		block = GRID[idx];
+		if(block == 0){
+			player.cursor_x =  64 + ix;
+			player.cursor_y = 208 - iy;
+			player.cursor_idx = idx;
+		}
 	} else {
 		if(JOY_UP(player.joy)){
 			// TODO up cursor.
@@ -211,6 +232,21 @@ void player_pick_up(void){
 		player.blocks_held[iy] = GRID[idx];
 		grid_set_block(idx, 0);
 	}
+	
+	// Wait for the PPU buffer to flush.
+	px_wait_nmi();
+}
+
+void player_drop(void){
+	for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, ++iy){
+		grid_set_block(idx, player.blocks_held[iy]);
+		player.blocks_held[iy] = 0;
+		
+		if(JOY_DOWN(player.joy)) player.pos_y += 16*256;
+	}
+	
+	// Wait for the PPU buffer to flush.
+	px_wait_nmi();
 }
 
 void player_tick(u8 joy){
@@ -223,8 +259,12 @@ void player_tick(u8 joy){
 	
 	// Update action.
 	player_cursor_update();
-	if(!JOY_BTN_2(player.joy) && JOY_BTN_2(player.prev_joy) && player.cursor_idx){
-		player_pick_up();
+	if(JOY_BTN_2(player.joy) && !JOY_BTN_2(player.prev_joy) && player.cursor_idx){
+		if(player.blocks_held[0]){
+			player_drop();
+		} else {
+			player_pick_up();
+		}
 	}
 	
 	// Draw

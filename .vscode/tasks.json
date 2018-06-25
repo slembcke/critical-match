@@ -14,19 +14,22 @@
 			"label": "run-linux",
 			"type": "shell",
 			"command": "make run-linux",
-			"group": "build"
+			"group": "build",
+			"problemMatcher": []
 		},
 		{
 			"label": "rom",
 			"type": "shell",
 			"command": "make rom",
-			"group": "build"
+			"group": "build",
+			"problemMatcher": []
 		},
 		{
 			"label": "clean",
 			"type": "shell",
 			"command": "make clean",
-			"group": "build"
+			"group": "build",
+			"problemMatcher": []
 		}
 	]
 }

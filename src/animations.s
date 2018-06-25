@@ -152,18 +152,22 @@ sprite_pal: .byte 0
 	sta OAM+14, x
 	
 	; Store x-values.
-	lda #8
+	ldy #1
+	lda (sp), y
 	sta OAM+3, x
 	sta OAM+11, x
-	lda #16
+	clc
+	adc #8
 	sta OAM+7, x
 	sta OAM+15, x
 	
 	; Store y-values.
-	lda #8
+	ldy #0
+	lda (sp), y
 	sta OAM+0, x
 	sta OAM+4, x
-	lda #16
+	clc
+	adc #8
 	sta OAM+8, x
 	sta OAM+12, x
 	
@@ -173,7 +177,7 @@ sprite_pal: .byte 0
 	adc #16
 	sta px_sprite_cursor
 	
-	rts
+	jmp incsp2
 .endproc
 
 .export _px_spr_end

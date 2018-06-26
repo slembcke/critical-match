@@ -83,7 +83,7 @@ sprite_pal: .byte 0
 	lda #2 ; TODO
 	sta sprite_pal
 	
-	; TODO: Hardcode or no?
+	; TODO: Unroll.
 	lda #6
 	sta sreg
 	
@@ -124,6 +124,65 @@ sprite_pal: .byte 0
 	
 	stx px_sprite_cursor
 	jmp incsp2
+.endproc
+
+cursor_metasprite:
+	.byte 253, 252, $14, $00
+	.byte  11, 252, $14, $40
+	.byte 253,  10, $14, $80
+	.byte  11,  10, $14, $C0
+
+.export _cursor_sprite
+.proc _cursor_sprite ; u8 x, u8 y
+	; Set x/y offsets.
+	sta sprite_y
+	ldy #0
+	lda (sp), y
+	sta sprite_x
+	
+	; TODO: Unroll.
+	lda #4
+	sta sreg
+	
+	ldx px_sprite_cursor
+	ldy #0
+	:	; x-pos
+		lda cursor_metasprite, y
+		iny
+		clc
+		adc sprite_x
+		sta OAM+3, x
+		
+		; y-pos
+		lda cursor_metasprite, y
+		iny
+		clc
+		adc sprite_y
+		sta OAM+0, x
+		
+		; chr
+		lda cursor_metasprite, y
+		iny
+		sta OAM+1, x
+		
+		; attr
+		lda px_ticks
+		lsr
+		and #$03
+		ora cursor_metasprite, y
+		iny
+		sta OAM+2, x
+		
+		inx
+		inx
+		inx
+		inx
+		
+		dec sreg
+		bne :-
+	
+	stx px_sprite_cursor
+	jmp incsp1
 .endproc
 
 .export _block_sprite
@@ -178,81 +237,4 @@ sprite_pal: .byte 0
 	sta px_sprite_cursor
 	
 	jmp incsp2
-.endproc
-
-.export _px_spr_end
-.proc _px_spr_end
-	; TODO Infinite loop if cursor is not aligned!
-	lda #240 ; y positions past 240 are offscreen.
-	; Move sprites offscreen.
-	ldx px_sprite_cursor
-	:	sta OAM, x ; Store y position;
-		; Skip 4 bytes to the next sprite.
-		inx
-		inx
-		inx
-		inx
-		bne :-
-	
-	stx px_sprite_cursor
-	rts
-.endproc
-
-cursor_metasprite:
-	.byte 253, 252, $14, $00
-	.byte  11, 252, $14, $40
-	.byte 253,  10, $14, $80
-	.byte  11,  10, $14, $C0
-
-.export _cursor_sprite
-.proc _cursor_sprite ; u8 x, u8 y
-	; Set x/y offsets.
-	sta sprite_y
-	ldy #0
-	lda (sp), y
-	sta sprite_x
-	
-	; TODO: Hardcode or no?
-	lda #4
-	sta sreg
-	
-	ldx px_sprite_cursor
-	ldy #0
-	:	; x-pos
-		lda cursor_metasprite, y
-		iny
-		clc
-		adc sprite_x
-		sta OAM+3, x
-		
-		; y-pos
-		lda cursor_metasprite, y
-		iny
-		clc
-		adc sprite_y
-		sta OAM+0, x
-		
-		; chr
-		lda cursor_metasprite, y
-		iny
-		sta OAM+1, x
-		
-		; attr
-		lda px_ticks
-		lsr
-		and #$03
-		ora cursor_metasprite, y
-		iny
-		sta OAM+2, x
-		
-		inx
-		inx
-		inx
-		inx
-		
-		dec sreg
-		bne :-
-	
-	stx px_sprite_cursor
-	jmp incsp1
 .endproc

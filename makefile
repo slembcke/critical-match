@@ -28,6 +28,7 @@ ASMSRC = \
 	pixler/pixler_banks.s \
 	pixler/pixler_buffer.s \
 	pixler/pixler_blit.s \
+	pixler/pixler_sprite.s \
 	famitone2/famitone2.s
 
 GFX = \

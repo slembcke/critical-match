@@ -82,9 +82,9 @@ GameState board(void){
 	grid_set_block(grid_block_idx(2, 10), 4);
 	grid_set_block(grid_block_idx(2,  8), 5);
 	grid_set_block(grid_block_idx(3,  8), 9);
-	grid_set_block(grid_block_idx(4,  6), 10);
-	grid_set_block(grid_block_idx(5,  7), 11);
-	grid_set_block(grid_block_idx(5,  3), 12);
+	grid_set_block(grid_block_idx(5,  3), 10);
+	grid_set_block(grid_block_idx(5,  2), 11);
+	grid_set_block(grid_block_idx(5,  1), 12);
 
 	return loop();
 }

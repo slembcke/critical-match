@@ -47,7 +47,8 @@ void player_init(void){
 }
 
 #define grid_block_at(x, y) (((y >> 1) & 0xF8) | ((x >> 4)))
-static u16 bx, by, block;
+static u16 bx, by;
+static u8 block;
 
 static void player_update_motion(void){
 	player.move = 0;
@@ -123,52 +124,44 @@ static void player_collide(void){
 static void player_cursor_update(void){
 	player.cursor_idx = 0;
 	
+	// Calculate the block index under the player's center.
+	ix = (player.pos_x >> 8) + 0;
+	iy = (player.pos_y >> 8) + 8;
+	idx = grid_block_at(ix, iy);
+	
 	if(player.blocks_held[0]){
-		ix = 0;
-		iy = 0;
-		
 		if(JOY_UP(player.joy)){
-			// Cannot drop blocks upwards.
-			return;
+			return; // Cannot drop blocks upwards.
 		} else if(JOY_DOWN(player.joy)){
 			// Place blocks in the character's current square, do nothing.
+		} else if(player.facingRight){
+			idx += 1;
 		} else {
-			ix = (player.facingRight ? 16 : -16);
-			iy = 8;
-		}
-		
-		ix = (ix + (player.pos_x >> 8)) & 0xF0;
-		iy = (iy + (player.pos_y >> 8)) & 0xF0;
-		idx = grid_block_at(ix, iy);
-		block = GRID[idx];
-		if(block == 0){
-			player.cursor_x =  64 + ix;
-			player.cursor_y = 208 - iy;
-			player.cursor_idx = idx;
+			idx -= 1;
 		}
 	} else {
 		if(JOY_UP(player.joy)){
-			// TODO up cursor.
+			// TODO grapple cursor.
 			return;
 		} else if(JOY_DOWN(player.joy)){
-			ix = 0;
-			iy = -8;
+			idx -= GRID_W;
+		} else if(player.facingRight){
+			idx += 1;
 		} else {
-			// Left or right.
-			ix = (player.facingRight ? 16 : -16);
-			iy = 8;
-		}
-		
-		ix = (ix + (player.pos_x >> 8)) & 0xF0;
-		iy = (iy + (player.pos_y >> 8)) & 0xF0;
-		idx = grid_block_at(ix, iy);
-		block = GRID[idx];
-		if(block > 0 && block != 0xFF){
-			player.cursor_x =  64 + ix;
-			player.cursor_y = 208 - iy;
-			player.cursor_idx = idx;
+			idx -= 1;
 		}
 	}
+	
+	block = GRID[idx];
+	if(!player.blocks_held[0] && block > 0 && block != 0xFF){
+		player.cursor_idx = idx;
+	} else if(player.blocks_held[0] && block == 0){
+		player.cursor_idx = idx;
+	}
+	
+	// Convert the index back to a screen position.
+	player.cursor_x =  (64 + (u8)((idx & 0x07) << 4));
+	player.cursor_y = -(48 + (u8)((idx & 0xF8) << 1));
 }
 
 static void player_facing_update(void){

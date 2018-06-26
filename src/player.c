@@ -141,8 +141,11 @@ static void player_cursor_update(void){
 		}
 	} else {
 		if(JOY_UP(player.joy)){
-			// TODO grapple cursor.
-			return;
+			// Search upwards for a block to grapple.
+			for(; GRID[idx] == 0; idx += GRID_W){
+				// Check if we missed.
+				if(idx > GRID_W*GRID_H) return;
+			}
 		} else if(JOY_DOWN(player.joy)){
 			idx -= GRID_W;
 		} else if(player.facingRight){

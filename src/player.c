@@ -278,7 +278,7 @@ void player_tick(u8 joy){
 	if(player.cursor_idx){
 		ix =  (64 + (u8)((idx & 0x07) << 4));
 		iy = -(48 + (u8)((idx & 0xF8) << 1));
-		cursor_sprite(ix, iy, 1);
+		cursor_sprite(ix, iy, 4);
 	}
 	
 	// Draw blocks.

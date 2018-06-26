@@ -149,12 +149,26 @@ sprite_pal = tmp3
 .proc _cursor_sprite ; u8 x, u8 y, u8 height
 
 .rodata
-@PALETTES:
-	.byte $00, $03, $01, $03
+	@PALETTE_ANIM: .byte $00, $03, $01, $03
 
 .code
 	ldx px_sprite_cursor
-	ldx #0
+	asl a
+	asl a
+	asl a
+	asl a
+	sub #2
+	sta tmp1
+	
+	; Set y-values.
+	ldy #0
+	lda (sp), y
+	add #10
+	sta OAM+ 8+0, x
+	sta OAM+12+0, x
+	sub tmp1
+	sta OAM+ 0+0, x
+	sta OAM+ 4+0, x
 	
 	; Set x-values.
 	ldy #1
@@ -165,16 +179,6 @@ sprite_pal = tmp3
 	add #14
 	sta OAM+ 4+3, x
 	sta OAM+12+3, x
-	
-	; Set y-values.
-	ldy #0
-	lda (sp), y
-	sub #4
-	sta OAM+ 0+0, x
-	sta OAM+ 4+0, x
-	add #14
-	sta OAM+ 8+0, x
-	sta OAM+12+0, x
 	
 	; Set chr.
 	lda #$14
@@ -188,7 +192,7 @@ sprite_pal = tmp3
 	lsr a
 	and #$03
 	tay
-	lda @PALETTES, y
+	lda @PALETTE_ANIM, y
 	tay
 	
 	; Set attr.

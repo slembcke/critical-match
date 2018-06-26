@@ -231,7 +231,7 @@ static void player_sprite_draw(void){
 }
 
 void player_pick_up(void){
-	for(idx = player.cursor_idx, iy = 0; GRID[idx]; idx += GRID_W, ++iy){
+	for(idx = player.cursor_idx, iy = 0; GRID[idx]; idx += GRID_W, iy += 1){
 		player.blocks_held[iy] = GRID[idx];
 		grid_set_block(idx, 0);
 	}
@@ -241,7 +241,16 @@ void player_pick_up(void){
 }
 
 void player_drop(void){
-	for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, ++iy){
+	// TODO needs to check if there is enough space.
+	for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, iy += 1){
+		if(GRID[idx] != 0){
+			// Area not clear, can't put down the stack.
+			// TODO sound?
+			return;
+		}
+	}
+	
+	for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, iy += 1){
 		grid_set_block(idx, player.blocks_held[iy]);
 		player.blocks_held[iy] = 0;
 		

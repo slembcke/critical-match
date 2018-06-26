@@ -134,10 +134,17 @@ static void player_cursor_update(void){
 			return; // Cannot drop blocks upwards.
 		} else if(JOY_DOWN(player.joy)){
 			// Place blocks in the character's current square, do nothing.
-		} else if(player.facingRight){
-			idx += 1;
 		} else {
-			idx -= 1;
+			// Start down a row + left/right.
+			if(player.facingRight){
+				idx += -GRID_W + 1;
+			} else {
+				idx += -GRID_W - 1;
+			}
+			
+			// Move up twice to look for clear locations.
+			if(GRID[idx] != 0) idx += GRID_W;
+			if(GRID[idx] != 0) idx += GRID_W;
 		}
 	} else {
 		if(JOY_UP(player.joy)){

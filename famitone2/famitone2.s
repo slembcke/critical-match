@@ -235,8 +235,8 @@ FamiToneInit:
 
 	stx FT_SONG_LIST_L		;store music data pointer for further use
 	sty FT_SONG_LIST_H
-	stx <FT_TEMP_PTR_L
-	sty <FT_TEMP_PTR_H
+	stx FT_TEMP_PTR_L
+	sty FT_TEMP_PTR_H
 
 	.if(FT_PITCH_FIX)
 	tax						;set SZ flags for A
@@ -344,27 +344,27 @@ FamiToneMusicStop:
 FamiToneMusicPlay:
 
 	ldx FT_SONG_LIST_L
-	stx <FT_TEMP_PTR_L
+	stx FT_TEMP_PTR_L
 	ldx FT_SONG_LIST_H
-	stx <FT_TEMP_PTR_H
+	stx FT_TEMP_PTR_H
 
 	ldy #0
 	cmp (FT_TEMP_PTR),y		;check if there is such sub song
 	bcs @skip
 
 	asl a					;multiply song number by 14
-	sta <FT_TEMP_PTR_L		;use pointer LSB as temp variable
+	sta FT_TEMP_PTR_L		;use pointer LSB as temp variable
 	asl a
 	tax
 	asl a
-	adc <FT_TEMP_PTR_L
-	stx <FT_TEMP_PTR_L
-	adc <FT_TEMP_PTR_L
+	adc FT_TEMP_PTR_L
+	stx FT_TEMP_PTR_L
+	adc FT_TEMP_PTR_L
 	adc #5					;add offset
 	tay
 
 	lda FT_SONG_LIST_L		;restore pointer LSB
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_L
 
 	jsr FamiToneMusicStop	;stop music, initialize channels and envelopes
 
@@ -551,9 +551,9 @@ FamiToneUpdate:
 @env_read:
 
 	lda FT_ENV_ADR_L,x		;load envelope data address into temp
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_L
 	lda FT_ENV_ADR_H,x
-	sta <FT_TEMP_PTR_H
+	sta FT_TEMP_PTR_H
 	ldy FT_ENV_PTR,x		;load envelope pointer
 
 @env_read_value:
@@ -693,11 +693,11 @@ FamiToneUpdate:
 	adc FT_CH4_NOTE_OFF
 	and #$0f
 	eor #$0f
-	sta <FT_TEMP_VAR1
+	sta FT_TEMP_VAR1
 	lda FT_CH4_DUTY
 	asl a
 	and #$80
-	ora <FT_TEMP_VAR1
+	ora FT_TEMP_VAR1
 	sta FT_MR_NOISE_F
 	lda FT_CH4_VOLUME
 @ch4cut:
@@ -783,12 +783,12 @@ _FT2SetInstrument:
 	tay
 	lda FT_INSTRUMENT_H
 	adc #0					;use carry to extend range for 64 instruments
-	sta <FT_TEMP_PTR_H
+	sta FT_TEMP_PTR_H
 	lda FT_INSTRUMENT_L
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_L
 
 	lda (FT_TEMP_PTR),y		;duty cycle
-	sta <FT_TEMP_VAR1
+	sta FT_TEMP_VAR1
 	iny
 
 	lda (FT_TEMP_PTR),y		;instrument pointer LSB
@@ -825,7 +825,7 @@ _FT2SetInstrument:
 	sta FT_ENV_ADR_H,x
 
 @no_pitch:
-	lda <FT_TEMP_VAR1
+	lda FT_TEMP_VAR1
 	rts
 
 
@@ -841,18 +841,18 @@ _FT2ChannelUpdate:
 
 @no_repeat:
 	lda FT_CHN_PTR_L,x		;load channel pointer into temp
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_L
 	lda FT_CHN_PTR_H,x
-	sta <FT_TEMP_PTR_H
+	sta FT_TEMP_PTR_H
 @no_repeat_r:
 	ldy #0
 
 @read_byte:
 	lda (FT_TEMP_PTR),y		;read byte of the channel
 
-	inc <FT_TEMP_PTR_L		;advance pointer
+	inc FT_TEMP_PTR_L		;advance pointer
 	bne @no_inc_ptr1
-	inc <FT_TEMP_PTR_H
+	inc FT_TEMP_PTR_H
 @no_inc_ptr1:
 
 	ora #0
@@ -884,41 +884,41 @@ _FT2ChannelUpdate:
 
 @set_reference:
 	clc						;remember return address+3
-	lda <FT_TEMP_PTR_L
+	lda FT_TEMP_PTR_L
 	adc #3
 	sta FT_CHN_RETURN_L,x
-	lda <FT_TEMP_PTR_H
+	lda FT_TEMP_PTR_H
 	adc #0
 	sta FT_CHN_RETURN_H,x
 	lda (FT_TEMP_PTR),y		;read length of the reference (how many rows)
 	sta FT_CHN_REF_LEN,x
 	iny
 	lda (FT_TEMP_PTR),y		;read 16-bit absolute address of the reference
-	sta <FT_TEMP_VAR1		;remember in temp
+	sta FT_TEMP_VAR1		;remember in temp
 	iny
 	lda (FT_TEMP_PTR),y
-	sta <FT_TEMP_PTR_H
-	lda <FT_TEMP_VAR1
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_H
+	lda FT_TEMP_VAR1
+	sta FT_TEMP_PTR_L
 	ldy #0
 	jmp @read_byte
 
 @set_speed:
 	lda (FT_TEMP_PTR),y
 	sta FT_SONG_SPEED
-	inc <FT_TEMP_PTR_L		;advance pointer after reading the speed value
+	inc FT_TEMP_PTR_L		;advance pointer after reading the speed value
 	bne @read_byte
-	inc <FT_TEMP_PTR_H
+	inc FT_TEMP_PTR_H
 	bne @read_byte ;bra
 
 @set_loop:
 	lda (FT_TEMP_PTR),y
-	sta <FT_TEMP_VAR1
+	sta FT_TEMP_VAR1
 	iny
 	lda (FT_TEMP_PTR),y
-	sta <FT_TEMP_PTR_H
-	lda <FT_TEMP_VAR1
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_H
+	lda FT_TEMP_VAR1
+	sta FT_TEMP_PTR_L
 	dey
 	jmp @read_byte
 
@@ -938,9 +938,9 @@ _FT2ChannelUpdate:
 	rts
 
 @no_ref:
-	lda <FT_TEMP_PTR_L
+	lda FT_TEMP_PTR_L
 	sta FT_CHN_PTR_L,x
-	lda <FT_TEMP_PTR_H
+	lda FT_TEMP_PTR_H
 	sta FT_CHN_PTR_H,x
 	rts
 
@@ -993,16 +993,16 @@ FamiToneSamplePlay:
 
 _FT2SamplePlay:
 
-	sta <FT_TEMP		;sample number*3, offset in the sample table
+	sta FT_TEMP		;sample number*3, offset in the sample table
 	asl a
 	clc
-	adc <FT_TEMP
+	adc FT_TEMP
 	
 	adc FT_DPCM_LIST_L
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_L
 	lda #0
 	adc FT_DPCM_LIST_H
-	sta <FT_TEMP_PTR_H
+	sta FT_TEMP_PTR_H
 
 	lda #%00001111			;stop DPCM
 	sta APU_SND_CHN
@@ -1035,8 +1035,8 @@ _FT2SamplePlay:
 
 FamiToneSfxInit:
 
-	stx <FT_TEMP_PTR_L
-	sty <FT_TEMP_PTR_H
+	stx FT_TEMP_PTR_L
+	sty FT_TEMP_PTR_H
 	
 	ldy #0
 	
@@ -1103,9 +1103,9 @@ FamiToneSfxPlay:
 	jsr _FT2SfxClearChannel	;stops the effect if it plays
 
 	lda FT_SFX_ADR_L
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_L
 	lda FT_SFX_ADR_H
-	sta <FT_TEMP_PTR_H
+	sta FT_TEMP_PTR_H
 
 	lda (FT_TEMP_PTR),y		;read effect pointer from the table
 	sta FT_SFX_PTR_L,x		;store it
@@ -1132,9 +1132,9 @@ _FT2SfxUpdate:
 	rts						;return otherwise, no active effect
 
 @sfx_active:
-	sta <FT_TEMP_PTR_H		;load effect pointer into temp
+	sta FT_TEMP_PTR_H		;load effect pointer into temp
 	lda FT_SFX_PTR_L,x
-	sta <FT_TEMP_PTR_L
+	sta FT_TEMP_PTR_L
 	ldy FT_SFX_OFF,x
 	clc
 
@@ -1150,13 +1150,13 @@ _FT2SfxUpdate:
 
 @get_data:
 	iny
-	stx <FT_TEMP_VAR1		;it is a register write
-	adc <FT_TEMP_VAR1		;get offset in the effect output buffer
+	stx FT_TEMP_VAR1		;it is a register write
+	adc FT_TEMP_VAR1		;get offset in the effect output buffer
 	tax
 	lda (FT_TEMP_PTR),y		;read value
 	iny
 	sta FT_SFX_BUF-128,x	;store into output buffer
-	ldx <FT_TEMP_VAR1
+	ldx FT_TEMP_VAR1
 	jmp @read_byte			;and read next byte
 
 @eof:
@@ -1166,10 +1166,10 @@ _FT2SfxUpdate:
 
 	lda FT_OUT_BUF			;compare effect output buffer with main output buffer
 	and #$0f				;if volume of pulse 1 of effect is higher than that of the
-	sta <FT_TEMP_VAR1		;main buffer, overwrite the main buffer value with the new one
+	sta FT_TEMP_VAR1		;main buffer, overwrite the main buffer value with the new one
 	lda FT_SFX_BUF+0,x
 	and #$0f
-	cmp <FT_TEMP_VAR1
+	cmp FT_TEMP_VAR1
 	bcc @no_pulse1
 	lda FT_SFX_BUF+0,x
 	sta FT_OUT_BUF+0
@@ -1181,10 +1181,10 @@ _FT2SfxUpdate:
 
 	lda FT_OUT_BUF+3		;same for pulse 2
 	and #$0f
-	sta <FT_TEMP_VAR1
+	sta FT_TEMP_VAR1
 	lda FT_SFX_BUF+3,x
 	and #$0f
-	cmp <FT_TEMP_VAR1
+	cmp FT_TEMP_VAR1
 	bcc @no_pulse2
 	lda FT_SFX_BUF+3,x
 	sta FT_OUT_BUF+3
@@ -1205,10 +1205,10 @@ _FT2SfxUpdate:
 
 	lda FT_OUT_BUF+9		;same as for pulse 1 and 2, but for noise
 	and #$0f
-	sta <FT_TEMP_VAR1
+	sta FT_TEMP_VAR1
 	lda FT_SFX_BUF+9,x
 	and #$0f
-	cmp <FT_TEMP_VAR1
+	cmp FT_TEMP_VAR1
 	bcc @no_noise
 	lda FT_SFX_BUF+9,x
 	sta FT_OUT_BUF+9

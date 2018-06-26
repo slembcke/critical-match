@@ -231,6 +231,8 @@ void player_pick_up(void){
 		grid_set_block(idx, 0);
 	}
 	
+	player.cursor_idx = 0;
+	
 	// Wait for the PPU buffer to flush.
 	px_wait_nmi();
 }
@@ -251,6 +253,8 @@ void player_drop(void){
 		
 		if(JOY_DOWN(player.joy)) player.pos_y += 16*256;
 	}
+	
+	player.cursor_idx = 0;
 	
 	// Wait for the PPU buffer to flush.
 	px_wait_nmi();

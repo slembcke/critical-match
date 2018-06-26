@@ -20,7 +20,7 @@ SRC = \
 
 ASMSRC = \
 	src/zeropage.s \
-	src/animations.s \
+	src/sprites.s \
 	src/audio.s \
 	pixler/pixler_boot.s \
 	pixler/pixler_zeropage.s \

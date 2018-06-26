@@ -139,70 +139,76 @@ sprite_pal = tmp3
 	; Increment sprite cursor.
 	ldx px_sprite_cursor
 	txa
-	clc
-	adc #(24)
+	add #(24)
 	sta px_sprite_cursor
 	
 	jmp incsp2
 .endproc
 
-cursor_metasprite:
-	.byte 253, 252, $14, $00
-	.byte  11, 252, $14, $40
-	.byte 253,  10, $14, $80
-	.byte  11,  10, $14, $C0
-
 .export _cursor_sprite
-.proc _cursor_sprite ; u8 x, u8 y
-	; Set x/y offsets.
-	sta sprite_y
+.proc _cursor_sprite ; u8 x, u8 y, u8 height
+
+.rodata
+@PALETTES:
+	.byte $00, $03, $01, $03
+
+.code
+	ldx px_sprite_cursor
+	ldx #0
+	
+	; Set x-values.
+	ldy #1
+	lda (sp), y
+	sub #3
+	sta OAM+ 0+3, x
+	sta OAM+ 8+3, x
+	add #14
+	sta OAM+ 4+3, x
+	sta OAM+12+3, x
+	
+	; Set y-values.
 	ldy #0
 	lda (sp), y
-	sta sprite_x
+	sub #4
+	sta OAM+ 0+0, x
+	sta OAM+ 4+0, x
+	add #14
+	sta OAM+ 8+0, x
+	sta OAM+12+0, x
 	
-	; TODO: Unroll.
-	lda #4
-	sta sreg
+	; Set chr.
+	lda #$14
+	sta OAM+ 0+1, x
+	sta OAM+ 4+1, x
+	sta OAM+ 8+1, x
+	sta OAM+12+1, x
 	
-	ldx px_sprite_cursor
-	ldy #0
-	:	; x-pos
-		lda cursor_metasprite, y
-		iny
-		clc
-		adc sprite_x
-		sta OAM+3, x
-		
-		; y-pos
-		lda cursor_metasprite, y
-		iny
-		clc
-		adc sprite_y
-		sta OAM+0, x
-		
-		; chr
-		lda cursor_metasprite, y
-		iny
-		sta OAM+1, x
-		
-		; attr
-		lda px_ticks
-		lsr
-		and #$03
-		ora cursor_metasprite, y
-		iny
-		sta OAM+2, x
-		
-		inx
-		inx
-		inx
-		inx
-		
-		dec sreg
-		bne :-
+	; Calculate palette.
+	lda px_ticks
+	lsr a
+	and #$03
+	tay
+	lda @PALETTES, y
+	tay
 	
-	stx px_sprite_cursor
-	jmp incsp1
+	; Set attr.
+	sta OAM+ 0+2, x
+	tya
+	ora #$40
+	sta OAM+ 4+2, x
+	tya
+	ora #$80
+	sta OAM+ 8+2, x
+	tya
+	ora #$C0
+	sta OAM+12+2, x
+	
+	; Increment sprite cursor.
+	txa
+	add #16
+	sta px_sprite_cursor
+	
+	jmp incsp2
 .endproc
 
 .export _block_sprite
@@ -235,8 +241,7 @@ cursor_metasprite:
 	lda (sp), y
 	sta OAM+3, x
 	sta OAM+11, x
-	clc
-	adc #8
+	add #8
 	sta OAM+7, x
 	sta OAM+15, x
 	
@@ -245,15 +250,13 @@ cursor_metasprite:
 	lda (sp), y
 	sta OAM+0, x
 	sta OAM+4, x
-	clc
-	adc #8
+	add #8
 	sta OAM+8, x
 	sta OAM+12, x
 	
 	; Increment sprite cursor.
 	txa
-	clc
-	adc #16
+	add #16
 	sta px_sprite_cursor
 	
 	jmp incsp2

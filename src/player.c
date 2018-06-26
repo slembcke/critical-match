@@ -13,7 +13,7 @@
 
 void player_sprite(u8 x, u8 y, u8 frame);
 void block_sprite(u8 x, u8 y, u8 block);
-void cursor_sprite(u8 x, u8 y);
+void cursor_sprite(u8 x, u8 y, u8 height);
 
 typedef struct {
 	u16 pos_x, pos_y;
@@ -28,7 +28,6 @@ typedef struct {
 	// Remaining ticks of jump power.
 	u8 jump_ticks;
 	
-	u8 cursor_x, cursor_y;
 	// Selected block under the cursor.
 	u8 cursor_idx;
 	
@@ -168,10 +167,6 @@ static void player_cursor_update(void){
 	} else if(player.blocks_held[0] && block == 0){
 		player.cursor_idx = idx;
 	}
-	
-	// Convert the index back to a screen position.
-	player.cursor_x =  (64 + (u8)((idx & 0x07) << 4));
-	player.cursor_y = -(48 + (u8)((idx & 0xF8) << 1));
 }
 
 static void player_facing_update(void){
@@ -279,12 +274,14 @@ void player_tick(u8 joy){
 		}
 	}
 	
-	// Draw
+	// Draw cursor.
 	if(player.cursor_idx){
-		// TODO cursor height?
-		cursor_sprite(player.cursor_x, player.cursor_y);
+		ix =  (64 + (u8)((idx & 0x07) << 4));
+		iy = -(48 + (u8)((idx & 0xF8) << 1));
+		cursor_sprite(ix, iy, 1);
 	}
 	
+	// Draw blocks.
 	ix = ( 64 -  8) + (player.pos_x >> 8);
 	iy = (224 - 32) - (player.pos_y >> 8);
 	for(idx = 0; player.blocks_held[idx]; ++idx){

@@ -4,7 +4,38 @@
 
 .importzp px_sprite_cursor
 
+.import incsp3
 .import OAM
+
+
+.export _px_spr
+.proc _px_spr ; u8 x, u8, y, u8 attr, u8 chr
+	ldx px_sprite_cursor
+	
+	; Store chr.
+	sta OAM + 1, x
+	
+	; Store x.
+	ldy #2
+	lda (sp), y
+	sta OAM + 3, x
+	
+	; Store y.
+	dey
+	lda (sp), y
+	sta OAM + 0, x
+	
+	; Store attr.
+	dey
+	lda (sp), y
+	sta OAM + 2, x
+	
+	txa
+	add #4
+	sta px_sprite_cursor
+	
+	jmp incsp3
+.endproc
 
 .export _px_spr_end
 .proc _px_spr_end

@@ -65,6 +65,7 @@ void px_buffer_data(u8 len, u16 addr);
 void px_buffer_set_color(u8 idx, u8 color);
 void px_buffer_set_metatile(u8 index, u16 addr);
 
+void px_spr(u8 x, u8 y, u8 attr, u8 chr);
 void px_spr_end(void);
 
 void px_wait_nmi(void);

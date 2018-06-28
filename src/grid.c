@@ -5,8 +5,7 @@
 #include "shared.h"
 
 u8 GRID[GRID_W*GRID_H] = {};
-
-// #define PX_WRITE_IDX_TO_BUFFER(i) {asm("lda %v", idx); asm("ldy #%b", i); asm("sta (%v + %b), y", PX, offsetof(PX_t, buffer));}
+static u8 GRID_HEIGHT[GRID_W] = {};
 
 static const u16 ROW_ADDRS[] = {
 	NT_ADDR(0, 8, 26 - 2* 0),
@@ -25,13 +24,13 @@ static const u16 ROW_ADDRS[] = {
 
 void grid_set_block(u8 index, u8 block){
 	px_buffer_inc(PX_INC1);
+	// TODO This generates garbage assembly.
 	px_buffer_set_metatile(block, ROW_ADDRS[index >> 3] + (((index & 0x7) << 1)));
 	
 	// idx = grid_block_idx(x, y);
 	GRID[index] = block;
 }
 
-static u8 GRID_HEIGHT[GRID_W] = {};
 static void grid_tick(void){
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = 1; iy < GRID_H - 1; ++iy){
@@ -41,15 +40,6 @@ static void grid_tick(void){
 		
 		GRID_HEIGHT[ix] = iy;
 	}
-	
-	// px_buffer_inc(PX_INC1);
-	// px_buffer_data(6, NT_ADDR(0, 0, 1));
-	// PX.buffer[0] = '0' - 1 + GRID_HEIGHT[1];
-	// PX.buffer[1] = '0' - 1 + GRID_HEIGHT[2];
-	// PX.buffer[2] = '0' - 1 + GRID_HEIGHT[3];
-	// PX.buffer[3] = '0' - 1 + GRID_HEIGHT[4];
-	// PX.buffer[4] = '0' - 1 + GRID_HEIGHT[5];
-	// PX.buffer[5] = '0' - 1 + GRID_HEIGHT[6];
 }
 
 // TODO Is this code bigger than a table? LOL
@@ -72,7 +62,15 @@ void grid_init(void){
 
 void grid_update(void){
 	static u8 frames = 1;
-	u8 above;
+	register u8 above;
+	
+	if(true){
+		// Debug draw stack heights.
+		idx = px_ticks & 0x7;
+		ix = 68 + 16*idx;
+		iy = 216 - 16*GRID_HEIGHT[idx];
+		px_spr(ix, iy, 0x00, '*');
+	}
 	
 	if(frames < GRID_H - 1){
 		px_buffer_inc(PX_INC1);

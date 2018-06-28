@@ -42,6 +42,20 @@ static GameState loop(void){
 	return loop();
 }
 
+// Block color.
+#define BLOCK_MASK_COLOR 0x03
+#define BLOCK_BLUE 0x00
+#define BLOCK_RED 0x01
+#define BLOCK_GREEN 0x02
+#define BLOCK_PURPLE 0x03
+
+// Block type.
+#define BLOCK_MASK_TYPE 0x0C
+#define BLOCK_EMTPY 0x00
+#define BLOCK_CHEST 0x04
+#define BLOCK_KEY 0x08
+#define BLOCK_OPEN 0x0C
+
 GameState board(void){
 	player_init();
 	grid_init();
@@ -75,16 +89,20 @@ GameState board(void){
 
 	// Enable rendering.
 	px_ppu_enable();
-
-	grid_set_block(grid_block_idx(1, 10), 1);
-	grid_set_block(grid_block_idx(1,  9), 2);
-	grid_set_block(grid_block_idx(1,  8), 3);
-	grid_set_block(grid_block_idx(2, 10), 4);
-	grid_set_block(grid_block_idx(2,  8), 5);
-	grid_set_block(grid_block_idx(3,  8), 9);
-	grid_set_block(grid_block_idx(5,  3), 10);
-	grid_set_block(grid_block_idx(5,  2), 11);
-	grid_set_block(grid_block_idx(5,  1), 12);
+	
+	{
+		u8 block = BLOCK_CHEST | BLOCK_PURPLE;
+		grid_set_block(grid_block_idx(1, 10), block);
+		grid_set_block(grid_block_idx(1,  9), block);
+		grid_set_block(grid_block_idx(1,  8), block);
+		grid_set_block(grid_block_idx(2, 10), block);
+		grid_set_block(grid_block_idx(2,  8), block);
+		grid_set_block(grid_block_idx(3,  8), block);
+		grid_set_block(grid_block_idx(4,  3), block);
+		grid_set_block(grid_block_idx(5,  2), block);
+		grid_set_block(grid_block_idx(5,  1), block);
+		grid_set_block(grid_block_idx(6,  10), BLOCK_PURPLE | BLOCK_KEY);
+	}
 
 	return loop();
 }

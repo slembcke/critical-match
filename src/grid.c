@@ -5,7 +5,7 @@
 #include "shared.h"
 
 u8 GRID[GRID_W*GRID_H];
-static u8 GRID_HEIGHT[GRID_W];
+static u8 GRID_MAX_Y[GRID_W];
 
 static const u16 ROW_ADDRS[] = {
 	NT_ADDR(0, 8, 26 - 2* 0),
@@ -33,15 +33,47 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
+#define QUEUE_SIZE 16
+#define QUEUE_INC(x) ((x + 1) & (QUEUE_SIZE - 1))
+static u8 QUEUE[QUEUE_SIZE];
+static u8 QUEUE_WRITE;
+static u8 QUEUE_READ;
+
 static void grid_tick(void){
+	register u8 block, color, type;
+	
+	px_profile_enable();
+	// Calculate stack heights.
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = 1; iy < GRID_H - 1; ++iy){
 			idx = grid_block_idx(ix, iy);
 			if(GRID[idx] == 0) break;
 		}
 		
-		GRID_HEIGHT[ix] = iy;
+		--iy;
+		GRID_MAX_Y[ix] = iy;
 	}
+	
+	for(ix = 1; ix < GRID_W - 1; ++ix){
+		for(iy = GRID_MAX_Y[ix]; iy > 0; --iy){
+			idx = grid_block_idx(ix, iy);
+			block = GRID[idx];
+			color = block & BLOCK_MASK_COLOR;
+			
+			if((block & BLOCK_MASK_TYPE) != BLOCK_CHEST) continue;
+			
+			if(
+				GRID_MAX_Y[ix + 1] >= iy && (GRID[idx + 1] == (BLOCK_KEY | color) || GRID[idx + 1] == (BLOCK_OPEN | color))){
+				grid_set_block(idx, BLOCK_OPEN | color);
+			}
+			if(
+				(GRID[idx - GRID_W] == (BLOCK_KEY | color) || GRID[idx - GRID_W] == (BLOCK_OPEN | color))){
+				grid_set_block(idx, BLOCK_OPEN | color);
+			}
+		}
+	}
+	
+	px_profile_disable();
 }
 
 // TODO Is this code bigger than a table? LOL
@@ -70,7 +102,7 @@ void grid_update(void){
 		// Debug draw stack heights.
 		idx = px_ticks & 0x7;
 		ix = 68 + 16*idx;
-		iy = 216 - 16*GRID_HEIGHT[idx];
+		iy = 200 - 16*GRID_MAX_Y[idx];
 		px_spr(ix, iy, 0x00, '*');
 	}
 	

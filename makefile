@@ -49,6 +49,7 @@ clean:
 	rm -rf $(SRC:.c=.s)
 	rm -rf $(OBJS)
 	rm -rf gfx/*.chr
+	rm -rf dat/*.lz4
 	rm -rf link.log
 
 run-mac: $(ROM)
@@ -68,8 +69,8 @@ run-linux: $(ROM)
 
 pixler/pixler_banks.o: $(GFX)
 
-data/grid.bin: data/grid.hex
-	xxd -r -c 8 $< $@
+dat/grid_template.lz4: dat/grid_template.hex
+	xxd -r -c 8 $< | lz4 -9 -l - $@
 
 # Cancel built in rule for .c files.
 %.o: %.c

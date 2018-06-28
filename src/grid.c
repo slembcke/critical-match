@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <lz4.h>
 
 #include "pixler.h"
 #include "shared.h"
@@ -76,13 +77,13 @@ static void grid_tick(void){
 	px_profile_disable();
 }
 
-extern const u8 GRID_BIN[];
+extern const u8 GRID_BIN_LZ4[];
 
 // TODO Is this code bigger than a table? LOL
 void grid_init(void){
 	static const u8 row[] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
 	
-	memcpy(GRID, GRID_BIN, GRID_W*GRID_H);
+	decompress_lz4(GRID_BIN_LZ4, GRID, GRID_W*GRID_H);
 }
 
 void grid_update(void){

@@ -30,3 +30,29 @@ PAL2 = %10101010
 PAL3 = %11111111
 
 QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
+
+.macro px_buffer_write_func f
+	lda #<(f - 1)
+	sta $0100, x
+	lda #>(f - 1)
+	sta $0101, x
+.endmacro
+
+.macro px_buffer_write_arg idx, value
+	.scope
+		.ifnblank value
+			lda #value
+		.endif
+		
+		addr = $0102 + idx
+		sta addr, x
+	.endscope
+.endmacro
+
+.macro px_buffer_write_ax idx
+	.scope
+		sta $0103 + idx, y
+		txa
+		sta $0102 + idx, y
+	.endscope
+.endmacro

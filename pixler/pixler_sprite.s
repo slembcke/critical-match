@@ -1,11 +1,11 @@
 .include "zeropage.inc"
+.include "pixler.inc"
 
 .macpack generic
 
 .importzp px_sprite_cursor
 
 .import incsp3
-.import OAM
 
 
 .export _px_spr
@@ -13,22 +13,22 @@
 	ldx px_sprite_cursor
 	
 	; Store chr.
-	sta OAM + 1, x
+	sta OAM_CHR, x
 	
 	; Store x.
 	ldy #2
 	lda (sp), y
-	sta OAM + 3, x
+	sta OAM_X, x
 	
 	; Store y.
 	dey
 	lda (sp), y
-	sta OAM + 0, x
+	sta OAM_Y, x
 	
 	; Store attr.
 	dey
 	lda (sp), y
-	sta OAM + 2, x
+	sta OAM_ATTR, x
 	
 	txa
 	add #4
@@ -42,8 +42,8 @@
 	; TODO Infinite loop if cursor is not aligned!
 	lda #240 ; y positions past 240 are offscreen.
 	ldx px_sprite_cursor
-	:	sta OAM, x ; Store y position;
-		; Skip 4 bytes to the next sprite.
+	:	sta OAM_Y, x
+		; Skip to the next sprite.
 		inx
 		inx
 		inx

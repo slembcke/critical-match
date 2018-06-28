@@ -12,7 +12,7 @@
 
 .export start, _exit = start
 .export __STARTUP__:absolute = 1
-.export OAM, _OAM = OAM
+.export _OAM = OAM
 
 .segment "HEADER"
 

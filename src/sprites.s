@@ -1,4 +1,5 @@
 .include "zeropage.inc"
+.include "pixler/pixler.inc"
 
 .macpack generic
 
@@ -7,7 +8,6 @@
 
 .import incsp1
 .import incsp2
-.import OAM
 
 .import METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
 
@@ -75,12 +75,12 @@ sprite_pal = tmp3
 	ora #2 ; Set the palette bits.
 	
 	; Set attributes.
-	sta OAM+ 0+2, x
-	sta OAM+ 4+2, x
-	sta OAM+ 8+2, x
-	sta OAM+12+2, x
-	sta OAM+16+2, x
-	sta OAM+20+2, x
+	sta OAM_ATTR+ 0, x
+	sta OAM_ATTR+ 4, x
+	sta OAM_ATTR+ 8, x
+	sta OAM_ATTR+12, x
+	sta OAM_ATTR+16, x
+	sta OAM_ATTR+20, x
 	
 	; Fetch frame address.
 	tya ; Restore frame number.
@@ -94,47 +94,47 @@ sprite_pal = tmp3
 	; Set chr.
 	ldy #0
 	lda (ptr1), y
-	sta OAM+ 0+1, x
+	sta OAM_CHR+ 0, x
 	iny
 	lda (ptr1), y
-	sta OAM+ 4+1, x
+	sta OAM_CHR+ 4, x
 	iny
 	lda (ptr1), y
-	sta OAM+ 8+1, x
+	sta OAM_CHR+ 8, x
 	iny
 	lda (ptr1), y
-	sta OAM+12+1, x
+	sta OAM_CHR+12, x
 	iny
 	lda (ptr1), y
-	sta OAM+16+1, x
+	sta OAM_CHR+16, x
 	iny
 	lda (ptr1), y
-	sta OAM+20+1, x
+	sta OAM_CHR+20, x
 	
 	; Set x-values.
 	ldy #1
 	lda (sp), y
-	sta OAM+ 4+3, x
-	sta OAM+12+3, x
-	sta OAM+20+3, x
+	sta OAM_X+ 4, x
+	sta OAM_X+12, x
+	sta OAM_X+20, x
 	sub #8
-	sta OAM+ 0+3, x
-	sta OAM+ 8+3, x
-	sta OAM+16+3, x
+	sta OAM_X+ 0, x
+	sta OAM_X+ 8, x
+	sta OAM_X+16, x
 	add #8
 	
 	; Set y-values.
 	ldy #0
 	lda (sp), y
 	sub #9
-	sta OAM+16+0, x
-	sta OAM+20+0, x
+	sta OAM_Y+16, x
+	sta OAM_Y+20, x
 	sub #8
-	sta OAM+ 8+0, x
-	sta OAM+12+0, x
+	sta OAM_Y+ 8, x
+	sta OAM_Y+12, x
 	sub #8
-	sta OAM+ 0+0, x
-	sta OAM+ 4+0, x
+	sta OAM_Y+ 0, x
+	sta OAM_Y+ 4, x
 	
 	; Increment sprite cursor.
 	ldx px_sprite_cursor
@@ -164,28 +164,28 @@ sprite_pal = tmp3
 	ldy #0
 	lda (sp), y
 	add #10
-	sta OAM+ 8+0, x
-	sta OAM+12+0, x
+	sta OAM_Y+ 8, x
+	sta OAM_Y+12, x
 	sub tmp1
-	sta OAM+ 0+0, x
-	sta OAM+ 4+0, x
+	sta OAM_Y+ 0, x
+	sta OAM_Y+ 4, x
 	
 	; Set x-values.
 	ldy #1
 	lda (sp), y
 	sub #3
-	sta OAM+ 0+3, x
-	sta OAM+ 8+3, x
+	sta OAM_X+ 0, x
+	sta OAM_X+ 8, x
 	add #14
-	sta OAM+ 4+3, x
-	sta OAM+12+3, x
+	sta OAM_X+ 4, x
+	sta OAM_X+12, x
 	
 	; Set chr.
 	lda #$14
-	sta OAM+ 0+1, x
-	sta OAM+ 4+1, x
-	sta OAM+ 8+1, x
-	sta OAM+12+1, x
+	sta OAM_CHR+ 0, x
+	sta OAM_CHR+ 4, x
+	sta OAM_CHR+ 8, x
+	sta OAM_CHR+12, x
 	
 	; Calculate palette.
 	lda px_ticks
@@ -196,16 +196,16 @@ sprite_pal = tmp3
 	tay
 	
 	; Set attr.
-	sta OAM+ 0+2, x
+	sta OAM_ATTR+ 0, x
 	tya
 	ora #$40
-	sta OAM+ 4+2, x
+	sta OAM_ATTR+ 4, x
 	tya
 	ora #$80
-	sta OAM+ 8+2, x
+	sta OAM_ATTR+ 8, x
 	tya
 	ora #$C0
-	sta OAM+12+2, x
+	sta OAM_ATTR+12, x
 	
 	; Increment sprite cursor.
 	txa
@@ -224,39 +224,39 @@ sprite_pal = tmp3
 	
 	; Store chr.
 	lda METATILE0, y
-	sta OAM+1, x
+	sta OAM_CHR+ 0, x
 	lda METATILE1, y
-	sta OAM+5, x
+	sta OAM_CHR+ 4, x
 	lda METATILE2, y
-	sta OAM+9, x
+	sta OAM_CHR+ 8, x
 	lda METATILE3, y
-	sta OAM+13, x
+	sta OAM_CHR+12, x
 	
 	; Store attr.
 	lda METATILE4, y
 	and #$03
-	sta OAM+2, x
-	sta OAM+6, x
-	sta OAM+10, x
-	sta OAM+14, x
+	sta OAM_ATTR+ 0, x
+	sta OAM_ATTR+ 4, x
+	sta OAM_ATTR+ 8, x
+	sta OAM_ATTR+12, x
 	
 	; Store x-values.
 	ldy #1
 	lda (sp), y
-	sta OAM+3, x
-	sta OAM+11, x
+	sta OAM_X+ 0, x
+	sta OAM_X+ 8, x
 	add #8
-	sta OAM+7, x
-	sta OAM+15, x
+	sta OAM_X+ 4, x
+	sta OAM_X+12, x
 	
 	; Store y-values.
 	ldy #0
 	lda (sp), y
-	sta OAM+0, x
-	sta OAM+4, x
+	sta OAM_Y+ 0, x
+	sta OAM_Y+ 4, x
 	add #8
-	sta OAM+8, x
-	sta OAM+12, x
+	sta OAM_Y+ 8, x
+	sta OAM_Y+12, x
 	
 	; Increment sprite cursor.
 	txa

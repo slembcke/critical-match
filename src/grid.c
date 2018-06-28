@@ -76,22 +76,13 @@ static void grid_tick(void){
 	px_profile_disable();
 }
 
+extern const u8 GRID_BIN[];
+
 // TODO Is this code bigger than a table? LOL
 void grid_init(void){
 	static const u8 row[] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
 	
-	memset(GRID, 0xFF, 1*GRID_W);
-	memcpy(GRID +  1*GRID_W, row, GRID_W);
-	memcpy(GRID +  2*GRID_W, row, GRID_W);
-	memcpy(GRID +  3*GRID_W, row, GRID_W);
-	memcpy(GRID +  4*GRID_W, row, GRID_W);
-	memcpy(GRID +  5*GRID_W, row, GRID_W);
-	memcpy(GRID +  6*GRID_W, row, GRID_W);
-	memcpy(GRID +  7*GRID_W, row, GRID_W);
-	memcpy(GRID +  8*GRID_W, row, GRID_W);
-	memcpy(GRID +  9*GRID_W, row, GRID_W);
-	memcpy(GRID + 10*GRID_W, row, GRID_W);
-	memcpy(GRID + 11*GRID_W, row, GRID_W);
+	memcpy(GRID, GRID_BIN, GRID_W*GRID_H);
 }
 
 void grid_update(void){

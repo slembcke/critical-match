@@ -23,6 +23,7 @@ ASMSRC = \
 	src/sprites.s \
 	src/audio.s \
 	src/metatiles.s \
+	data/data.s \
 	pixler/pixler_boot.s \
 	pixler/pixler_zeropage.s \
 	pixler/pixler_nmi.s \
@@ -54,7 +55,7 @@ run-mac: $(ROM)
 	open -a Nestopia $(ROM)
 
 run-linux: $(ROM)
-	nestopia -d -w -l 1 -n -s 4 -t $(ROM)
+	nestopia -d -w -l 0 -n -s 1 -t $(ROM)
 
 %.s: %.c
 	$(CC) $(CFLAGS) $< --add-source $(INCLUDE) -o $@
@@ -66,6 +67,9 @@ run-linux: $(ROM)
 	tools/png2chr $< $@
 
 pixler/pixler_banks.o: $(GFX)
+
+data/grid.bin: data/grid.hex
+	xxd -r -c 8 $< $@
 
 # Cancel built in rule for .c files.
 %.o: %.c

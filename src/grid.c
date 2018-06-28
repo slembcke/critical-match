@@ -4,8 +4,8 @@
 #include "pixler.h"
 #include "shared.h"
 
-u8 GRID[GRID_W*GRID_H] = {};
-static u8 GRID_HEIGHT[GRID_W] = {};
+u8 GRID[GRID_W*GRID_H];
+static u8 GRID_HEIGHT[GRID_W];
 
 static const u16 ROW_ADDRS[] = {
 	NT_ADDR(0, 8, 26 - 2* 0),

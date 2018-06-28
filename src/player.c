@@ -38,7 +38,7 @@ typedef struct {
 } Player;
 
 static const Player INIT = {64 << 8, 16 << 8, 0, 0};
-static Player player = {};
+static Player player;
 
 void player_init(void){
 	player = INIT;

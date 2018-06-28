@@ -16,22 +16,22 @@ SRC = \
 	src/grid.c \
 	src/player.c \
 	src/debug.c \
-	pixler/pixler.c
+	lib/pixler/pixler.c
 
 ASMSRC = \
 	src/zeropage.s \
 	src/sprites.s \
 	src/audio.s \
 	src/metatiles.s \
-	data/data.s \
-	pixler/pixler_boot.s \
-	pixler/pixler_zeropage.s \
-	pixler/pixler_nmi.s \
-	pixler/pixler_banks.s \
-	pixler/pixler_buffer.s \
-	pixler/pixler_blit.s \
-	pixler/pixler_sprite.s \
-	famitone2/famitone2.s
+	dat/data.s \
+	lib/pixler/pixler_boot.s \
+	lib/pixler/pixler_zeropage.s \
+	lib/pixler/pixler_nmi.s \
+	lib/pixler/pixler_banks.s \
+	lib/pixler/pixler_buffer.s \
+	lib/pixler/pixler_blit.s \
+	lib/pixler/pixler_sprite.s \
+	lib/famitone2/famitone2.s
 
 GFX = \
 	gfx/sheet1.chr \
@@ -67,7 +67,7 @@ run-linux: $(ROM)
 %.chr: %.png
 	tools/png2chr $< $@
 
-pixler/pixler_banks.o: $(GFX)
+lib/pixler/pixler_banks.o: $(GFX)
 
 dat/grid_template.lz4: dat/grid_template.hex
 	xxd -r -c 8 $< | lz4 -9 -l - $@

@@ -22,10 +22,12 @@ static const u16 ROW_ADDRS[] = {
 	NT_ADDR(0, 8, 26 - 2*11),
 };
 
+void buffer_set_metatile(u8 index, u16 addr);
+
 void grid_set_block(u8 index, u8 block){
 	px_buffer_inc(PX_INC1);
 	// TODO This generates garbage assembly.
-	px_buffer_set_metatile(block, ROW_ADDRS[index >> 3] + (((index & 0x7) << 1)));
+	buffer_set_metatile(block, ROW_ADDRS[index >> 3] + (((index & 0x7) << 1)));
 	
 	// idx = grid_block_idx(x, y);
 	GRID[index] = block;

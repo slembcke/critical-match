@@ -18,6 +18,8 @@ METATILE2: .byte  $00,  $00,  $00,  $00,  $90,  $92,  $94,  $96,  $98,  $98,  $9
 METATILE3: .byte  $00,  $00,  $00,  $00,  $91,  $93,  $91,  $97,  $99,  $99,  $99,  $9B,  $93,  $93,  $93,  $93
 METATILE4: .byte PAL0, PAL0, PAL0, PAL0, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL2, PAL3
 
+.code
+
 .proc exec_set_metatile
 	_addr = px_nmi_tmp + 0
 	_attr = px_nmi_tmp + 2
@@ -84,8 +86,8 @@ METATILE4: .byte PAL0, PAL0, PAL0, PAL0, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL
 	rts
 .endproc
 
-.export _px_buffer_set_metatile
-.proc _px_buffer_set_metatile
+.export _buffer_set_metatile
+.proc _buffer_set_metatile
 	_index = 0
 	_addr = ptr1
 	_qmask = tmp1

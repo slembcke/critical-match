@@ -101,7 +101,8 @@ METATILE4: .byte PAL0, PAL0, PAL0, PAL0, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL
 	
 	; Write tile index.
 	ldx px_buffer_cursor
-	c_var _index
+	ldy #(_index)
+	lda (sp), y
 	px_buffer_write_arg 0
 	
 	; Calculate quadrant index.
@@ -151,7 +152,8 @@ METATILE4: .byte PAL0, PAL0, PAL0, PAL0, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL
 	px_buffer_write_arg 5
 	
 	; Write attribute byte.
-	c_var _index
+	ldy #(_index)
+	lda (sp), y
 	tay
 	lda METATILE4, y
 	and _qmask

@@ -127,7 +127,8 @@ px_nmi_tmp: .res 4
 	px_buffer_write_func exec_data
 	
 	; Write len.
-	c_var _len
+	ldy #(_len)
+	lda (sp), y
 	px_buffer_write_arg 2
 	
 	; Increment cursor
@@ -156,7 +157,8 @@ px_nmi_tmp: .res 4
 	px_buffer_write_arg 1
 	
 	; Write idx
-	c_var _idx
+	ldy #(_idx)
+	lda (sp), y
 	px_buffer_write_arg 0
 	
 	px_buffer_write_func exec_set_color

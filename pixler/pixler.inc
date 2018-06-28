@@ -19,11 +19,6 @@ PPU_VRAM_ADDR = PPU_VRAM_ADDR2
 PPU_NAMETBL0 = $2000
 PPU_PAL0 = $3F00
 
-.macro c_var idx
-	ldy #(idx)
-	lda (sp), y
-.endmacro
-
 PAL0 = %00000000
 PAL1 = %01010101
 PAL2 = %10101010

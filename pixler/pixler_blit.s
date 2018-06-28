@@ -32,7 +32,8 @@
 	; _chr = a
 	
 	tax
-	c_var _len + 1
+	ldy #(_len+1)
+	lda (sp), y
 	beq @remainder
 
 	tay
@@ -47,7 +48,8 @@
 	tax
 
 	@remainder:
-	c_var _len + 0
+	ldy #(_len+0)
+	lda (sp), y
 	tay
 	txa
 	: sta PPU_VRAM_IO
@@ -64,7 +66,8 @@
 	sta ptr1 + 0
 	stx ptr1 + 1
 	
-	c_var _len + 1
+	ldy #(_len+1)
+	lda (sp), y
 	beq @remainder
 
 	tax
@@ -79,7 +82,8 @@
 		bne :--
 
 	@remainder:
-	c_var _len + 0
+	ldy #(_len+0)
+	lda (sp), y
 	sta tmp1 + 0
 	
 	ldy #0

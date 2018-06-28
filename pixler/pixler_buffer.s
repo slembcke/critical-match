@@ -5,14 +5,12 @@
 .importzp PX_buffer
 
 .import incsp1
+.import METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
 
 .export px_buffer_exec
 .export _px_buffer_inc
 .export _px_buffer_data
 .export _px_buffer_set_color
-
-; TODO these really need to be moved...
-.export METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
 
 .macpack generic
 
@@ -192,22 +190,6 @@ nmi_tmp: .res 4
 	
 	jmp incsp1
 .endproc
-
-.rodata ; TODO move this somewhere else.
-
-PAL0 = %00000000
-PAL1 = %01010101
-PAL2 = %10101010
-PAL3 = %11111111
-METATILE0: .byte  $00,  $80,  $82,  $84,  $86,  $8A,  $88,  $88,  $88,  $8C,  $8C,  $8C,  $8C
-METATILE1: .byte  $00,  $81,  $83,  $85,  $87,  $89,  $8B,  $89,  $89,  $8D,  $8D,  $8D,  $8D
-METATILE2: .byte  $00,  $90,  $92,  $94,  $96,  $98,  $98,  $9A,  $98,  $92,  $92,  $92,  $92
-METATILE3: .byte  $00,  $91,  $93,  $91,  $97,  $99,  $99,  $99,  $9B,  $93,  $93,  $93,  $93
-METATILE4: .byte PAL0, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL2, PAL3, PAL0, PAL1, PAL2, PAL3
-
-QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000
-
-.code
 
 .proc exec_set_metatile
 	_addr = nmi_tmp + 0

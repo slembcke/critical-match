@@ -16,7 +16,13 @@ px_nmi_ready: .byte 0
 .code
 
 .proc px_nmi
-	interrupt_enter
+	; Interrupt enter.
+	pha
+	txa
+	pha
+	tya
+	pha
+
 	lda px_nmi_ready
 	beq @skip_frame
 	
@@ -46,7 +52,13 @@ px_nmi_ready: .byte 0
 	
 	jsr FamiToneUpdate
 	
-	interrupt_exit
+	; Interrupt exit.
+	pla
+	tay
+	pla
+	tax
+	pla
+	
 	rti
 .endproc
 

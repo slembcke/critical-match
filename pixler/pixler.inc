@@ -2,6 +2,10 @@
 
 .import __OAM_START__
 OAM = __OAM_START__
+OAM_X = __OAM_START__ + 3
+OAM_Y = __OAM_START__ + 0
+OAM_CHR = __OAM_START__ + 1
+OAM_ATTR = __OAM_START__ + 2
 
 ; Some more descriptive aliases for the cc65 defines.
 APU_FRAME_COUNTER = APU_PAD2
@@ -20,20 +24,9 @@ PPU_PAL0 = $3F00
 	lda (sp), y
 .endmacro
 
-.macro interrupt_enter
-	pha
-	txa
-	pha
-	tya
-	pha
-.endmacro
+PAL0 = %00000000
+PAL1 = %01010101
+PAL2 = %10101010
+PAL3 = %11111111
 
-.macro interrupt_exit
-	pla
-	tay
-	pla
-	tax
-	pla
-	
-	rti
-.endmacro
+QUADRANT_MASK: .byte %00000011, %00001100, %00110000, %11000000

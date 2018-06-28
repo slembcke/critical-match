@@ -22,6 +22,7 @@ ASMSRC = \
 	src/zeropage.s \
 	src/sprites.s \
 	src/audio.s \
+	src/metatiles.s \
 	pixler/pixler_boot.s \
 	pixler/pixler_zeropage.s \
 	pixler/pixler_nmi.s \

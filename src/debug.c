@@ -9,9 +9,10 @@
 
 static const char HEX[] = "0123456789ABCDEF";
 
-GameState Freeze(){
+GameState debug_freeze(){
+	px_ppu_enable();
 	px_wait_nmi();
-	return Freeze();
+	return debug_freeze();
 }
 
 void debug_hex(u8 value){
@@ -23,7 +24,7 @@ void debug_hex(u8 value){
 
 GameState debug_display(void){
 	px_ppu_enable();
-	return Freeze();
+	return debug_freeze();
 }
 
 GameState debug_palette(){

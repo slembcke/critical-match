@@ -13,7 +13,10 @@
 			"*.inc": "mads",
 			"nes.h": "c",
 			"pixler.h": "c",
-			"stdbool.h": "c"
+			"stdbool.h": "c",
+			"string.h": "c",
+			"lz4.h": "c",
+			"stdlib.h": "c"
 		}
 	}
 }

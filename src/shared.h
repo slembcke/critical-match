@@ -53,6 +53,7 @@ GameState board(void);
 
 
 GameState debug_chr(void);
+GameState debug_freeze(void);
 void debug_hex(u8 value);
 
 #endif

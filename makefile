@@ -24,6 +24,7 @@ ASMSRC = \
 	src/audio.s \
 	src/metatiles.s \
 	src/lz4vram.s \
+	gfx/gfx.s \
 	dat/data.s \
 	lib/pixler/pixler_boot.s \
 	lib/pixler/pixler_zeropage.s \
@@ -77,7 +78,7 @@ run-linux: $(ROM)
 %.lz4: %.bin
 	tools/lz4x -9 $< $@
 
-lib/pixler/pixler_banks.o: $(GFX)
+gfx/gfx.s: $(GFX)
 
 dat/data.s: dat/grid_template.lz4
 

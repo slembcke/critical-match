@@ -22,7 +22,7 @@
 	jmp px_bank_select
 .endproc
 
-.segment "PRG0"
+.rodata
 
 .export _neschar_inc
 _neschar_inc:
@@ -36,6 +36,7 @@ _gfx_sheet1_lz4chr:
 _gfx_squidman_lz4chr:
 	.incbin "gfx/squidman.lz4chr", 8
 
+.segment "PRG0"
 .segment "PRG1"
 .segment "PRG2"
 .segment "PRG3"

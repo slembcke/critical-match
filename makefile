@@ -23,6 +23,7 @@ ASMSRC = \
 	src/sprites.s \
 	src/audio.s \
 	src/metatiles.s \
+	src/lz4vram.s \
 	dat/data.s \
 	lib/pixler/pixler_boot.s \
 	lib/pixler/pixler_zeropage.s \
@@ -34,8 +35,8 @@ ASMSRC = \
 	lib/famitone2/famitone2.s
 
 GFX = \
-	gfx/sheet1.chr \
-	gfx/squidman.chr
+	gfx/sheet1.lz4chr \
+	gfx/squidman.lz4chr
 
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
@@ -66,6 +67,9 @@ run-linux: $(ROM)
 
 %.chr: %.png
 	tools/png2chr $< $@
+
+%.lz4chr: %.chr
+	tools/lz4x -9 $< $@
 
 %.bin: %.hex
 	xxd -r -c 8 $< > $@

@@ -28,13 +28,13 @@
 _neschar_inc:
 	.include "neschar.inc"
 
-.export _gfx_sheet1_chr
-_gfx_sheet1_chr:
-	.incbin "gfx/sheet1.chr"
+.export _gfx_sheet1_lz4chr
+_gfx_sheet1_lz4chr:
+	.incbin "gfx/sheet1.lz4chr", 8
 
-.export _gfx_squidman_chr
-_gfx_squidman_chr:
-	.incbin "gfx/squidman.chr"
+.export _gfx_squidman_lz4chr
+_gfx_squidman_lz4chr:
+	.incbin "gfx/squidman.lz4chr", 8
 
 .segment "PRG1"
 .segment "PRG2"

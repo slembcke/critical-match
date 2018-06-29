@@ -3,8 +3,7 @@
 
 #include "pixler/pixler.h"
 
-extern u8 i, ix, iy, idx;
-#pragma zpsym("i");
+extern u8 ix, iy, idx;
 #pragma zpsym("ix");
 #pragma zpsym("iy");
 #pragma zpsym("idx");

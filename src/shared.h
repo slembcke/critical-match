@@ -1,7 +1,7 @@
 #ifndef _SHARED_H
 #define _SHARED_H
 
-#include "pixler.h"
+#include "pixler/pixler.h"
 
 extern u8 i, ix, iy, idx;
 #pragma zpsym("i");

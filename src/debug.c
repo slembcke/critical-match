@@ -4,7 +4,7 @@
 #include <nes.h>
 #include <joystick.h>
 
-#include "pixler.h"
+#include "pixler/pixler.h"
 #include "shared.h"
 
 static const char HEX[] = "0123456789ABCDEF";

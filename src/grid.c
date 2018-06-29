@@ -2,7 +2,7 @@
 #include <string.h>
 #include <lz4.h>
 
-#include "pixler.h"
+#include "pixler/pixler.h"
 #include "shared.h"
 
 u8 GRID[GRID_W*GRID_H];

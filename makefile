@@ -8,8 +8,8 @@ LD = $(CC65_ROOT)/bin/ld65
 
 CFLAGS = -t nes -Oirs --register-space 16
 
-INCLUDE = -I $(CC65_ROOT)/include -I pixler
-ASMINC = -I . -I $(CC65_ROOT)/libsrc/nes
+INCLUDE = -I $(CC65_ROOT)/include -I lib
+ASMINC = -I lib/ -I $(CC65_ROOT)/libsrc/nes
 
 SRC = \
 	src/main.c \
@@ -67,10 +67,15 @@ run-linux: $(ROM)
 %.chr: %.png
 	tools/png2chr $< $@
 
+%.bin: %.hex
+	xxd -r -c 8 $< > $@
+
+%.lz4: %.bin
+	tools/lz4x -9 $< $@
+
 lib/pixler/pixler_banks.o: $(GFX)
 
-dat/grid_template.lz4: dat/grid_template.hex
-	xxd -r -c 8 $< | lz4 -9 -l - $@
+dat/data.s: dat/grid_template.lz4
 
 # Cancel built in rule for .c files.
 %.o: %.c

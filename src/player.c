@@ -1,7 +1,7 @@
 #include <nes.h>
 #include <joystick.h>
 
-#include "pixler.h"
+#include "pixler/pixler.h"
 #include "shared.h"
 
 #define PLAYER_MAX_SPEED 0x0300

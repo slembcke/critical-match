@@ -4,7 +4,9 @@
 *.d
 link.log
 gfx/*.chr
+dat/*.bin
 dat/*.lz4
 
 tools/png2chr
 tools/chr2png
+tools/lz4x

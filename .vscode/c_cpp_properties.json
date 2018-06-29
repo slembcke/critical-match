@@ -4,9 +4,8 @@
             "name": "cc65",
             "includePath": [
                 "../cc65/include",
-                "pixler",
-                "src",
-                "${workspaceRoot}"
+                "${workspaceRoot}",
+                "${workspaceFolder}/lib"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

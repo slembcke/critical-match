@@ -36,8 +36,9 @@ ASMSRC = \
 	lib/famitone2/famitone2.s
 
 GFX = \
-	gfx/sheet1.lz4chr \
-	gfx/squidman.lz4chr
+	gfx/neschar.png \
+	gfx/sheet1.png \
+	gfx/squidman.png
 
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
@@ -51,6 +52,7 @@ clean:
 	rm -rf $(SRC:.c=.s)
 	rm -rf $(OBJS)
 	rm -rf gfx/*.chr
+	rm -rf gfx/*.lz4chr
 	rm -rf dat/*.lz4
 	rm -rf link.log
 
@@ -78,7 +80,7 @@ run-linux: $(ROM)
 %.lz4: %.bin
 	tools/lz4x -9 $< $@
 
-gfx/gfx.s: $(GFX)
+gfx/gfx.s: $(GFX:.png=.lz4chr)
 
 dat/data.s: dat/grid_template.lz4
 

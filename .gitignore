@@ -4,6 +4,7 @@
 *.d
 link.log
 gfx/*.chr
+gfx/*lz4chr
 dat/*.bin
 dat/*.lz4
 

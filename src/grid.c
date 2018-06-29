@@ -64,11 +64,11 @@ static void grid_tick(void){
 			if((block & BLOCK_MASK_TYPE) != BLOCK_CHEST) continue;
 			
 			if(
-				GRID_MAX_Y[ix + 1] >= iy && (GRID[idx + 1] == (BLOCK_KEY | color) || GRID[idx + 1] == (BLOCK_OPEN | color))){
+				(GRID_MAX_Y + 1)[ix] >= iy && ((GRID + 1)[idx] == (BLOCK_KEY | color) || (GRID + 1)[idx] == (BLOCK_OPEN | color))){
 				grid_set_block(idx, BLOCK_OPEN | color);
 			}
 			if(
-				(GRID[idx - GRID_W] == (BLOCK_KEY | color) || GRID[idx - GRID_W] == (BLOCK_OPEN | color))){
+				((GRID + -GRID_W)[idx] == (BLOCK_KEY | color) || (GRID + -GRID_W)[idx] == (BLOCK_OPEN | color))){
 				grid_set_block(idx, BLOCK_OPEN | color);
 			}
 		}
@@ -105,7 +105,7 @@ void grid_update(void){
 			idx = grid_block_idx(ix, frames);
 			
 			if(GRID[idx] == 0){
-				above = GRID[idx + GRID_W];
+				above = (GRID + GRID_W)[idx];
 				if(above != 0){
 					// TODO split this across frames to avoid using so much buffer memory?
 					grid_set_block(idx, above);

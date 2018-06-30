@@ -154,10 +154,16 @@ static void player_cursor_update(void){
 			}
 		} else if(JOY_DOWN(player.joy)){
 			idx -= GRID_W;
-		} else if(player.facingRight){
-			idx += 1;
 		} else {
-			idx -= 1;
+			// Get the block in front of the player.
+			if(player.facingRight){
+				idx += 1;
+			} else {
+				idx -= 1;
+			}
+			
+			// Move down a row if it's empty.
+			if(GRID[idx] == 0) idx -= GRID_W;
 		}
 	}
 	

@@ -77,17 +77,43 @@ GameState board(void){
 	px_ppu_enable();
 	
 	{
-		u8 block = BLOCK_CHEST | BLOCK_PURPLE;
-		grid_set_block(grid_block_idx(1, 10), block);
-		grid_set_block(grid_block_idx(1,  9), block);
-		grid_set_block(grid_block_idx(1,  8), block);
-		grid_set_block(grid_block_idx(2, 10), block);
-		grid_set_block(grid_block_idx(2,  8), block);
-		grid_set_block(grid_block_idx(3,  8), block);
-		grid_set_block(grid_block_idx(4,  3), block);
-		grid_set_block(grid_block_idx(5,  2), block);
-		grid_set_block(grid_block_idx(5,  1), block);
-		grid_set_block(grid_block_idx(6,  10), BLOCK_PURPLE | BLOCK_KEY);
+		u8 color = BLOCK_PURPLE;
+		u8 block = BLOCK_CHEST | color;
+		grid_set_block(grid_block_idx(1, 3), block);
+		grid_set_block(grid_block_idx(1, 4), block);
+		grid_set_block(grid_block_idx(1, 5), block);
+		grid_set_block(grid_block_idx(1, 6), block);
+		grid_set_block(grid_block_idx(1, 7), block);
+		px_wait_nmi();
+		
+		grid_set_block(grid_block_idx(2, 3), block);
+		grid_set_block(grid_block_idx(2, 4), block);
+		grid_set_block(grid_block_idx(2, 5), block);
+		grid_set_block(grid_block_idx(2, 6), block);
+		grid_set_block(grid_block_idx(2, 7), block);
+		px_wait_nmi();
+		
+		grid_set_block(grid_block_idx(3, 3), block);
+		grid_set_block(grid_block_idx(3, 4), block);
+		grid_set_block(grid_block_idx(3, 5), BLOCK_KEY | color);
+		grid_set_block(grid_block_idx(3, 6), block);
+		grid_set_block(grid_block_idx(3, 7), block);
+		px_wait_nmi();
+		
+		grid_set_block(grid_block_idx(4, 3), block);
+		grid_set_block(grid_block_idx(4, 4), block);
+		grid_set_block(grid_block_idx(4, 5), block);
+		grid_set_block(grid_block_idx(4, 6), block);
+		grid_set_block(grid_block_idx(4, 7), block);
+		px_wait_nmi();
+		
+		grid_set_block(grid_block_idx(5, 3), block);
+		grid_set_block(grid_block_idx(5, 4), block);
+		grid_set_block(grid_block_idx(5, 5), block);
+		grid_set_block(grid_block_idx(5, 6), block);
+		grid_set_block(grid_block_idx(5, 7), block);
+		px_wait_nmi();
+		
 	}
 
 	return loop();

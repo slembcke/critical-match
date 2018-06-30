@@ -5,8 +5,20 @@
 #include "pixler/pixler.h"
 #include "shared.h"
 
+// Block values in the grid.
 u8 GRID[GRID_W*GRID_H];
-static u8 GRID_MAX_Y[GRID_W];
+
+// Height of each stacked column.
+static u8 COLUMN_HEIGHT[GRID_W];
+
+// Aliases for left/right/up/down from current block.
+#define GRID_L (GRID + -1)
+#define GRID_R (GRID +  1)
+#define GRID_U (GRID +  GRID_W)
+#define GRID_D (GRID + -GRID_W)
+
+#define COLUMN_HEIGHT_L (COLUMN_HEIGHT + -1)
+#define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
 
 static const u16 ROW_ADDRS[] = {
 	NT_ADDR(0, 8, 26 - 2* 0),
@@ -34,17 +46,54 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
-#define QUEUE_SIZE 16
-#define QUEUE_INC(x) ((x + 1) & (QUEUE_SIZE - 1))
-static u8 QUEUE[QUEUE_SIZE];
-static u8 QUEUE_WRITE;
-static u8 QUEUE_READ;
-
-static void grid_tick(void){
+static void grid_open_chests(void){
+	static u8 queue[8];
+	register u8 cursor = 0;
+	
 	register u8 block, color, type;
 	
-	px_profile_enable();
-	// Calculate stack heights.
+	for(ix = 1; ix < GRID_W - 1; ++ix){
+		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
+			idx = grid_block_idx(ix, iy);
+			block = GRID[idx];
+			color = block & BLOCK_MASK_COLOR;
+			
+			if((block & BLOCK_MASK_TYPE) != BLOCK_CHEST) continue;
+			
+			if(GRID_D[idx] == (BLOCK_KEY | color) || GRID_D[idx] == (BLOCK_OPEN | color)){
+				queue[cursor] = idx;
+				if(++cursor == sizeof(queue)) goto open_queued_chests;
+			}
+			
+			if(COLUMN_HEIGHT[ix] >= iy + 1 && (GRID_U[idx] == (BLOCK_KEY | color) || GRID_U[idx] == (BLOCK_OPEN | color))){
+				queue[cursor] = idx;
+				if(++cursor == sizeof(queue)) goto open_queued_chests;
+			}
+			
+			if(COLUMN_HEIGHT_R[ix] >= iy && (GRID_R[idx] == (BLOCK_KEY | color) || GRID_R[idx] == (BLOCK_OPEN | color))){
+				queue[cursor] = idx;
+				if(++cursor == sizeof(queue)) goto open_queued_chests;
+			}
+			
+			if(COLUMN_HEIGHT_L[ix] >= iy && (GRID_L[idx] == (BLOCK_KEY | color) || GRID_L[idx] == (BLOCK_OPEN | color))){
+				queue[cursor] = idx;
+				if(++cursor == sizeof(queue)) goto open_queued_chests;
+			}
+		}
+	}
+	
+	open_queued_chests:
+	while(cursor > 0){
+		--cursor;
+		
+		idx = queue[cursor];
+		color = GRID[idx] & BLOCK_MASK_COLOR;
+		grid_set_block(idx, BLOCK_OPEN | color);
+	}
+}
+
+static void grid_tick(void){
+	// Calculate column heights.
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = 1; iy < GRID_H - 1; ++iy){
 			idx = grid_block_idx(ix, iy);
@@ -52,38 +101,30 @@ static void grid_tick(void){
 		}
 		
 		--iy;
-		GRID_MAX_Y[ix] = iy;
+		COLUMN_HEIGHT[ix] = iy;
 	}
 	
-	for(ix = 1; ix < GRID_W - 1; ++ix){
-		for(iy = GRID_MAX_Y[ix]; iy > 0; --iy){
-			idx = grid_block_idx(ix, iy);
-			block = GRID[idx];
-			color = block & BLOCK_MASK_COLOR;
-			
-			if((block & BLOCK_MASK_TYPE) != BLOCK_CHEST) continue;
-			
-			if(
-				(GRID_MAX_Y + 1)[ix] >= iy && ((GRID + 1)[idx] == (BLOCK_KEY | color) || (GRID + 1)[idx] == (BLOCK_OPEN | color))){
-				grid_set_block(idx, BLOCK_OPEN | color);
-			}
-			if(
-				((GRID + -GRID_W)[idx] == (BLOCK_KEY | color) || (GRID + -GRID_W)[idx] == (BLOCK_OPEN | color))){
-				grid_set_block(idx, BLOCK_OPEN | color);
-			}
-		}
-	}
-	
-	px_profile_disable();
+	grid_open_chests();
 }
 
-extern const u8 GRID_BIN_LZ4[];
-
-// TODO Is this code bigger than a table? LOL
 void grid_init(void){
-	static const u8 row[] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
+	static const u8 TEMPLATE[] = {
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+		0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF,
+	};
 	
-	decompress_lz4(GRID_BIN_LZ4, GRID, GRID_W*GRID_H);
+	// TODO could shorten this with some magic.
+	memcpy(GRID, TEMPLATE, sizeof(GRID));
 }
 
 void grid_update(void){
@@ -94,7 +135,7 @@ void grid_update(void){
 		// Debug draw stack heights.
 		idx = px_ticks & 0x7;
 		ix = 68 + 16*idx;
-		iy = 200 - 16*GRID_MAX_Y[idx];
+		iy = 200 - 16*COLUMN_HEIGHT[idx];
 		px_spr(ix, iy, 0x00, '*');
 	}
 	
@@ -105,7 +146,7 @@ void grid_update(void){
 			idx = grid_block_idx(ix, frames);
 			
 			if(GRID[idx] == 0){
-				above = (GRID + GRID_W)[idx];
+				above = GRID_U[idx];
 				if(above != 0){
 					// TODO split this across frames to avoid using so much buffer memory?
 					grid_set_block(idx, above);

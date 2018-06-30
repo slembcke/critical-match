@@ -46,50 +46,61 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
+#define MATCH_KEY (BLOCK_CHEST ^ BLOCK_KEY)
+#define MATCH_OPEN (BLOCK_CHEST ^ BLOCK_OPEN)
+
 static void grid_open_chests(void){
 	static u8 queue[8];
 	register u8 cursor = 0;
+	register u8 block, cmp;
 	
-	register u8 block, color, type;
-	
+	px_profile_enable();
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
+			if(cursor == sizeof(queue)) break;
+			
 			idx = grid_block_idx(ix, iy);
 			block = GRID[idx];
-			color = block & BLOCK_MASK_COLOR;
 			
 			if((block & BLOCK_MASK_TYPE) != BLOCK_CHEST) continue;
 			
-			if(GRID_D[idx] == (BLOCK_KEY | color) || GRID_D[idx] == (BLOCK_OPEN | color)){
+			cmp = block ^ GRID_D[idx];
+			if(cmp == MATCH_KEY || cmp == MATCH_OPEN){
 				queue[cursor] = idx;
-				if(++cursor == sizeof(queue)) goto open_queued_chests;
+				++cursor;
+				continue;
 			}
 			
-			if(COLUMN_HEIGHT[ix] >= iy + 1 && (GRID_U[idx] == (BLOCK_KEY | color) || GRID_U[idx] == (BLOCK_OPEN | color))){
+			cmp = block ^ GRID_U[idx];
+			if(COLUMN_HEIGHT[ix] > iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)){
 				queue[cursor] = idx;
-				if(++cursor == sizeof(queue)) goto open_queued_chests;
+				++cursor;
+				continue;
 			}
 			
-			if(COLUMN_HEIGHT_R[ix] >= iy && (GRID_R[idx] == (BLOCK_KEY | color) || GRID_R[idx] == (BLOCK_OPEN | color))){
+			cmp = block ^ GRID_L[idx];
+			if(COLUMN_HEIGHT_L[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)){
 				queue[cursor] = idx;
-				if(++cursor == sizeof(queue)) goto open_queued_chests;
+				++cursor;
+				continue;
 			}
 			
-			if(COLUMN_HEIGHT_L[ix] >= iy && (GRID_L[idx] == (BLOCK_KEY | color) || GRID_L[idx] == (BLOCK_OPEN | color))){
+			cmp = block ^ GRID_R[idx];
+			if(COLUMN_HEIGHT_R[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)){
 				queue[cursor] = idx;
-				if(++cursor == sizeof(queue)) goto open_queued_chests;
+				++cursor;
+				continue;
 			}
 		}
 	}
 	
-	open_queued_chests:
 	while(cursor > 0){
 		--cursor;
 		
 		idx = queue[cursor];
-		color = GRID[idx] & BLOCK_MASK_COLOR;
-		grid_set_block(idx, BLOCK_OPEN | color);
+		grid_set_block(idx, BLOCK_OPEN | (GRID[idx] & BLOCK_MASK_COLOR));
 	}
+	px_profile_disable();
 }
 
 static void grid_tick(void){

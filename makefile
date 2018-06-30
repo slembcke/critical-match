@@ -23,7 +23,6 @@ ASMSRC = \
 	src/sprites.s \
 	src/audio.s \
 	src/metatiles.s \
-	src/lz4vram.s \
 	gfx/gfx.s \
 	dat/data.s \
 	lib/pixler/pixler_boot.s \
@@ -33,6 +32,7 @@ ASMSRC = \
 	lib/pixler/pixler_buffer.s \
 	lib/pixler/pixler_blit.s \
 	lib/pixler/pixler_sprite.s \
+	lib/pixler/lz4vram.s \
 	lib/famitone2/famitone2.s
 
 GFX = \

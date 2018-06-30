@@ -4,11 +4,11 @@
 #include "pixler/pixler.h"
 #include "shared.h"
 
-#define PLAYER_MAX_SPEED 0x0300
+#define PLAYER_MAX_SPEED 0x0180
 #define PLAYER_ACCEL 0x0060
-#define PLAYER_GRAVITY 0x00C0
-#define PLAYER_MAX_FALL (5*PLAYER_MAX_SPEED/2)
-#define PLAYER_JUMP 0x0500
+#define PLAYER_GRAVITY 0x00A0
+#define PLAYER_MAX_FALL (6*PLAYER_MAX_SPEED/2)
+#define PLAYER_JUMP 0x03C0
 #define PLAYER_JUMP_TICKS 5
 
 void player_sprite(u8 x, u8 y, u8 frame);

@@ -6,6 +6,12 @@
 
 #include <nes.h>
 
+#ifndef __CC65__
+	#define asm(...)
+	#define __AX__ 0
+	#define __EAX__ 0
+#endif
+
 typedef int8_t s8;
 typedef int16_t s16;
 

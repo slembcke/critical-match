@@ -54,7 +54,6 @@ static void grid_open_chests(void){
 	register u8 cursor = 0;
 	register u8 block, cmp;
 	
-	px_profile_enable();
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
 			if(cursor == sizeof(queue)) break;
@@ -94,13 +93,28 @@ static void grid_open_chests(void){
 		}
 	}
 	
+	// Open chests that
 	while(cursor > 0){
 		--cursor;
-		
 		idx = queue[cursor];
 		grid_set_block(idx, BLOCK_OPEN | (GRID[idx] & BLOCK_MASK_COLOR));
 	}
-	px_profile_disable();
+}
+
+static void grid_fall(u8 tick_timer){
+	px_buffer_inc(PX_INC1);
+	
+	for(ix = 1; ix < GRID_W - 1; ++ix){
+		idx = grid_block_idx(ix, tick_timer);
+		
+		if(GRID[idx] == 0){
+			if(GRID_U[idx] != 0){
+				// TODO split this across frames to avoid using so much buffer memory?
+				grid_set_block(idx, GRID_U[idx]);
+				grid_set_block(idx + GRID_W, 0);
+			}
+		}
+	}
 }
 
 static void grid_tick(void){
@@ -114,8 +128,6 @@ static void grid_tick(void){
 		--iy;
 		COLUMN_HEIGHT[ix] = iy;
 	}
-	
-	grid_open_chests();
 }
 
 void grid_init(void){
@@ -139,8 +151,7 @@ void grid_init(void){
 }
 
 void grid_update(void){
-	static u8 frames = 1;
-	register u8 above;
+	static u8 tick_timer = 1;
 	
 	if(true){
 		// Debug draw stack heights.
@@ -150,26 +161,17 @@ void grid_update(void){
 		px_spr(ix, iy, 0x00, '*');
 	}
 	
-	if(frames < GRID_H - 1){
-		px_buffer_inc(PX_INC1);
-		
-		for(ix = 1; ix < GRID_W - 1; ++ix){
-			idx = grid_block_idx(ix, frames);
-			
-			if(GRID[idx] == 0){
-				above = GRID_U[idx];
-				if(above != 0){
-					// TODO split this across frames to avoid using so much buffer memory?
-					grid_set_block(idx, above);
-					grid_set_block(idx + GRID_W, 0);
-				}
-			}
-		}
+	if(tick_timer < GRID_H - 1){
+		// Move blocks down for the first few frames.
+		grid_fall(tick_timer);
+	} else {
+		// Then start looking for matches.
+		grid_open_chests();
 	}
 	
-	++frames;
-	if(frames >= 32){
-		frames = 1;
+	++tick_timer;
+	if(tick_timer >= 32){
 		grid_tick();
+		tick_timer = 1;
 	}
 }

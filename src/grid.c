@@ -56,44 +56,34 @@ static void grid_open_chests(void){
 	
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
-			if(cursor == sizeof(queue)) break;
-			
 			idx = grid_block_idx(ix, iy);
 			block = GRID[idx];
 			
 			if((block & BLOCK_MASK_TYPE) != BLOCK_CHEST) continue;
 			
 			cmp = block ^ GRID_D[idx];
-			if(cmp == MATCH_KEY || cmp == MATCH_OPEN){
-				queue[cursor] = idx;
-				++cursor;
-				continue;
-			}
+			if(cmp == MATCH_KEY || cmp == MATCH_OPEN) goto enqueue;
 			
 			cmp = block ^ GRID_U[idx];
-			if(COLUMN_HEIGHT[ix] > iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)){
-				queue[cursor] = idx;
-				++cursor;
-				continue;
-			}
+			if(COLUMN_HEIGHT[ix] > iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)) goto enqueue;
 			
 			cmp = block ^ GRID_L[idx];
-			if(COLUMN_HEIGHT_L[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)){
-				queue[cursor] = idx;
-				++cursor;
-				continue;
-			}
+			if(COLUMN_HEIGHT_L[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)) goto enqueue;
 			
 			cmp = block ^ GRID_R[idx];
-			if(COLUMN_HEIGHT_R[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)){
+			if(COLUMN_HEIGHT_R[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)) goto enqueue;
+			
+			enqueue:{
 				queue[cursor] = idx;
 				++cursor;
-				continue;
+				
+				// Ran out of queue space.
+				if(cursor == sizeof(queue)) goto open_queued_chests;
 			}
 		}
 	}
 	
-	// Open chests that
+	open_queued_chests:
 	while(cursor > 0){
 		--cursor;
 		idx = queue[cursor];

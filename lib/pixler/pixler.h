@@ -60,7 +60,7 @@ void px_bank_select(u8 bank);
 void px_inc(u8 direction);
 void px_fill(u16 len, char chr);
 void px_blit(u16 len, const u8 *src);
-#define px_blit_chr(count, src) {px_inc(PX_INC1); px_blit(count << 4, src);}
+void vram_unlz4(u16 addr, void *src, u16 len);
 
 void px_buffer_inc(u8 direction);
 void px_buffer_data(u8 len, u16 addr);

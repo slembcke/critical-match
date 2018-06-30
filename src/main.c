@@ -97,18 +97,17 @@ extern u8 gfx_neschar_lz4chr[];
 extern u8 gfx_sheet1_lz4chr[];
 extern u8 gfx_squidman_lz4chr[];
 
-void vram_unlz4(u16 addr, void *src, u16 len);
-
 GameState main(void){
 	joy_install(joy_static_stddrv);
 
 	px_bank_select(0);
 	
+	px_inc(PX_INC1);
+	
 	vram_unlz4(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
 	vram_unlz4(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
 	vram_unlz4(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
 
-	px_inc(PX_INC1);
 	px_addr(PAL_ADDR);
 	px_blit(32, (u8 *)PALETTE);
 	

@@ -20,29 +20,50 @@ static u8 COLUMN_HEIGHT[GRID_W];
 #define COLUMN_HEIGHT_L (COLUMN_HEIGHT + -1)
 #define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
 
-static const u16 ROW_ADDRS[] = {
-	NT_ADDR(0, 8, 26 - 2* 0),
-	NT_ADDR(0, 8, 26 - 2* 1),
-	NT_ADDR(0, 8, 26 - 2* 2),
-	NT_ADDR(0, 8, 26 - 2* 3),
-	NT_ADDR(0, 8, 26 - 2* 4),
-	NT_ADDR(0, 8, 26 - 2* 5),
-	NT_ADDR(0, 8, 26 - 2* 6),
-	NT_ADDR(0, 8, 26 - 2* 7),
-	NT_ADDR(0, 8, 26 - 2* 8),
-	NT_ADDR(0, 8, 26 - 2* 9),
-	NT_ADDR(0, 8, 26 - 2*10),
-	NT_ADDR(0, 8, 26 - 2*11),
-};
-
 void buffer_set_metatile(u8 index, u16 addr);
 
 void grid_set_block(u8 index, u8 block){
-	px_buffer_inc(PX_INC1);
-	// TODO This generates garbage assembly.
-	buffer_set_metatile(block, ROW_ADDRS[index >> 3] + (((index & 0x7) << 1)));
+	static const u16 ROW_ADDRS[] = {
+		NT_ADDR(0, 8, 26 - 2* 0),
+		NT_ADDR(0, 8, 26 - 2* 1),
+		NT_ADDR(0, 8, 26 - 2* 2),
+		NT_ADDR(0, 8, 26 - 2* 3),
+		NT_ADDR(0, 8, 26 - 2* 4),
+		NT_ADDR(0, 8, 26 - 2* 5),
+		NT_ADDR(0, 8, 26 - 2* 6),
+		NT_ADDR(0, 8, 26 - 2* 7),
+		NT_ADDR(0, 8, 26 - 2* 8),
+		NT_ADDR(0, 8, 26 - 2* 9),
+		NT_ADDR(0, 8, 26 - 2*10),
+		NT_ADDR(0, 8, 26 - 2*11),
+	};
 	
-	// idx = grid_block_idx(x, y);
+	register u16 addr;
+	
+	// addr = ROW_ADDRS[index >> 3];
+	asm("ldy #%o", index); \
+	asm("lda (sp), y"); \
+	asm("tay"); \
+	asm("lsr a"); \
+	asm("lsr a"); \
+	asm("and #$FE"); \
+	asm("tax"); \
+	asm("lda %v+0, x", ROW_ADDRS); \
+	asm("sta %v+0", addr); \
+	asm("lda %v+1, x", ROW_ADDRS); \
+	asm("sta %v+1", addr);
+	
+	// addr += (((index & 0x7) << 1));
+	asm("tya"); \
+	asm("and #$07"); \
+	asm("asl a"); \
+	asm("clc"); \
+	asm("adc %v+0", addr); \
+	asm("sta %v+0", addr);
+	
+	px_buffer_inc(PX_INC1);
+	buffer_set_metatile(block, addr);
+	
 	GRID[index] = block;
 }
 

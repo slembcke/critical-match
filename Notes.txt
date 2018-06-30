@@ -1,1 +1,6 @@
-Grid size: 6x10?
+TODO:
+* Drop blocks.
+* Shuffle drops.
+* Match out blocks.
+* Garbage blocks?
+* 

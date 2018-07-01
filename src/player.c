@@ -168,7 +168,7 @@ static void player_cursor_update(void){
 	}
 	
 	block = GRID[idx];
-	if(!player.blocks_held[0] && block > 0 && block != 0xFF){
+	if(!player.blocks_held[0] && block > BLOCK_BORDER){
 		player.cursor_idx = idx;
 	} else if(player.blocks_held[0] && block == 0){
 		player.cursor_idx = idx;

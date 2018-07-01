@@ -67,8 +67,8 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
-#define MATCH_KEY (BLOCK_CHEST ^ BLOCK_KEY)
-#define MATCH_OPEN (BLOCK_CHEST ^ BLOCK_OPEN)
+#define MATCH_KEY (BLOCK_TYPE_CHEST ^ BLOCK_TYPE_KEY)
+#define MATCH_OPEN (BLOCK_TYPE_CHEST ^ BLOCK_TYPE_OPEN)
 
 static void grid_open_chests(void){
 	static u8 queue[8];
@@ -80,7 +80,7 @@ static void grid_open_chests(void){
 			idx = grid_block_idx(ix, iy);
 			block = GRID[idx];
 			
-			if((block & BLOCK_MASK_TYPE) != BLOCK_CHEST) continue;
+			if((block & BLOCK_TYPE_MASK) != BLOCK_TYPE_CHEST) continue;
 			
 			cmp = block ^ GRID_D[idx];
 			if(cmp == MATCH_KEY || cmp == MATCH_OPEN) goto enqueue;
@@ -108,7 +108,7 @@ static void grid_open_chests(void){
 	while(cursor > 0){
 		--cursor;
 		idx = queue[cursor];
-		grid_set_block(idx, BLOCK_OPEN | (GRID[idx] & BLOCK_MASK_COLOR));
+		grid_set_block(idx, BLOCK_TYPE_OPEN | (GRID[idx] & BLOCK_COLOR_MASK));
 	}
 }
 
@@ -142,12 +142,12 @@ static void grid_tick(void){
 }
 
 void grid_init(void){
-	static const u8 ROW[] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF};
+	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
 	
 	// Abuse memcpy to smear the row template.
 	memcpy(GRID + 0x58, ROW, sizeof(ROW));
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
-	memset(GRID, 0xFF, 8);
+	memset(GRID, BLOCK_BORDER, 8);
 }
 
 void grid_update(void){

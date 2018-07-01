@@ -22,18 +22,25 @@ extern const u8 PALETTE[];
 typedef struct {} GameState;
 
 // Block color.
-#define BLOCK_MASK_COLOR 0x03
-#define BLOCK_BLUE 0x00
-#define BLOCK_RED 0x01
-#define BLOCK_GREEN 0x02
-#define BLOCK_PURPLE 0x03
+#define BLOCK_COLOR_MASK 0x03
+#define BLOCK_COLOR_BLUE 0x00
+#define BLOCK_COLOR_RED 0x01
+#define BLOCK_COLOR_GREEN 0x02
+#define BLOCK_COLOR_PURPLE 0x03
 
 // Block type.
-#define BLOCK_MASK_TYPE 0x0C
-#define BLOCK_EMTPY 0x00
-#define BLOCK_CHEST 0x04
-#define BLOCK_KEY 0x08
-#define BLOCK_OPEN 0x0C
+#define BLOCK_TYPE_MASK 0x0C
+#define BLOCK_TYPE_OTHER 0x00
+#define BLOCK_TYPE_CHEST 0x04
+#define BLOCK_TYPE_KEY 0x08
+#define BLOCK_TYPE_OPEN 0x0C
+
+#define BLOCK_EMPTY 0x00
+#define BLOCK_BORDER 0x01
+#define BLOCK_GARBAGE 0x02
+
+// Block status bits.
+#define BLOCK_BIT_OPEN 0x10
 
 #define GRID_W 8
 #define GRID_H 12

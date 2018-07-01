@@ -27,7 +27,7 @@ static GameState loop(void){
 	px_ppu_enable();
 	
 	while(true){
-		// px_profile_enable();
+		px_profile_enable();
 		
 		joy0 = joy_read(0);
 
@@ -77,8 +77,8 @@ GameState board(void){
 	px_ppu_enable();
 	
 	{
-		u8 color = BLOCK_PURPLE;
-		u8 block = BLOCK_CHEST | color;
+		u8 color = BLOCK_COLOR_PURPLE;
+		u8 block = BLOCK_TYPE_CHEST | color;
 		grid_set_block(grid_block_idx(1, 3), block);
 		grid_set_block(grid_block_idx(1, 4), block);
 		grid_set_block(grid_block_idx(1, 5), block);
@@ -95,7 +95,7 @@ GameState board(void){
 		
 		grid_set_block(grid_block_idx(3, 3), block);
 		grid_set_block(grid_block_idx(3, 4), block);
-		grid_set_block(grid_block_idx(3, 5), BLOCK_KEY | color);
+		grid_set_block(grid_block_idx(3, 5), BLOCK_TYPE_KEY | color);
 		grid_set_block(grid_block_idx(3, 6), block);
 		grid_set_block(grid_block_idx(3, 7), block);
 		px_wait_nmi();
@@ -112,6 +112,7 @@ GameState board(void){
 		grid_set_block(grid_block_idx(5, 5), block);
 		grid_set_block(grid_block_idx(5, 6), block);
 		grid_set_block(grid_block_idx(5, 7), block);
+		grid_set_block(grid_block_idx(5, 10), block);
 		px_wait_nmi();
 		
 	}

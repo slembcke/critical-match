@@ -27,7 +27,7 @@ static GameState loop(void){
 	px_ppu_enable();
 	
 	while(true){
-		px_profile_enable();
+		DEBUG_PROFILE_START();
 		
 		joy0 = joy_read(0);
 
@@ -35,7 +35,7 @@ static GameState loop(void){
 		player_tick(joy0);
 		
 		px_spr_end();
-		px_profile_disable();
+		DEBUG_PROFILE_END();
 		px_wait_nmi();
 	}
 

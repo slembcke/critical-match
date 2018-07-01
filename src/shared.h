@@ -64,6 +64,13 @@ void player_tick(u8 joy);
 
 GameState board(void);
 
+#ifdef DEBUG
+	#define DEBUG_PROFILE_START() px_profile_start()
+	#define DEBUG_PROFILE_END() px_profile_end()
+#else
+	#define DEBUG_PROFILE_START()
+	#define DEBUG_PROFILE_END()
+#endif
 
 GameState debug_chr(void);
 GameState debug_freeze(void);

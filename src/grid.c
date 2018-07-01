@@ -166,13 +166,13 @@ void grid_init(void){
 void grid_update(void){
 	static u8 tick_timer = 1;
 	
-	if(true){
+	#ifdef DEBUG
 		// Debug draw stack heights.
 		idx = px_ticks & 0x7;
 		ix = 68 + 16*idx;
 		iy = 200 - 16*COLUMN_HEIGHT[idx];
 		px_spr(ix, iy, 0x00, '*');
-	}
+	#endif
 	
 	if(tick_timer < GRID_H - 1){
 		// Move blocks down for the first few frames.

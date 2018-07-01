@@ -32,8 +32,8 @@ extern u8 px_ctrl;
 #define PX_MASK_SPRITE_ENABLE 0x10
 #define PX_MASK_RENDER_ENABLE (PX_MASK_SPRITE_ENABLE | PX_MASK_BG_ENABLE)
 
-#define px_profile_enable() {px_mask |= PX_MASK_GRAY; PPU.mask = px_mask;}
-#define px_profile_disable() {px_mask &= ~PX_MASK_GRAY; PPU.mask = px_mask;}
+#define px_profile_start() {px_mask |= PX_MASK_GRAY; PPU.mask = px_mask;}
+#define px_profile_end() {px_mask &= ~PX_MASK_GRAY; PPU.mask = px_mask;}
 
 #define px_ppu_enable() {px_mask |= PX_MASK_RENDER_ENABLE; PPU.mask = px_mask;}
 #define px_ppu_disable() {px_mask &= ~PX_MASK_RENDER_ENABLE; PPU.mask = px_mask;}

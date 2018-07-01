@@ -91,7 +91,7 @@ $(ROM): ld65.cfg $(OBJS)
 
 gfx/gfx.s: $(GFX:.png=.lz4chr)
 
-dat/data.s: dat/grid_template.lz4
+dat/data.s:
 
 # Cancel built in rule for .c files.
 %.o: %.c

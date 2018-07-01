@@ -77,44 +77,18 @@ GameState board(void){
 	px_ppu_enable();
 	
 	{
-		u8 color = BLOCK_COLOR_PURPLE;
-		u8 block = BLOCK_TYPE_CHEST | color;
-		grid_set_block(grid_block_idx(1, 3), block);
-		grid_set_block(grid_block_idx(1, 4), block);
-		grid_set_block(grid_block_idx(1, 5), block);
-		grid_set_block(grid_block_idx(1, 6), block);
-		grid_set_block(grid_block_idx(1, 7), block);
-		px_wait_nmi();
+		u8 color = 0;
+		u8 counter = 0;
 		
-		grid_set_block(grid_block_idx(2, 3), block);
-		grid_set_block(grid_block_idx(2, 4), block);
-		grid_set_block(grid_block_idx(2, 5), block);
-		grid_set_block(grid_block_idx(2, 6), block);
-		grid_set_block(grid_block_idx(2, 7), block);
-		px_wait_nmi();
-		
-		grid_set_block(grid_block_idx(3, 3), block);
-		grid_set_block(grid_block_idx(3, 4), block);
-		grid_set_block(grid_block_idx(3, 5), BLOCK_TYPE_KEY | color);
-		grid_set_block(grid_block_idx(3, 6), block);
-		grid_set_block(grid_block_idx(3, 7), block);
-		px_wait_nmi();
-		
-		grid_set_block(grid_block_idx(4, 3), block);
-		grid_set_block(grid_block_idx(4, 4), block);
-		grid_set_block(grid_block_idx(4, 5), block);
-		grid_set_block(grid_block_idx(4, 6), block);
-		grid_set_block(grid_block_idx(4, 7), block);
-		px_wait_nmi();
-		
-		grid_set_block(grid_block_idx(5, 3), block);
-		grid_set_block(grid_block_idx(5, 4), block);
-		grid_set_block(grid_block_idx(5, 5), block);
-		grid_set_block(grid_block_idx(5, 6), block);
-		grid_set_block(grid_block_idx(5, 7), block);
-		grid_set_block(grid_block_idx(5, 10), block);
-		px_wait_nmi();
-		
+		for(iy = 1; iy <= 5; ++iy){
+			for(ix = 1; ix <= 6; ++ix){
+				grid_set_block(grid_block_idx(ix, iy), (counter == 0 ? BLOCK_KEY : BLOCK_CHEST) | color);
+				
+				color = (color + 1) & BLOCK_COLOR_MASK;
+				if(++counter == 7) counter = 0;
+			}
+			px_wait_nmi();
+		}
 	}
 
 	return loop();

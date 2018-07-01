@@ -62,13 +62,18 @@ void grid_set_block(u8 index, u8 block){
 	asm("sta %v+0", addr);
 	
 	px_buffer_inc(PX_INC1);
-	buffer_set_metatile(block, addr);
+	buffer_set_metatile(block & ~BLOCK_STATUS_MASK, addr);
 	
 	GRID[index] = block;
 }
 
-#define MATCH_KEY (BLOCK_TYPE_CHEST ^ BLOCK_TYPE_KEY)
-#define MATCH_OPEN (BLOCK_TYPE_CHEST ^ BLOCK_TYPE_OPEN)
+// Only care about color and the 'matching' bit.
+#define BLOCK_MATCH_MASK (BLOCK_COLOR_MASK | BLOCK_STATUS_MATCHABLE | BLOCK_STATUS_MATCHING)
+
+// XOR a block with a neighbor.
+// The color should be equal (zeroed bits), and the 'matching' bit should not.
+// Ignoring other bits with a mask should leave only the 'matching' bit.
+#define BLOCK_MATCH(block, arr, idx) (((block ^ arr[idx]) & BLOCK_MATCH_MASK) == BLOCK_STATUS_MATCHING)
 
 static void grid_open_chests(void){
 	static u8 queue[8];
@@ -80,21 +85,20 @@ static void grid_open_chests(void){
 			idx = grid_block_idx(ix, iy);
 			block = GRID[idx];
 			
-			if((block & BLOCK_TYPE_MASK) != BLOCK_TYPE_CHEST) continue;
+			if(
+				// Skip blocks that are already unlocked.
+				(block & BLOCK_STATUS_UNLOCKED) ||
+				// Skip blocks that are unmatchable (empty, border, etc)
+				(block & BLOCK_STATUS_MATCHABLE) == 0
+			) continue;
 			
-			cmp = block ^ GRID_D[idx];
-			if(cmp == MATCH_KEY || cmp == MATCH_OPEN) goto enqueue;
-			
-			cmp = block ^ GRID_U[idx];
-			if(COLUMN_HEIGHT[ix] > iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)) goto enqueue;
-			
-			cmp = block ^ GRID_L[idx];
-			if(COLUMN_HEIGHT_L[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)) goto enqueue;
-			
-			cmp = block ^ GRID_R[idx];
-			if(COLUMN_HEIGHT_R[ix] >= iy && (cmp == MATCH_KEY || cmp == MATCH_OPEN)) goto enqueue;
-			
-			enqueue:{
+			if(
+				BLOCK_MATCH(block, GRID_D, idx) ||
+				(COLUMN_HEIGHT[ix] > iy && BLOCK_MATCH(block, GRID_U, idx)) ||
+				(COLUMN_HEIGHT_L[ix] >= iy && BLOCK_MATCH(block, GRID_L, idx)) ||
+				(COLUMN_HEIGHT_R[ix] >= iy && BLOCK_MATCH(block, GRID_R, idx)) ||
+				false
+			){
 				queue[cursor] = idx;
 				++cursor;
 				
@@ -108,22 +112,29 @@ static void grid_open_chests(void){
 	while(cursor > 0){
 		--cursor;
 		idx = queue[cursor];
-		grid_set_block(idx, BLOCK_TYPE_OPEN | (GRID[idx] & BLOCK_COLOR_MASK));
+		block = GRID[idx];
+		
+		if((block & BLOCK_TYPE_MASK) == BLOCK_TYPE_CHEST){
+			// Change chests into open chests.
+			block ^= BLOCK_TYPE_CHEST ^ BLOCK_TYPE_OPEN;
+		}
+		
+		grid_set_block(idx, block | BLOCK_STATUS_MATCHING | BLOCK_STATUS_UNLOCKED);
 	}
 }
 
-static void grid_fall(u8 tick_timer){
+static void grid_fall(u8 row){
 	px_buffer_inc(PX_INC1);
 	
 	for(ix = 1; ix < GRID_W - 1; ++ix){
-		idx = grid_block_idx(ix, tick_timer);
+		idx = grid_block_idx(ix, row);
 		
-		if(GRID[idx] == 0){
-			if(GRID_U[idx] != 0){
-				// TODO split this across frames to avoid using so much buffer memory?
-				grid_set_block(idx, GRID_U[idx]);
-				grid_set_block(idx + GRID_W, 0);
-			}
+		if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
+			// TODO split this across frames to avoid using so much buffer memory?
+			grid_set_block(idx, GRID_U[idx]);
+			grid_set_block(idx + GRID_W, 0);
+		} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
+			grid_set_block(idx, 0);
 		}
 	}
 }
@@ -139,6 +150,8 @@ static void grid_tick(void){
 		--iy;
 		COLUMN_HEIGHT[ix] = iy;
 	}
+	
+	// TODO Fall should be triggered here.
 }
 
 void grid_init(void){
@@ -167,6 +180,8 @@ void grid_update(void){
 	} else {
 		// Then start looking for matches.
 		grid_open_chests();
+		
+		// TODO reset fall timer.
 	}
 	
 	++tick_timer;

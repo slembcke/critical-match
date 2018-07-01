@@ -232,6 +232,7 @@ static void player_sprite_draw(void){
 }
 
 void player_pick_up(void){
+	// TODO Update column height.
 	for(idx = player.cursor_idx, iy = 0; GRID[idx]; idx += GRID_W, iy += 1){
 		player.blocks_held[iy] = GRID[idx];
 		grid_set_block(idx, 0);
@@ -303,7 +304,7 @@ void player_tick(u8 joy){
 	ix = ( 64 -  8) + (player.pos_x >> 8);
 	iy = (224 - 32) - (player.pos_y >> 8);
 	for(idx = 0; player.blocks_held[idx]; ++idx){
-		block_sprite(ix, iy, player.blocks_held[idx]);
+		block_sprite(ix, iy, player.blocks_held[idx] & ~BLOCK_STATUS_MASK);
 		iy -= 16;
 	}
 	

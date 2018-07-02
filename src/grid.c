@@ -27,6 +27,18 @@ static const u8 DROP_BLOCKS[] = {
 	BLOCK_KEY | BLOCK_COLOR_PURPLE,
 };
 
+static u8 DROP_X[] = {
+	4, 5, 6, 2, 3, 1,
+	3, 2, 1, 5, 4, 6,
+	1, 4, 2, 6, 5, 3,
+	4, 1, 6, 5, 3, 2,
+	4, 5, 2, 6, 1, 3,
+	2, 6, 4, 1, 3, 5,
+	5, 2, 6, 1, 3, 4,
+	2, 3, 4, 5, 1, 6,
+	6, 1, 3, 4, 2, 5,
+	1, 3, 2, 4, 5, 6,
+};
 
 // Block values in the grid.
 u8 GRID[GRID_W*GRID_H];
@@ -198,7 +210,6 @@ static bool grid_any_falling(void){
 		for(iy = COLUMN_HEIGHT[ix] + 1; iy < GRID_H - 1; ++iy){
 			idx = grid_block_idx(ix, iy);
 			if(GRID[idx] != BLOCK_EMPTY){
-				debug_hex(idx);
 				return true;
 			}
 		}
@@ -253,7 +264,7 @@ void grid_update(void){
 			grid.drop_queue[0] = DROP_BLOCKS[(drop >> 0) & 0x7];
 			grid.drop_queue[1] = DROP_BLOCKS[(drop >> 4) & 0x7];
 			
-			grid.drop_x = 1;
+			grid.drop_x = DROP_X[grid.drop_counter];
 			grid.drop_counter += 1;
 			// TODO reset drop counter.
 		}

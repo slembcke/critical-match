@@ -8,7 +8,7 @@
 
 .import incsp1
 
-.rodata ; TODO move this somewhere else.
+.rodata
 
 ; Empty, Chest, Open, Key
 .export METATILE0, METATILE1, METATILE2, METATILE3, METATILE4

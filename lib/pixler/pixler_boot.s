@@ -109,7 +109,6 @@
 	lda PPU_STATUS
 	
 	; Blit CHR RAM
-	; (TODO make into function)
 	lda #0
 	sta PPU_VRAM_ADDR
 	sta PPU_VRAM_ADDR

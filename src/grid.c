@@ -103,7 +103,7 @@ void grid_set_block(u8 index, u8 block){
 // XOR a block with a neighbor.
 // The color should be equal (zeroed bits), and the 'matching' bit should not.
 // Ignoring other bits with a mask should leave only the 'matching' bit.
-#define BLOCK_MATCH(block, arr, idx) (((block ^ arr[idx]) & BLOCK_MATCH_MASK) == BLOCK_STATUS_MATCHING)
+#define BLOCK_MATCH(block, cmp) (((block ^ cmp) & BLOCK_MATCH_MASK) == BLOCK_STATUS_MATCHING)
 
 static bool grid_open_chests(void){
 	static u8 queue[8];
@@ -123,10 +123,10 @@ static bool grid_open_chests(void){
 			) continue;
 			
 			if(
-				BLOCK_MATCH(block, GRID_D, idx) ||
-				(COLUMN_HEIGHT[ix] > iy && BLOCK_MATCH(block, GRID_U, idx)) ||
-				(COLUMN_HEIGHT_L[ix] >= iy && BLOCK_MATCH(block, GRID_L, idx)) ||
-				(COLUMN_HEIGHT_R[ix] >= iy && BLOCK_MATCH(block, GRID_R, idx)) ||
+				BLOCK_MATCH(block, GRID_D[idx]) ||
+				(COLUMN_HEIGHT[ix] > iy && BLOCK_MATCH(block, GRID_U[idx])) ||
+				(COLUMN_HEIGHT_L[ix] >= iy && BLOCK_MATCH(block, GRID_L[idx])) ||
+				(COLUMN_HEIGHT_R[ix] >= iy && BLOCK_MATCH(block, GRID_R[idx])) ||
 				false
 			){
 				queue[cursor] = idx;
@@ -255,6 +255,7 @@ void grid_update(void){
 			
 			grid.drop_x = 1;
 			grid.drop_counter += 1;
+			// TODO reset drop counter.
 		}
 		
 		tick_timer = 1;

@@ -82,10 +82,10 @@ void grid_set_block(u8 index, u8 block){
 // Ignoring other bits with a mask should leave only the 'matching' bit.
 #define BLOCK_MATCH(block, arr, idx) (((block ^ arr[idx]) & BLOCK_MATCH_MASK) == BLOCK_STATUS_MATCHING)
 
-static void grid_open_chests(void){
+static bool grid_open_chests(void){
 	static u8 queue[8];
 	register u8 cursor = 0;
-	register u8 block, cmp;
+	register u8 block;
 	
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
@@ -115,6 +115,8 @@ static void grid_open_chests(void){
 		}
 	}
 	
+	if(cursor == 0) return false;
+	
 	open_queued_chests:
 	while(cursor > 0){
 		--cursor;
@@ -128,45 +130,58 @@ static void grid_open_chests(void){
 		
 		grid_set_block(idx, block | BLOCK_STATUS_MATCHING | BLOCK_STATUS_UNLOCKED);
 	}
+	
+	return true;
 }
 
-static grid_fall(u8 row){
+static void grid_fall(u8 row){
 	px_buffer_inc(PX_INC1);
 	
-	for(ix = 1; ix < GRID_W - 1; ++ix){
-		idx = grid_block_idx(ix, row);
-		
-		if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
-			// TODO split this across frames to avoid using so much buffer memory?
-			grid_set_block(idx, GRID_U[idx]);
-			grid_set_block(idx + GRID_W, 0);
-		} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
-			// Remove unlocked blocks.
-			grid_set_block(idx, 0);
-		}
-	}
-	
 	if(row == 10){
-		// Drop queued blocks;
+		// Shift in queued blocks;
 		grid_set_block(grid_block_idx(grid.drop_x, 10), grid.drop_queue[0]);
 		grid.drop_queue[0] = grid.drop_queue[1];
 		grid.drop_queue[1] = BLOCK_EMPTY;
+	} else {
+		for(ix = 1; ix < GRID_W - 1; ++ix){
+			idx = grid_block_idx(ix, row);
+			
+			if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
+				// TODO split this across frames to avoid using so much buffer memory?
+				grid_set_block(idx, GRID_U[idx]);
+				grid_set_block(idx + GRID_W, 0);
+			} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
+				// Remove unlocked blocks.
+				grid_set_block(idx, 0);
+			}
+		}
 	}
 }
 
-static void grid_tick(void){
-	// Calculate column heights.
+static void grid_update_column_height(void){
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = 1; iy < GRID_H - 1; ++iy){
 			idx = grid_block_idx(ix, iy);
-			if(GRID[idx] == 0) break;
+			if(GRID[idx] == BLOCK_EMPTY) break;
 		}
 		
 		--iy;
 		COLUMN_HEIGHT[ix] = iy;
 	}
+}
+
+static bool grid_any_falling(void){
+	for(ix = 1; ix < GRID_W - 1; ++ix){
+		for(iy = COLUMN_HEIGHT[ix] + 1; iy < GRID_H - 1; ++iy){
+			idx = grid_block_idx(ix, iy);
+			if(GRID[idx] != BLOCK_EMPTY){
+				debug_hex(idx);
+				return true;
+			}
+		}
+	}
 	
-	// TODO Fall should be triggered here.
+	return false;
 }
 
 void grid_init(void){
@@ -177,12 +192,13 @@ void grid_init(void){
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
 	memset(GRID, BLOCK_BORDER, 8);
 	
-	grid.drop_queue[0] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
-	grid.drop_queue[1] = BLOCK_CHEST | BLOCK_COLOR_BLUE;
+	grid.drop_queue[0] = BLOCK_EMPTY;
+	grid.drop_queue[1] = BLOCK_EMPTY;
 	grid.drop_x = 1;
 }
 
 void grid_update(void){
+	// TODO redo the timer logic.
 	static u8 tick_timer = 1;
 	
 	#ifdef DEBUG
@@ -198,14 +214,22 @@ void grid_update(void){
 		grid_fall(tick_timer);
 	} else {
 		// Then start looking for matches.
-		grid_open_chests();
-		
-		// TODO reset fall timer.
+		if(grid_open_chests()){
+			// Prevent the timer from advancing as long as matches are happening.
+			tick_timer = GRID_H;
+		}
 	}
 	
 	++tick_timer;
-	if(tick_timer >= 32){
-		grid_tick();
+	if(tick_timer >= 64){
+		grid_update_column_height();
+		
+		if(!grid_any_falling()){
+			grid.drop_queue[0] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
+			grid.drop_queue[1] = BLOCK_CHEST | BLOCK_COLOR_BLUE;
+			grid.drop_x = 2;
+		}
+		
 		tick_timer = 1;
 	}
 }

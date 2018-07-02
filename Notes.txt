@@ -1,7 +1,6 @@
 TODO:
-* Drop blocks.
 * Shuffle drops.
-* Match out blocks.
 * Garbage blocks?
 * Push player to top of stack.
 * Disallow picking up matching blocks.
+* Grab/drop fixes column height.

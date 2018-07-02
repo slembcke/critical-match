@@ -4,3 +4,6 @@ TODO:
 * Push player to top of stack.
 * Disallow picking up matching blocks.
 * Grab/drop fixes column height.
+* Keys don't match with keys.
+* Blocks can be grabbed while rows are individually ticked.
+* Drops can be grabbed before they fully appear.

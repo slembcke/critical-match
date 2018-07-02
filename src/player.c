@@ -234,6 +234,9 @@ static void player_sprite_draw(void){
 void player_pick_up(void){
 	// TODO Update column height.
 	for(idx = player.cursor_idx, iy = 0; GRID[idx]; idx += GRID_W, iy += 1){
+		// Stop when it gets to a block that is matching.
+		if(GRID[idx] & BLOCK_STATUS_UNLOCKED) break;
+		
 		player.blocks_held[iy] = GRID[idx];
 		grid_set_block(idx, 0);
 	}

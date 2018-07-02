@@ -20,6 +20,13 @@ static u8 COLUMN_HEIGHT[GRID_W];
 #define COLUMN_HEIGHT_L (COLUMN_HEIGHT + -1)
 #define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
 
+typedef struct {
+	u8 drop_queue[2];
+	u8 drop_x;
+} Grid;
+
+static Grid grid;
+
 void buffer_set_metatile(u8 index, u16 addr);
 
 void grid_set_block(u8 index, u8 block){
@@ -123,7 +130,7 @@ static void grid_open_chests(void){
 	}
 }
 
-static void grid_fall(u8 row){
+static grid_fall(u8 row){
 	px_buffer_inc(PX_INC1);
 	
 	for(ix = 1; ix < GRID_W - 1; ++ix){
@@ -134,8 +141,16 @@ static void grid_fall(u8 row){
 			grid_set_block(idx, GRID_U[idx]);
 			grid_set_block(idx + GRID_W, 0);
 		} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
+			// Remove unlocked blocks.
 			grid_set_block(idx, 0);
 		}
+	}
+	
+	if(row == 10){
+		// Drop queued blocks;
+		grid_set_block(grid_block_idx(grid.drop_x, 10), grid.drop_queue[0]);
+		grid.drop_queue[0] = grid.drop_queue[1];
+		grid.drop_queue[1] = BLOCK_EMPTY;
 	}
 }
 
@@ -161,6 +176,10 @@ void grid_init(void){
 	memcpy(GRID + 0x58, ROW, sizeof(ROW));
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
 	memset(GRID, BLOCK_BORDER, 8);
+	
+	grid.drop_queue[0] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
+	grid.drop_queue[1] = BLOCK_CHEST | BLOCK_COLOR_BLUE;
+	grid.drop_x = 1;
 }
 
 void grid_update(void){

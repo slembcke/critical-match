@@ -76,20 +76,20 @@ GameState board(void){
 	// Enable rendering.
 	px_ppu_enable();
 	
-	{
-		u8 color = 0;
-		u8 counter = 0;
+	// {
+	// 	u8 color = 0;
+	// 	u8 counter = 0;
 		
-		for(iy = 1; iy <= 5; ++iy){
-			for(ix = 1; ix <= 6; ++ix){
-				grid_set_block(grid_block_idx(ix, iy), (counter == 0 ? BLOCK_KEY : BLOCK_CHEST) | color);
+	// 	for(iy = 1; iy <= 5; ++iy){
+	// 		for(ix = 1; ix <= 6; ++ix){
+	// 			grid_set_block(grid_block_idx(ix, iy), (counter == 0 ? BLOCK_KEY : BLOCK_CHEST) | color);
 				
-				color = (color + 1) & BLOCK_COLOR_MASK;
-				if(++counter == 7) counter = 0;
-			}
-			px_wait_nmi();
-		}
-	}
+	// 			color = (color + 1) & BLOCK_COLOR_MASK;
+	// 			if(++counter == 7) counter = 0;
+	// 		}
+	// 		px_wait_nmi();
+	// 	}
+	// }
 
 	return loop();
 }

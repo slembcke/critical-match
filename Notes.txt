@@ -4,3 +4,4 @@ TODO:
 * Match out blocks.
 * Garbage blocks?
 * Push player to top of stack.
+* Disallow picking up matching blocks.

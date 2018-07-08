@@ -5,8 +5,11 @@
 
 .data
 
-RESUME_ADDR: .res 2
-YIELD_ADDR: .res 2
+CORO_RESUME_ADDR: .res 2
+CORO_YIELD_ADDR: .res 2
+CORO_SP: .res 2
+CORO_STACK: .res 16
+CORO_STACK_END:
 
 .code
 
@@ -24,15 +27,27 @@ YIELD_ADDR: .res 2
 	pha
 .endmacro
 
+.macro swap_bytes var_a, var_b
+	lda var_a
+	ldx var_b
+	stx var_a
+	sta var_b
+.endmacro
+
 .export _coro_start
 .proc _coro_start ; coro_func func -> void
 	; Subtract 1 from the function address due to how jsr/ret work.
 	sub #1
-	sta RESUME_ADDR+0
+	sta CORO_RESUME_ADDR+0
 	bcs :+
 		dex
 	:
-	stx RESUME_ADDR+1
+	stx CORO_RESUME_ADDR+1
+	
+	lda #>(CORO_STACK_END)
+	sta CORO_SP+0
+	lda #<(CORO_STACK_END)
+	sta CORO_SP+1
 	
 	rts
 .endproc
@@ -42,12 +57,16 @@ YIELD_ADDR: .res 2
 	; Save the resume value;
 	sta sreg
 	
+	swap_bytes sp+0, CORO_SP+0
+	swap_bytes sp+1, CORO_SP+1
+	
 	; Swap out the return address.
-	pull_address YIELD_ADDR
-	push_address RESUME_ADDR
+	pull_address CORO_YIELD_ADDR
+	push_address CORO_RESUME_ADDR
 	
 	; Return the resume address.
 	lda sreg
+	ldx #0
 	rts
 .endproc
 
@@ -56,11 +75,15 @@ YIELD_ADDR: .res 2
 	; Save the yield value.
 	sta sreg
 	
+	swap_bytes sp+0, CORO_SP+0
+	swap_bytes sp+1, CORO_SP+1
+	
 	; Swap out the return address.
-	pull_address RESUME_ADDR
-	push_address YIELD_ADDR
+	pull_address CORO_RESUME_ADDR
+	push_address CORO_YIELD_ADDR
 	
 	; Return the yield value.
 	lda sreg
+	ldx #0
 	rts
 .endproc

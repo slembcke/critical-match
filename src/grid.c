@@ -58,6 +58,9 @@ static u8 COLUMN_HEIGHT[GRID_W];
 typedef struct {
 	u8 drop_queue[2];
 	u8 drop_x, drop_counter;
+	
+	void (*state_func)(void);
+	u8 state_timer;
 } Grid;
 
 static Grid grid;
@@ -169,28 +172,40 @@ static bool grid_open_chests(void){
 	return true;
 }
 
-static void grid_fall(u8 row){
+static void grid_fall(void){
 	px_buffer_inc(PX_INC1);
 	
-	if(row == 10){
-		// Shift in queued blocks;
-		grid_set_block(grid_block_idx(grid.drop_x, 10), grid.drop_queue[0]);
-		grid.drop_queue[0] = grid.drop_queue[1];
-		grid.drop_queue[1] = BLOCK_EMPTY;
-	} else {
-		for(ix = 1; ix < GRID_W - 1; ++ix){
-			idx = grid_block_idx(ix, row);
-			
-			if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
-				// TODO split this across frames to avoid using so much buffer memory?
-				grid_set_block(idx, GRID_U[idx]);
-				grid_set_block(idx + GRID_W, 0);
-			} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
-				// Remove unlocked blocks.
-				grid_set_block(idx, 0);
+	if(grid.state_timer == 0){
+		// On the first tick, make blocks fall.
+		for(iy = 1; iy < GRID_H - 1; ++iy){
+			for(ix = 1; ix < GRID_W - 1; ++ix){
+				idx = grid_block_idx(ix, iy);
+				
+				if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
+					GRID[idx] = GRID_U[idx];
+					GRID_U[idx] = BLOCK_EMPTY;
+				} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
+					// Remove unlocked blocks.
+					GRID[idx] = BLOCK_EMPTY;
+				}
 			}
 		}
+		
+		if(grid.drop_x != 0){
+			grid_set_block(grid_block_idx(grid.drop_x, GRID_H - 2), BLOCK_CHEST | BLOCK_COLOR_GREEN);
+			
+			idx = grid_block_idx(grid.drop_x, GRID_H - 1);
+			GRID[idx] = BLOCK_KEY | BLOCK_COLOR_BLUE;
+			grid.drop_x = 0;
+		}
+	} else if(grid.state_timer < GRID_H - 1){
+		for(ix = 1; ix < GRID_W - 1; ++ix){
+			idx = grid_block_idx(ix, grid.state_timer);
+			grid_set_block(idx, GRID[idx]);
+		}
 	}
+	
+	++grid.state_timer;
 }
 
 static void grid_update_column_height(void){
@@ -218,23 +233,9 @@ static bool grid_any_falling(void){
 	return false;
 }
 
-void grid_init(void){
-	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
-	
-	// Abuse memcpy to smear the row template.
-	memcpy(GRID + 0x58, ROW, sizeof(ROW));
-	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
-	memset(GRID, BLOCK_BORDER, 8);
-	
-	grid.drop_queue[0] = BLOCK_EMPTY;
-	grid.drop_queue[1] = BLOCK_EMPTY;
-	grid.drop_x = 1;
-	grid.drop_counter = 0;
-}
-
-void grid_update(void){
+void _grid_update(void){
 	// TODO redo the timer logic.
-	static u8 tick_timer = 1;
+	static u8 tick_timer = 0;
 	
 	#ifdef DEBUG
 		// Debug draw stack heights.
@@ -246,7 +247,7 @@ void grid_update(void){
 	
 	if(tick_timer < GRID_H - 1){
 		// Move blocks down for the first few frames.
-		grid_fall(tick_timer);
+		grid_fall();
 	} else {
 		// Then start looking for matches.
 		if(grid_open_chests()){
@@ -269,6 +270,26 @@ void grid_update(void){
 			// TODO reset drop counter.
 		}
 		
-		tick_timer = 1;
+		tick_timer = 0;
 	}
+}
+
+void grid_init(void){
+	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
+	
+	// Abuse memcpy to smear the row template.
+	memcpy(GRID + 0x58, ROW, sizeof(ROW));
+	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
+	memset(GRID, BLOCK_BORDER, 8);
+	
+	grid.drop_queue[0] = BLOCK_EMPTY;
+	grid.drop_queue[1] = BLOCK_EMPTY;
+	grid.drop_x = 1;
+	grid.drop_counter = 0;
+	
+	grid.state_func = grid_fall;
+}
+
+void grid_update(void){
+	grid.state_func();
 }

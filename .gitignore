@@ -11,3 +11,5 @@ dat/*.lz4
 tools/png2chr
 tools/chr2png
 tools/lz4x
+
+lib/coro/coro_test

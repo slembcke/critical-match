@@ -172,6 +172,8 @@ static bool grid_open_chests(void){
 	return true;
 }
 
+static void grid_wait_for_tick(void);
+
 static void grid_fall(void){
 	px_buffer_inc(PX_INC1);
 	
@@ -192,20 +194,25 @@ static void grid_fall(void){
 		}
 		
 		if(grid.drop_x != 0){
-			grid_set_block(grid_block_idx(grid.drop_x, GRID_H - 2), BLOCK_CHEST | BLOCK_COLOR_GREEN);
+			grid_set_block(grid_block_idx(grid.drop_x, GRID_H - 2), grid.drop_queue[0]);
 			
 			idx = grid_block_idx(grid.drop_x, GRID_H - 1);
-			GRID[idx] = BLOCK_KEY | BLOCK_COLOR_BLUE;
+			GRID[idx] = grid.drop_queue[1];
 			grid.drop_x = 0;
 		}
+		
+		++grid.state_timer;
 	} else if(grid.state_timer < GRID_H - 1){
 		for(ix = 1; ix < GRID_W - 1; ++ix){
 			idx = grid_block_idx(ix, grid.state_timer);
 			grid_set_block(idx, GRID[idx]);
 		}
+		
+		++grid.state_timer;
+	} else {
+		grid.state_timer = 0;
+		grid.state_func = grid_wait_for_tick;
 	}
-	
-	++grid.state_timer;
 }
 
 static void grid_update_column_height(void){
@@ -231,6 +238,32 @@ static bool grid_any_falling(void){
 	}
 	
 	return false;
+}
+
+static void grid_wait_for_tick(){
+	// Look for matches.
+	if(grid_open_chests()){
+		// Prevent the timer from advancing as long as matches are happening.
+		grid.state_timer = 0;
+	}
+	
+	++grid.state_timer;
+	if(grid.state_timer > 60){
+		grid_update_column_height();
+		
+		if(!grid_any_falling()){
+			u8 drop = DROPS[grid.drop_counter];
+			grid.drop_queue[0] = DROP_BLOCKS[(drop >> 0) & 0x7];
+			grid.drop_queue[1] = DROP_BLOCKS[(drop >> 4) & 0x7];
+			
+			grid.drop_x = DROP_X[grid.drop_counter];
+			grid.drop_counter += 1;
+			// TODO reset drop counter.
+		}
+		
+		grid.state_timer = 0;
+		grid.state_func = grid_fall;
+	}
 }
 
 void _grid_update(void){
@@ -287,7 +320,8 @@ void grid_init(void){
 	grid.drop_x = 1;
 	grid.drop_counter = 0;
 	
-	grid.state_func = grid_fall;
+	grid.state_timer = 0;
+	grid.state_func = grid_wait_for_tick;
 }
 
 void grid_update(void){

@@ -1,8 +1,6 @@
 ; TODO coro_resume needs to push a return catch address.
 
-.export _resume_addr = RESUME_ADDR
-.export _yield_addr = YIELD_ADDR
-
+.include "zeropage.inc"
 .macpack generic
 
 .data
@@ -27,28 +25,42 @@ YIELD_ADDR: .res 2
 .endmacro
 
 .export _coro_start
-.proc _coro_start ; coro_func func
+.proc _coro_start ; coro_func func -> void
 	; Subtract 1 from the function address due to how jsr/ret work.
 	sub #1
 	sta RESUME_ADDR+0
-	sbc #0
+	bcs :+
+		dex
+	:
 	stx RESUME_ADDR+1
 	
 	rts
 .endproc
 
 .export _coro_resume
-.proc _coro_resume
-	pull_address YIELD_ADDR
+.proc _coro_resume ; u8 value -> void
+	; Save the resume value;
+	sta sreg
 	
+	; Swap out the return address.
+	pull_address YIELD_ADDR
 	push_address RESUME_ADDR
+	
+	; Return the resume address.
+	lda sreg
 	rts
 .endproc
 
 .export _coro_yield
-.proc _coro_yield
-	pull_address RESUME_ADDR
+.proc _coro_yield ; void -> u8
+	; Save the yield value.
+	sta sreg
 	
+	; Swap out the return address.
+	pull_address RESUME_ADDR
 	push_address YIELD_ADDR
+	
+	; Return the yield value.
+	lda sreg
 	rts
 .endproc

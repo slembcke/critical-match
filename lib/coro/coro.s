@@ -10,10 +10,13 @@
 
 .data
 
-CORO_IP: .res 2
-CORO_SP: .res 2
+CORO_IP: .res 2 ; Yield/resume instruction pointer - 1
+CORO_SP: .res 2 ; Yield/resume stack pointer.
+CORO_S: .res 1 ; S register adjust value.
 CORO_STACK: .res 16
 CORO_STACK_END:
+
+.export _stack_offset = CORO_S
 
 .code
 
@@ -59,9 +62,10 @@ CORO_STACK_END:
 	ldx #<(coro_catch - 1)
 	jsr pushax
 	
-	jsr coro_swap_stack
+	lda #2
+	sta CORO_S
 	
-	rts
+	jmp coro_swap_stack
 .endproc
 
 .export _coro_resume
@@ -78,13 +82,21 @@ CORO_STACK_END:
 	pla
 	sta ptr1+1
 	
+	; Stash the stack register.
+	tsx
+	
 	ldy #0
-	: lda (sp), y
+	: cpy CORO_S
+		beq :+
+		lda (sp), y
 		pha
 		iny
-		cpy #2
-		bne :-
+		jmp :-
+	:
 	jsr addysp
+	
+	; Save the old stack register value.
+	stx CORO_S
 	
 	; Push a new return address.
 	lda CORO_IP+1
@@ -113,7 +125,16 @@ CORO_STACK_END:
 	pla
 	sta ptr1+1
 	
-	ldy #2
+	; Calculate stack offset. -(s - CORO_S)
+	tsx
+	txa
+	clc
+	sbc CORO_S
+	eor $FF
+	tay
+	sty CORO_S
+	
+	; Stack offset will be at least 2 for the coro_catch address.
 	jsr subysp
 	: dey
 		pla
@@ -153,6 +174,9 @@ CORO_STACK_END:
 	sta CORO_IP+0
 	lda #>(_abort - 1)
 	sta CORO_IP+1
+	
+	lda #0
+	sta CORO_S
 	
 	jsr coro_swap_stack
 	jmp coro_ret_sreg

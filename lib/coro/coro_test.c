@@ -27,6 +27,8 @@ static uintptr_t func(uintptr_t n){
 	return 0;
 }
 
+extern uint8_t stack_offset;
+
 int main(void){
 	static uint8_t n;
 	
@@ -34,7 +36,7 @@ int main(void){
 	
 	for(n = 1; n < 20; ++n){
 		uintptr_t value = coro_resume(n);
-		printf("main() n: %d, value: %d\n", n, value);
+		printf("main() n: %d, value: %d, stack offset: %d\n", n, value, stack_offset);
 		
 		if(value == 0) break;
 	}

@@ -26,6 +26,7 @@ ASMSRC = \
 	src/metatiles.s \
 	gfx/gfx.s \
 	dat/data.s \
+	lib/coro/coro.s \
 	lib/pixler/pixler_boot.s \
 	lib/pixler/pixler_zeropage.s \
 	lib/pixler/pixler_nmi.s \

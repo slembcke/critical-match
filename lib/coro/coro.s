@@ -6,17 +6,17 @@
 .import pusha, popa
 .import pushax
 .import addysp, subysp
-.import _abort
+.import _exit
 
 .data
+
+CORO_ABORT = _exit
 
 CORO_IP: .res 2 ; Yield/resume instruction pointer - 1
 CORO_SP: .res 2 ; Yield/resume stack pointer.
 CORO_S: .res 1 ; S register adjust value.
 CORO_STACK: .res 16
 CORO_STACK_END:
-
-.export _stack_offset = CORO_S
 
 .code
 
@@ -170,9 +170,9 @@ CORO_STACK_END:
 	pha
 	
 	; Invalidate the resume address.
-	lda #<(_abort - 1)
+	lda #<(CORO_ABORT - 1)
 	sta CORO_IP+0
-	lda #>(_abort - 1)
+	lda #>(CORO_ABORT - 1)
 	sta CORO_IP+1
 	
 	lda #0

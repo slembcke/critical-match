@@ -5,6 +5,7 @@
 
 .import pusha, popa
 .import pushax
+.import addysp, subysp
 .import _abort
 
 .data
@@ -77,10 +78,13 @@ CORO_STACK_END:
 	pla
 	sta ptr1+1
 	
-	jsr popa
-	pha
-	jsr popa
-	pha
+	ldy #0
+	: lda (sp), y
+		pha
+		iny
+		cpy #2
+		bne :-
+	jsr addysp
 	
 	; Push a new return address.
 	lda CORO_IP+1
@@ -109,10 +113,13 @@ CORO_STACK_END:
 	pla
 	sta ptr1+1
 	
-	pla
-	jsr pusha
-	pla
-	jsr pusha
+	ldy #2
+	jsr subysp
+	: dey
+		pla
+		sta (sp), y
+		cpy #0
+		bne :-
 	
 	; Push a new return address.
 	lda CORO_IP+1

@@ -13,21 +13,19 @@ uintptr_t coro_resume(uintptr_t);
 static void func2(uintptr_t n){
 	n = coro_yield(n);
 	n = coro_yield(n);
-	n = coro_yield(n);
-	n = coro_yield(n);
 }
 
 static uintptr_t func(uintptr_t n){
 	n = coro_yield(n);
 	n = coro_yield(n);
+	
+	func2(n);
+	
 	n = coro_yield(n);
 	n = coro_yield(n);
 	
 	return 0;
 }
-
-uint8_t stack1(void);
-uint8_t stack2(void);
 
 int main(void){
 	static uint8_t n;

@@ -34,7 +34,8 @@ CORO_STACK_END:
 .export _coro_resume = coro_switch
 .proc coro_switch ; u8 value -> void
 	; Save the resume value;
-	sta sreg
+	sta sreg+0
+	stx sreg+1
 	
 	; Swap stack pointers.
 	ldx sp+0
@@ -65,8 +66,8 @@ CORO_STACK_END:
 	sty CORO_IP+1
 	
 	; Load the return value.
-	lda sreg
-	ldx #0
+	lda sreg+0
+	ldx sreg+1
 	
 	; Return to the new address.
 	rts

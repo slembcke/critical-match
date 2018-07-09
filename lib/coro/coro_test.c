@@ -4,20 +4,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// TODO Pass varargs?
-typedef void (*coro_func)(uint8_t);
+typedef uintptr_t (*coro_func)(uintptr_t);
 
 void coro_start(coro_func func);
-uint8_t coro_yield(uint8_t);
-uint8_t coro_resume(uint8_t);
+uintptr_t coro_yield(uintptr_t);
+uintptr_t coro_resume(uintptr_t);
 
-void func(uint8_t n){
+uintptr_t func(uintptr_t n){
 	while(true){
 		printf("func() n: %d\n", n);
 		n = coro_yield(2*n);
 		
 		if(n == 10) abort();
 	}
+	
+	return 67;
 }
 
 int main(void){

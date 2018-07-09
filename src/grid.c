@@ -3,6 +3,7 @@
 #include <lz4.h>
 
 #include "pixler/pixler.h"
+#include "coro/coro.h"
 #include "shared.h"
 
 static const u8 DROPS[] = {
@@ -307,6 +308,14 @@ void _grid_update(void){
 	}
 }
 
+uintptr_t grid_update_coro(uintptr_t _){
+	while(true){
+		coro_yield(true);
+	}
+	
+	return false;
+}
+
 void grid_init(void){
 	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
 	
@@ -322,8 +331,11 @@ void grid_init(void){
 	
 	grid.state_timer = 0;
 	grid.state_func = grid_wait_for_tick;
+	
+	coro_start(grid_update_coro);
 }
 
 void grid_update(void){
+	coro_resume(0);
 	grid.state_func();
 }

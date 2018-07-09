@@ -57,19 +57,18 @@ CORO_STACK_END:
 	lda #<(CORO_STACK_END)
 	sta CORO_SP+1
 	
+	lda #2
+	sta CORO_S
+	
 	jsr coro_swap_stack
 	lda #>(coro_catch - 1)
 	ldx #<(coro_catch - 1)
 	jsr pushax
-	
-	lda #2
-	sta CORO_S
-	
 	jmp coro_swap_stack
 .endproc
 
 .export _coro_resume
-.proc _coro_resume ; u8 value -> void
+.proc _coro_resume ; u16 -> u16
 	; Save the resume value;
 	sta sreg+0
 	stx sreg+1
@@ -85,15 +84,17 @@ CORO_STACK_END:
 	; Stash the stack register.
 	tsx
 	
+	lda CORO_S
+	beq @skip_copy
+	
 	ldy #0
-	: cpy CORO_S
-		beq :+
-		lda (sp), y
+	:	lda (sp), y
 		pha
 		iny
-		jmp :-
-	:
+		cpy CORO_S
+		bne :-
 	jsr addysp
+	@skip_copy:
 	
 	; Save the old stack register value.
 	stx CORO_S
@@ -114,7 +115,7 @@ CORO_STACK_END:
 .endproc
 
 .export _coro_yield
-.proc _coro_yield ; u8 value -> void
+.proc _coro_yield ; 16 -> u16
 	; Save the resume value;
 	sta sreg+0
 	stx sreg+1
@@ -131,16 +132,19 @@ CORO_STACK_END:
 	clc
 	sbc CORO_S
 	eor $FF
+	sta CORO_S
 	tay
-	sty CORO_S
 	
-	; Stack offset will be at least 2 for the coro_catch address.
+	cmp #0
+	beq @skip_copy
+	
 	jsr subysp
-	: dey
+	:	dey
 		pla
 		sta (sp), y
 		cpy #0
 		bne :-
+	@skip_copy:
 	
 	; Push a new return address.
 	lda CORO_IP+1
@@ -158,7 +162,7 @@ CORO_STACK_END:
 	jmp coro_ret_sreg
 .endproc
 
-.proc coro_catch ; u8 value -> void
+.proc coro_catch ; u16 -> u16
 	; Save the resume value;
 	sta sreg+0
 	stx sreg+1

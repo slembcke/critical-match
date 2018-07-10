@@ -57,10 +57,7 @@ static u8 COLUMN_HEIGHT[GRID_W];
 #define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
 
 typedef struct {
-	u8 drop_queue[2];
-	u8 drop_x, drop_counter;
-	
-	void (*state_func)(void);
+	u8 drop_counter;
 	u8 state_timer;
 } Grid;
 
@@ -201,18 +198,6 @@ static bool grid_any_falling(void){
 static void grid_tick(void){
 	grid_update_column_height();
 	
-	// TODO fail if column height prevents adding block?
-	// Drop in new blocks if the field is clear.
-	if(!grid_any_falling()){
-		u8 drop = DROPS[grid.drop_counter];
-		grid.drop_queue[0] = DROP_BLOCKS[(drop >> 0) & 0x7];
-		grid.drop_queue[1] = DROP_BLOCKS[(drop >> 4) & 0x7];
-		
-		grid.drop_x = DROP_X[grid.drop_counter];
-		grid.drop_counter += 1;
-		// TODO reset drop counter.
-	}
-	
 	// Make blocks fall.
 	for(iy = 1; iy < GRID_H - 1; ++iy){
 		for(ix = 1; ix < GRID_W - 1; ++ix){
@@ -228,14 +213,27 @@ static void grid_tick(void){
 		}
 	}
 	
-	// TODO this is weird and gross?
-	// Insert falling blocks.
-	if(grid.drop_x != 0){
-		grid_set_block(grid_block_idx(grid.drop_x, GRID_H - 2), grid.drop_queue[0]);
+	// TODO fail if column height prevents adding block?
+	// Drop in new blocks if the field is clear.
+	if(!grid_any_falling()){
+		u8 drop = DROPS[grid.drop_counter];
+		u8 block;
 		
-		idx = grid_block_idx(grid.drop_x, GRID_H - 1);
-		GRID[idx] = grid.drop_queue[1];
-		grid.drop_x = 0;
+		ix = DROP_X[grid.drop_counter];
+		
+		// Push the first block directly onto the screen.
+		idx = (drop >> 0) & 0x7;
+		block = DROP_BLOCKS[idx];
+		grid_set_block(grid_block_idx(ix, GRID_H - 2), block);
+		
+		// Write the second block into GRID and let it fall onto the screen.
+		idx = (drop >> 4) & 0x7;
+		block = DROP_BLOCKS[idx];
+		idx = grid_block_idx(ix, GRID_H - 1);
+		GRID[idx] = block;
+		
+		grid.drop_counter += 1;
+		// TODO wrap drop counter.
 	}
 }
 
@@ -279,7 +277,6 @@ void grid_init(void){
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
 	memset(GRID, BLOCK_BORDER, 8);
 	
-	grid.drop_x = 0;
 	grid.drop_counter = 0;
 	
 	coro_start(grid_update_coro);

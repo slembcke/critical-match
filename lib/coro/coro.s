@@ -1,3 +1,4 @@
+
 ; TODO coro_resume needs to push a return catch address.
 
 .include "zeropage.inc"
@@ -18,6 +19,8 @@ CORO_S: .res 1 ; S register adjust value.
 CORO_STACK: .res 16
 CORO_STACK_END:
 
+.export CORO_STACK, CORO_STACK_END, coro_catch
+
 .code
 
 .proc coro_swap_stack
@@ -35,7 +38,14 @@ CORO_STACK_END:
 	rts
 .endproc
 
-.proc coro_ret_sreg
+.proc coro_finish
+	; Save the old return address.
+	lda ptr1+0
+	sta CORO_IP+0
+	lda ptr1+1
+	sta CORO_IP+1
+	
+	; Load the return value.
 	lda sreg+0
 	ldx sreg+1
 	
@@ -52,14 +62,16 @@ CORO_STACK_END:
 	:
 	stx CORO_IP+1
 	
-	lda #>(CORO_STACK_END)
-	sta CORO_SP+0
 	lda #<(CORO_STACK_END)
+	sta CORO_SP+0
+	lda #>(CORO_STACK_END)
 	sta CORO_SP+1
 	
 	lda #2
 	sta CORO_S
 	
+	; Push coro_catch - 1 onto the C stack in reverse order.
+	; When it's copied onto the CPU stack it will have the right byte order.
 	jsr coro_swap_stack
 	lda #>(coro_catch - 1)
 	ldx #<(coro_catch - 1)
@@ -73,13 +85,13 @@ CORO_STACK_END:
 	sta sreg+0
 	stx sreg+1
 	
-	jsr coro_swap_stack
-	
 	; Stash the return address.
 	pla
 	sta ptr1+0
 	pla
 	sta ptr1+1
+	
+	jsr coro_swap_stack
 	
 	; Stash the stack register.
 	tsx
@@ -105,13 +117,7 @@ CORO_STACK_END:
 	lda CORO_IP+0
 	pha
 	
-	; Save the old return address.
-	lda ptr1+0
-	sta CORO_IP+0
-	lda ptr1+1
-	sta CORO_IP+1
-	
-	jmp coro_ret_sreg
+	jmp coro_finish
 .endproc
 
 .export _coro_yield
@@ -131,7 +137,7 @@ CORO_STACK_END:
 	txa
 	clc
 	sbc CORO_S
-	eor $FF
+	eor #$FF
 	sta CORO_S
 	tay
 	
@@ -152,14 +158,8 @@ CORO_STACK_END:
 	lda CORO_IP+0
 	pha
 	
-	; Save the old return address.
-	lda ptr1+0
-	sta CORO_IP+0
-	lda ptr1+1
-	sta CORO_IP+1
-	
 	jsr coro_swap_stack
-	jmp coro_ret_sreg
+	jmp coro_finish
 .endproc
 
 .proc coro_catch ; u16 -> u16
@@ -173,15 +173,15 @@ CORO_STACK_END:
 	lda CORO_IP+0
 	pha
 	
-	; Invalidate the resume address.
-	lda #<(CORO_ABORT - 1)
-	sta CORO_IP+0
-	lda #>(CORO_ABORT - 1)
-	sta CORO_IP+1
-	
+	; Invalidate the resume stack/address.
 	lda #0
 	sta CORO_S
 	
+	lda #<(CORO_ABORT - 1)
+	sta ptr1+0
+	lda #>(CORO_ABORT - 1)
+	sta ptr1+1
+	
 	jsr coro_swap_stack
-	jmp coro_ret_sreg
+	jmp coro_finish
 .endproc

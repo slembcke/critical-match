@@ -198,14 +198,51 @@ static bool grid_any_falling(void){
 	return false;
 }
 
-uintptr_t grid_update_coro(){
-	grid.drop_queue[0] = BLOCK_EMPTY;
-	grid.drop_queue[1] = BLOCK_EMPTY;
-	grid.drop_x = 1;
-	grid.drop_counter = 0;
+static void grid_tick(void){
+	grid_update_column_height();
 	
+	// TODO fail if column height prevents adding block?
+	// Drop in new blocks if the field is clear.
+	if(!grid_any_falling()){
+		u8 drop = DROPS[grid.drop_counter];
+		grid.drop_queue[0] = DROP_BLOCKS[(drop >> 0) & 0x7];
+		grid.drop_queue[1] = DROP_BLOCKS[(drop >> 4) & 0x7];
+		
+		grid.drop_x = DROP_X[grid.drop_counter];
+		grid.drop_counter += 1;
+		// TODO reset drop counter.
+	}
+	
+	// Make blocks fall.
+	for(iy = 1; iy < GRID_H - 1; ++iy){
+		for(ix = 1; ix < GRID_W - 1; ++ix){
+			idx = grid_block_idx(ix, iy);
+			
+			if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
+				GRID[idx] = GRID_U[idx];
+				GRID_U[idx] = BLOCK_EMPTY;
+			} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
+				// Remove unlocked blocks.
+				GRID[idx] = BLOCK_EMPTY;
+			}
+		}
+	}
+	
+	// TODO this is weird and gross?
+	// Insert falling blocks.
+	if(grid.drop_x != 0){
+		grid_set_block(grid_block_idx(grid.drop_x, GRID_H - 2), grid.drop_queue[0]);
+		
+		idx = grid_block_idx(grid.drop_x, GRID_H - 1);
+		GRID[idx] = grid.drop_queue[1];
+		grid.drop_x = 0;
+	}
+}
+
+uintptr_t grid_update_coro(uintptr_t _){
 	while(true){
 		// Look for matches while waiting for the next tick.
+		// TODO magic frame number.
 		for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer){
 			if(grid_open_chests()){
 				// Prevent the timer from advancing as long as matches are happening.
@@ -215,47 +252,10 @@ uintptr_t grid_update_coro(){
 			coro_yield(true);
 		}
 		
-		grid_update_column_height();
-		
-		// TODO fail if column height prevents adding block?
-		// Drop in new blocks if the field is clear.
-		if(!grid_any_falling()){
-			u8 drop = DROPS[grid.drop_counter];
-			grid.drop_queue[0] = DROP_BLOCKS[(drop >> 0) & 0x7];
-			grid.drop_queue[1] = DROP_BLOCKS[(drop >> 4) & 0x7];
-			
-			grid.drop_x = DROP_X[grid.drop_counter];
-			grid.drop_counter += 1;
-			// TODO reset drop counter.
-		}
-		
-		// Make blocks fall.
-		for(iy = 1; iy < GRID_H - 1; ++iy){
-			for(ix = 1; ix < GRID_W - 1; ++ix){
-				idx = grid_block_idx(ix, iy);
-				
-				if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
-					GRID[idx] = GRID_U[idx];
-					GRID_U[idx] = BLOCK_EMPTY;
-				} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
-					// Remove unlocked blocks.
-					GRID[idx] = BLOCK_EMPTY;
-				}
-			}
-		}
-		
-		if(grid.drop_x != 0){
-			grid_set_block(grid_block_idx(grid.drop_x, GRID_H - 2), grid.drop_queue[0]);
-			
-			idx = grid_block_idx(grid.drop_x, GRID_H - 1);
-			GRID[idx] = grid.drop_queue[1];
-			grid.drop_x = 0;
-		}
-		
-		// Enough work for this frame.
+		grid_tick();
 		coro_yield(true);
 		
-		// Blit the fallen blocks to the screen over several frames.
+		// Blit the blocks to the screen over several frames.
 		for(grid.state_timer = 1; grid.state_timer < GRID_H - 1; ++grid.state_timer){
 			px_buffer_inc(PX_INC1);
 			
@@ -279,9 +279,13 @@ void grid_init(void){
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
 	memset(GRID, BLOCK_BORDER, 8);
 	
-	coro_start((coro_func)grid_update_coro);
+	grid.drop_x = 0;
+	grid.drop_counter = 0;
+	
+	coro_start(grid_update_coro);
 }
 
 void grid_update(void){
+	// TODO bind coroutine.
 	coro_resume(0);
 }

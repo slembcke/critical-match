@@ -308,8 +308,15 @@ void _grid_update(void){
 	}
 }
 
-uintptr_t grid_update_coro(uintptr_t _){
+static const char HEX[] = "0123456789ABCDEF";
+
+uintptr_t grid_update_coro(){
 	while(true){
+		// px_buffer_inc(PX_INC1);
+		// px_buffer_data(4, NT_ADDR(0, 2, 2));
+		// PX.buffer[0] = HEX[(0xAB >> 4) & 0xF];
+		// PX.buffer[1] = HEX[(0xAB >> 0) & 0xF];
+		
 		coro_yield(true);
 	}
 	
@@ -332,7 +339,7 @@ void grid_init(void){
 	grid.state_timer = 0;
 	grid.state_func = grid_wait_for_tick;
 	
-	coro_start(grid_update_coro);
+	coro_start((coro_func)grid_update_coro);
 }
 
 void grid_update(void){

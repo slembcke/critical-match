@@ -15,8 +15,10 @@ CORO_ABORT = _exit
 CORO_IP: .res 2 ; Yield/resume instruction pointer - 1
 CORO_SP: .res 2 ; Yield/resume stack pointer.
 CORO_S: .res 1 ; S register adjust value.
-CORO_STACK: .res 16
+CORO_STACK: .res 64
 CORO_STACK_END:
+
+.export CORO_STACK, CORO_STACK_END, coro_catch
 
 .code
 
@@ -36,6 +38,13 @@ CORO_STACK_END:
 .endproc
 
 .proc coro_ret_sreg
+	; Save the old return address.
+	lda ptr1+0
+	sta CORO_IP+0
+	lda ptr1+1
+	sta CORO_IP+1
+	
+	; Load the return value.
 	lda sreg+0
 	ldx sreg+1
 	
@@ -57,14 +66,14 @@ CORO_STACK_END:
 	lda #<(CORO_STACK_END)
 	sta CORO_SP+1
 	
+	lda #2
+	sta CORO_S
+	; rts
+	
 	jsr coro_swap_stack
 	lda #>(coro_catch - 1)
 	ldx #<(coro_catch - 1)
 	jsr pushax
-	
-	lda #2
-	sta CORO_S
-	
 	jmp coro_swap_stack
 .endproc
 
@@ -85,14 +94,13 @@ CORO_STACK_END:
 	; Stash the stack register.
 	tsx
 	
+	; Transfer items from the C stack to the CPU stack.
 	ldy #0
-	: cpy CORO_S
-		beq :+
-		lda (sp), y
+	:	lda (sp), y
 		pha
 		iny
-		jmp :-
-	:
+		cpy CORO_S
+		bne :-
 	jsr addysp
 	
 	; Save the old stack register value.
@@ -103,12 +111,6 @@ CORO_STACK_END:
 	pha
 	lda CORO_IP+0
 	pha
-	
-	; Save the old return address.
-	lda ptr1+0
-	sta CORO_IP+0
-	lda ptr1+1
-	sta CORO_IP+1
 	
 	jmp coro_ret_sreg
 .endproc
@@ -134,7 +136,7 @@ CORO_STACK_END:
 	tay
 	sty CORO_S
 	
-	; Stack offset will be at least 2 for the coro_catch address.
+	; Transfer items from the CPU stack to the C stack.
 	jsr subysp
 	: dey
 		pla
@@ -147,12 +149,6 @@ CORO_STACK_END:
 	pha
 	lda CORO_IP+0
 	pha
-	
-	; Save the old return address.
-	lda ptr1+0
-	sta CORO_IP+0
-	lda ptr1+1
-	sta CORO_IP+1
 	
 	jsr coro_swap_stack
 	jmp coro_ret_sreg

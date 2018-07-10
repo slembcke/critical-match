@@ -312,11 +312,7 @@ static const char HEX[] = "0123456789ABCDEF";
 
 uintptr_t grid_update_coro(){
 	while(true){
-		// px_buffer_inc(PX_INC1);
-		// px_buffer_data(4, NT_ADDR(0, 2, 2));
-		// PX.buffer[0] = HEX[(0xAB >> 4) & 0xF];
-		// PX.buffer[1] = HEX[(0xAB >> 0) & 0xF];
-		
+		grid.state_func();
 		coro_yield(true);
 	}
 	
@@ -344,5 +340,4 @@ void grid_init(void){
 
 void grid_update(void){
 	coro_resume(0);
-	grid.state_func();
 }

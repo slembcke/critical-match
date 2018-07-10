@@ -15,7 +15,7 @@ CORO_ABORT = _exit
 CORO_IP: .res 2 ; Yield/resume instruction pointer - 1
 CORO_SP: .res 2 ; Yield/resume stack pointer.
 CORO_S: .res 1 ; S register adjust value.
-CORO_STACK: .res 32
+CORO_STACK: .res 16
 CORO_STACK_END:
 
 .export CORO_STACK, CORO_STACK_END, coro_catch
@@ -61,9 +61,9 @@ CORO_STACK_END:
 	:
 	stx CORO_IP+1
 	
-	lda #>(CORO_STACK_END)
-	sta CORO_SP+0
 	lda #<(CORO_STACK_END)
+	sta CORO_SP+0
+	lda #>(CORO_STACK_END)
 	sta CORO_SP+1
 	
 	lda #2

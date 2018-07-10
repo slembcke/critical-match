@@ -17,21 +17,21 @@ void log_stack(const char *msg){
 		printf(" $%02X", CPU_STACK[i]);
 	}
 	
-	printf("\n");
+	printf("\n %p\n", *((void **)0));
 }
 
 void func2(uintptr_t n){
-	log_stack("in func2");
+//	log_stack("in func2");
 	n = coro_yield(n);
 	n = coro_yield(n);
 }
 
 uintptr_t func(uintptr_t n){
-	log_stack("in func");
+//	log_stack("in func");
 	n = coro_yield(n);
-	log_stack("after_yield");
+//	log_stack("after_yield");
 	n = coro_yield(n);
-	log_stack("after_yield");
+//	log_stack("after_yield");
 	
 	func2(n);
 	

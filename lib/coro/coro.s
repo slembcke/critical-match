@@ -69,6 +69,8 @@ CORO_STACK_END:
 	lda #2
 	sta CORO_S
 	
+	; Push 1 - coro_catch onto the C stack in reverse order.
+	; When it's copied onto the CPU stack it will have the right byte order.
 	jsr coro_swap_stack
 	lda #>(coro_catch - 1)
 	ldx #<(coro_catch - 1)
@@ -93,6 +95,7 @@ CORO_STACK_END:
 	; Stash the stack register.
 	tsx
 	
+	; TODO CORO_S == 0
 	; Transfer items from the C stack to the CPU stack.
 	ldy #0
 	:	lda (sp), y
@@ -136,6 +139,7 @@ CORO_STACK_END:
 	tay
 	
 	; Transfer items from the CPU stack to the C stack.
+	; Should always have at least 2 bytes for the coro_catch address.
 	jsr subysp
 	: dey
 		pla

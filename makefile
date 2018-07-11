@@ -34,7 +34,7 @@ ASMSRC = \
 	lib/pixler/pixler_buffer.s \
 	lib/pixler/pixler_blit.s \
 	lib/pixler/pixler_sprite.s \
-	lib/pixler/lz4vram.s \
+	lib/pixler/decompress_lz4.s \
 	lib/famitone2/famitone2.s
 
 GFX = \

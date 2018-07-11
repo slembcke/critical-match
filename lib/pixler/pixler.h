@@ -76,7 +76,7 @@ void px_spr_end(void);
 
 void px_wait_nmi(void);
 
-void decompress_lz4_to_ram(void *dst, void *src, size_t len);
-void decompress_lz4_to_vram(u16 addr, void *src, size_t len);
+void decompress_lz4_to_ram(void *dst, void *src, u16 len);
+void decompress_lz4_to_vram(u16 addr, void *src, u16 len);
 
 #endif

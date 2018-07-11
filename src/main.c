@@ -106,9 +106,9 @@ GameState main(void){
 	
 	px_inc(PX_INC1);
 	
-	vram_unlz4(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
-	vram_unlz4(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
-	vram_unlz4(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
+	decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
+	decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
+	decompress_lz4_to_vram(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
 
 	px_addr(PAL_ADDR);
 	px_blit(32, (u8 *)PALETTE);

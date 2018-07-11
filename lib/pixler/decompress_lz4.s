@@ -13,7 +13,6 @@
 .import pushax, popax
 .import	memcpy_upwards
 .import _px_blit
-.export	_vram_unlz4
 
 out = regsave
 written = regsave + 2
@@ -30,6 +29,9 @@ memcpy_src_to_dst: jmp $FFFC
 memcpy_dst_to_dst: jmp $FFFC
 
 .code
+
+; These memcp-like functions are drop in replacements for memcpy_upwards().
+; They are patched in using the jump vectors above when decompressing to vram.
 
 .proc memcpy_ram_to_vram
 	lda	ptr2+1
@@ -97,8 +99,39 @@ memcpy_dst_to_dst: jmp $FFFC
 	jmp popax
 .endproc
 
-.proc	_vram_unlz4: near
-	; Unpack args.
+.export _decompress_lz4_to_ram
+.proc _decompress_lz4_to_ram
+	jsr pushax
+	
+	lda #<memcpy_upwards
+	ldx #>memcpy_upwards
+	sta memcpy_src_to_dst+1
+	stx memcpy_src_to_dst+2
+	sta memcpy_dst_to_dst+1
+	stx memcpy_dst_to_dst+2
+	
+	jmp decompress_lz4
+.endproc
+
+.export _decompress_lz4_to_vram
+.proc _decompress_lz4_to_vram
+	jsr pushax
+	
+	lda #<memcpy_ram_to_vram
+	ldx #>memcpy_ram_to_vram
+	sta memcpy_src_to_dst+1
+	stx memcpy_src_to_dst+2
+	
+	lda #<memcpy_vram_to_vram
+	ldx #>memcpy_vram_to_vram
+	sta memcpy_dst_to_dst+1
+	stx memcpy_dst_to_dst+2
+	
+	jmp decompress_lz4
+.endproc
+
+.proc	decompress_lz4
+	jsr popax
 	sta	outlen+0
 	stx	outlen+1
 	
@@ -109,17 +142,6 @@ memcpy_dst_to_dst: jmp $FFFC
 	jsr	popax
 	sta	out+0
 	stx	out+1
-	
-	; Set jump vector addresses.
-	lda #<memcpy_ram_to_vram
-	ldx #>memcpy_ram_to_vram
-	sta memcpy_src_to_dst+1
-	stx memcpy_src_to_dst+2
-	
-	lda #<memcpy_vram_to_vram
-	ldx #>memcpy_vram_to_vram
-	sta memcpy_dst_to_dst+1
-	stx memcpy_dst_to_dst+2
 	
 	; written = 0;
 	lda #0

@@ -5,114 +5,111 @@
 ;
 
 .include "zeropage.inc"
+.include "pixler.inc"
 
 .macpack	longbranch
-.import		pushax,popax, _px_blit
-.export		_vram_unlz4
+.import	memcpy_upwards, pushax, popax, _px_blit
+.export	_vram_unlz4
 
-_out = regsave
-_written = regsave + 2
-_tmp = tmp1
-_token = tmp2
-_offset = ptr3
-_in = sreg
-_outlen = ptr4
-
-PPU_ADDR = $2006
-PPU_DATA = $2007
+out = regsave
+written = regsave + 2
+tmp = tmp1
+token = tmp2
+offset = ptr3
+in = sreg
+outlen = ptr4
 
 ; ---------------------------------------------------------------
 ; void decompress_lz4 (const u8 *in, u8 * const out, const u16 outlen)
 ; ---------------------------------------------------------------
 
-.segment	"CODE"
+.code
 
 ; size in ptr3, src in ptr1, dest in ptr2
 ; don't touch size
-memcpy_r2v:
-
+.proc memcpy_r2v
 	lda	ptr2+1
-	sta	PPU_ADDR
-	lda	ptr2
-	sta	PPU_ADDR
+	sta	PPU_VRAM_ADDR
+	lda	ptr2+0
+	sta	PPU_VRAM_ADDR
 
-	lda	ptr3
+	lda	ptr3+0
 	ldx	ptr3+1
 	jsr	pushax
 
-	lda	ptr1
+	lda	ptr1+0
 	ldx	ptr1+1
 
-	jmp	_px_blit
+	jsr	_px_blit
+	jmp popax
+.endproc
 
-memcpy_v2v:
-
+.proc memcpy_v2v
 	lda	#0
 	sta	tmp3
 	sta	tmp4
 	jmp	@check
 
-@loop:
-; read source byte
-	lda	ptr1+1
-	sta	PPU_ADDR
-	lda	ptr1
-	sta	PPU_ADDR
+	@loop:
+		; read source byte
+		lda	ptr1+1
+		sta	PPU_VRAM_ADDR
+		lda	ptr1
+		sta	PPU_VRAM_ADDR
 
-	ldx	PPU_DATA
-	ldx	PPU_DATA
+		ldx	PPU_VRAM_IO
+		ldx	PPU_VRAM_IO
 
-	inc	ptr1
-	bne	@nosrcinc
-	inc	ptr1+1
-@nosrcinc:
+		inc	ptr1
+		bne	:+
+			inc	ptr1+1
+		:
 
-; write dst byte
-	lda	ptr2+1
-	sta	PPU_ADDR
-	lda	ptr2
-	sta	PPU_ADDR
+		; write dst byte
+		lda	ptr2+1
+		sta	PPU_VRAM_ADDR
+		lda	ptr2
+		sta	PPU_VRAM_ADDR
 
-	stx	PPU_DATA
+		stx	PPU_VRAM_IO
 
-	inc	ptr2
-	bne	@nodstinc
-	inc	ptr2+1
-@nodstinc:
+		inc	ptr2
+		bne	:+
+			inc	ptr2+1
+		:
 
-; increase counter
-	inc	tmp3
-	bne	@noinc
-	inc	tmp4
-@noinc:
+		; increase counter
+		inc	tmp3
+		bne	:+
+			inc	tmp4
+		:
 
-@check:
-	lda	tmp3
-	cmp	ptr3
-	lda	tmp4
-	sbc	ptr3+1
-	bcc	@loop
-
-	rts
+		@check:
+		lda	tmp3
+		cmp	ptr3
+		lda	tmp4
+		sbc	ptr3+1
+		bcc	@loop
+	jmp popax
+.endproc
 
 .proc	_vram_unlz4: near
-
-	sta	_outlen
-	stx	_outlen+1
-
-	jsr	popax
-	sta	_in
-	stx	_in+1
+	sta	outlen
+	stx	outlen+1
 
 	jsr	popax
-	sta	_out
-	stx	_out+1
+	sta	in
+	stx	in+1
+
+	jsr	popax
+	sta	out
+	stx	out+1
 
 ;
 ; written = 0;
 ;
 	lda     #$00
-	sta     _written
+	sta     written
 ;
 ; while (written < outlen) {
 ;
@@ -120,230 +117,235 @@ memcpy_v2v:
 ;
 ; token = *in++;
 ;
-L0004:	ldy	#0
-	lda     (_in),y
-	sta	_token
+L0004:  ldy     #$00
+        lda     (in),y
+        sta     token
 
-	inc	_in
-	bne	L000A
-	inc	_in+1
+        inc     in
+        bne     L000A
+        inc     in+1
 L000A:
 ;
 ; offset = token >> 4;
 ;
-	ldx     #$00
-	lsr     a
-	lsr     a
-	lsr     a
-	lsr     a
-	sta     _offset
-	stx     _offset+1
+        ldx     #$00
+        lsr     a
+        lsr     a
+        lsr     a
+        lsr     a
+        sta     offset
+        stx     offset+1
 ;
 ; token &= 0xf;
 ; token += 4; // Minmatch
 ;
-	lda     _token
-	and     #$0F
-	clc
-	adc	#4
-	sta     _token
+        lda     token
+        and     #$0F
+        clc
+        adc     #$04
+        sta     token
 ;
 ; if (offset == 15) {
 ;
-	lda     _offset
-	cmp     #$0F
-L0013:	bne     L001A
+        lda     offset
+        cmp     #$0F
+L0013:  bne     L001A
 ;
 ; tmp = *in++;
 ;
-	ldy	#0
-	lda	(_in),y
-	sta	_tmp
+        ldy     #$00
+        lda     (in),y
+        sta     tmp
 
-	inc	_in
-	bne	L0017
-	inc	_in+1
+        inc     in
+        bne     L0017
+        inc     in+1
 L0017:
 ;
 ; offset += tmp;
 ;
-	clc
-	adc     _offset
-	sta     _offset
-	lda     #$00
-	adc     _offset+1
-	sta     _offset+1
+        clc
+        adc     offset
+        sta     offset
+        lda     #$00
+        adc     offset+1
+        sta     offset+1
 ;
 ; if (tmp == 255)
 ;
-	lda     _tmp
-	cmp     #$FF
+        lda     tmp
+        cmp     #$FF
 ;
 ; goto moreliterals;
 ;
-	jmp     L0013
+        jmp     L0013
 ;
 ; if (offset) {
 ;
-L001A:	lda     _offset
-	ora     _offset+1
-	beq     L001C
+L001A:  lda     offset
+        ora     offset+1
+        beq     L001C
 ;
 ; memcpy(&out[written], in, offset);
 ;
-	lda     _out
-	clc
-	adc     _written
-	sta	ptr2
-	lda     _out+1
-	adc     _written+1
-	tax
-	stx	ptr2+1
-	lda     _in
-	ldx     _in+1
-	sta	ptr1
-	stx	ptr1+1
+        lda     out
+        clc
+        adc     written
+        sta     ptr2
+        lda     out+1
+        adc     written+1
+        tax
+        lda     ptr2
+        stx     ptr2+1
+        jsr     pushax
+        lda     in
+        ldx     in+1
+        sta     ptr1
+        stx     ptr1+1
+;        ldy     #$00 - not needed as pushax zeroes Y
 	jsr     memcpy_r2v
 ;
 ; written += offset;
 ;
-	lda     _offset
+	lda     offset
 	clc
-	adc     _written
-	sta     _written
-	lda     _offset+1
-	adc     _written+1
-	sta     _written+1
+	adc     written
+	sta     written
+	lda     offset+1
+	adc     written+1
+	sta     written+1
 ;
 ; in += offset;
 ;
-	lda     _offset
+	lda     offset
 	clc
-	adc     _in
-	sta     _in
-	lda     _offset+1
-	adc     _in+1
-	sta     _in+1
+	adc     in
+	sta     in
+	lda     offset+1
+	adc     in+1
+	sta     in+1
 ;
 ; if (written >= outlen)
 ;
-L001C:	lda     _written
-	cmp     _outlen
-	lda     _written+1
-	sbc     _outlen+1
+L001C:  lda     written
+        cmp     outlen
+        lda     written+1
+        sbc     outlen+1
 ;
 ; return;
 ;
-	bcc     L0047
-	rts
+        bcc     L0047
+        rts
 ;
 ; memcpy(&offset, in, 2);
 ;
-L0047:	ldy	#0
-	lda     (_in),y
-	sta	_offset
-	iny
-	lda     (_in),y
-	sta	_offset+1
+L0047:  ldy     #$00
+        lda     (in),y
+        sta     offset
+        iny
+        lda     (in),y
+        sta     offset+1
 ;
 ; in += 2;
 ;
-	lda     #$02
-	clc
-	adc     _in
-	sta     _in
-	bcc     L002F
-	inc     _in+1
+        lda     #$02
+        clc
+        adc     in
+        sta     in
+        bcc     L002F
+        inc     in+1
 ;
 ; copysrc = out + written - offset;
 ;
-L002F:	lda     _out
-	clc
-	adc     _written
-	pha
-	lda     _out+1
-	adc     _written+1
-	tax
-	pla
-	sec
-	sbc     _offset
-	sta     ptr1
-	txa
-	sbc     _offset+1
-	sta     ptr1+1
+L002F:  lda     out
+        clc
+        adc     written
+        tay
+        lda     out+1
+        adc     written+1
+        tax
+        tya
+        sec
+        sbc     offset
+        sta     ptr1
+        txa
+        sbc     offset+1
+        sta     ptr1+1
 ;
 ; offset = token;
 ;
-	lda     #$00
-	sta     _offset+1
-	lda     _token
-	sta     _offset
+        lda     #$00
+        sta     offset+1
+        lda     token
+        sta     offset
 ;
 ; if (token == 19) {
 ;
-	cmp     #$13
-L0045:	bne     L003C
+        cmp     #$13
+L0045:  bne     L003C
 ;
 ; tmp = *in++;
 ;
-	ldy	#0
-	lda	(_in),y
-	sta	_tmp
+        ldy     #$00
+        lda     (in),y
+        sta     tmp
 
-	inc	_in
-	bne	L0039
-	inc	_in+1
+        inc     in
+        bne     L0039
+        inc     in+1
 L0039:
 ;
 ; offset += tmp;
 ;
-	clc
-	adc     _offset
-	sta     _offset
-	tya
-	adc     _offset+1
-	sta     _offset+1
+        clc
+        adc     offset
+        sta     offset
+        tya
+        adc     offset+1
+        sta     offset+1
 ;
 ; if (tmp == 255)
 ;
-	lda     _tmp
-	cmp     #$FF
+        lda     tmp
+        cmp     #$FF
 ;
 ; goto morematches;
 ;
-	jmp     L0045
+        jmp     L0045
 ;
 ; memcpy(&out[written], copysrc, offset);
 ;
-L003C:	lda     _out
-	clc
-	adc     _written
-	sta	ptr2
-	lda     _out+1
-	adc     _written+1
-	tax
-	stx	ptr2+1
+L003C:  lda     out
+        clc
+        adc     written
+        sta     ptr2
+        lda     out+1
+        adc     written+1
+        tax
+        lda     ptr2
+        stx     ptr2+1
+        jsr     pushax
+;        ldy     #$00 - not needed as pushax zeroes Y
 	jsr     memcpy_v2v
 ;
 ; written += offset;
 ;
-	lda     _offset
+	lda     offset
 	clc
-	adc     _written
-	sta     _written
-	lda     _offset+1
-	adc     _written+1
-L0046:	sta     _written+1
+	adc     written
+	sta     written
+	lda     offset+1
+	adc     written+1
+L0046:  sta     written+1
 ;
 ; while (written < outlen) {
 ;
-	lda     _written
-	cmp     _outlen
-	lda     _written+1
-	sbc     _outlen+1
+	lda     written
+	cmp     outlen
+	lda     written+1
+	sbc     outlen+1
 	jcc     L0004
 
 	rts
 
 .endproc
-

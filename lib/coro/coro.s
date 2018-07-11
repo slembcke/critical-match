@@ -1,3 +1,5 @@
+; TODO implement context switching.
+
 .include "zeropage.inc"
 .macpack generic
 
@@ -95,14 +97,13 @@ CORO_STACK_END:
 	
 	lda CORO_S
 	beq @skip_copy
-	
-	ldy #0
-	:	lda (sp), y
-		pha
-		iny
-		cpy CORO_S
-		bne :-
-	jsr addysp
+		ldy #0
+		:	lda (sp), y
+			pha
+			iny
+			cpy CORO_S
+			bne :-
+		jsr addysp
 	@skip_copy:
 	
 	; Save the old stack register value.
@@ -140,13 +141,12 @@ CORO_STACK_END:
 	
 	cmp #0
 	beq @skip_copy
-	
-	jsr subysp
-	:	dey
-		pla
-		sta (sp), y
-		cpy #0
-		bne :-
+		jsr subysp
+		:	dey
+			pla
+			sta (sp), y
+			cpy #0
+			bne :-
 	@skip_copy:
 	
 	; Push a new return address.

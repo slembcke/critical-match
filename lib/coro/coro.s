@@ -1,6 +1,3 @@
-
-; TODO coro_resume needs to push a return catch address.
-
 .include "zeropage.inc"
 .macpack generic
 

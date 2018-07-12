@@ -196,8 +196,6 @@ static bool grid_any_falling(void){
 }
 
 static void grid_tick(void){
-	grid_update_column_height();
-	
 	// Make blocks fall.
 	for(iy = 1; iy < GRID_H - 1; ++iy){
 		for(ix = 1; ix < GRID_W - 1; ++ix){
@@ -212,6 +210,8 @@ static void grid_tick(void){
 			}
 		}
 	}
+	
+	grid_update_column_height();
 	
 	// TODO fail if column height prevents adding block?
 	// Drop in new blocks if the field is clear.

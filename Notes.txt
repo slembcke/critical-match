@@ -1,7 +1,6 @@
 TODO:
 * Garbage blocks?
 * Push player to top of stack.
-* Grab/drop fixes column height.
 * Keys don't match with keys.
 * Player can esape the game.
 * Coins.

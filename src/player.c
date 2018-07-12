@@ -255,6 +255,8 @@ void player_pick_up(void){
 	
 	player.cursor_idx = 0;
 	
+	grid_update_column_height();
+	
 	// Wait for the PPU buffer to flush.
 	px_wait_nmi();
 }
@@ -276,6 +278,8 @@ void player_drop(void){
 	}
 	
 	player.cursor_idx = 0;
+	
+	grid_update_column_height();
 	
 	// Wait for the PPU buffer to flush.
 	px_wait_nmi();

@@ -170,7 +170,7 @@ static bool grid_open_chests(void){
 	return true;
 }
 
-static void grid_update_column_height(void){
+void grid_update_column_height(void){
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = 1; iy < GRID_H - 1; ++iy){
 			idx = grid_block_idx(ix, iy);

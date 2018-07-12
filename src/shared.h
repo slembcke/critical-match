@@ -59,6 +59,7 @@ extern u8 GRID[];
 void grid_set_block(u8 index, u8 block);
 void grid_init(void);
 void grid_update(void);
+void grid_update_column_height(void);
 
 void player_init(void);
 void player_tick(u8 joy);

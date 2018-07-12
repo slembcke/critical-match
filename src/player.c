@@ -236,17 +236,22 @@ static void player_sprite_draw(void){
 void player_pick_up(void){
 	// TODO Can't pick up blocks on their first tick?
 	// TODO Update column height.
-	for(idx = player.cursor_idx, iy = 0; idx < GRID_BYTES; idx += GRID_W, iy += 1){
+	for(iy = 0, idx = player.cursor_idx; idx < GRID_BYTES; ++iy, idx += GRID_W){
 		if(
 			// Stop for empty spaces...
 			GRID[idx] == BLOCK_EMPTY ||
 			// ... or a block that is already matching.
-			GRID[idx] & BLOCK_STATUS_UNLOCKED
+			(GRID[idx] & BLOCK_STATUS_UNLOCKED)
 		) break;
 		
-		
 		player.blocks_held[iy] = GRID[idx];
-		if(idx < GRID_BYTES - 8) grid_set_block(idx, 0);
+		if(idx < GRID_BYTES - 8){
+			grid_set_block(idx, BLOCK_EMPTY);
+		} else {
+			// The top row of the grid is not shown.
+			// Don't change the tile, but do set the value.
+			GRID[idx] = BLOCK_EMPTY;
+		}
 	}
 	
 	player.cursor_idx = 0;
@@ -256,8 +261,7 @@ void player_pick_up(void){
 }
 
 void player_drop(void){
-	// TODO needs to check if there is enough space.
-	for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, iy += 1){
+	for(iy = 0, idx = player.cursor_idx; player.blocks_held[iy]; ++iy, idx += GRID_W){
 		if(GRID[idx] != 0){
 			// Area not clear, can't put down the stack.
 			// TODO sound?

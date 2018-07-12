@@ -31,7 +31,7 @@ typedef struct {
 	// Selected block under the cursor.
 	u8 cursor_idx;
 	
-	u8 blocks_held[10];
+	u8 blocks_held[GRID_H];
 	
 	// Input values
 	u8 joy, prev_joy;
@@ -148,9 +148,11 @@ static void player_cursor_update(void){
 	} else {
 		if(JOY_UP(player.joy)){
 			// Search upwards for a block to grapple.
-			for(; GRID[idx] == 0; idx += GRID_W){
-				// Check if we missed.
-				if(idx > GRID_W*GRID_H) return;
+			while(GRID[idx] == BLOCK_EMPTY){
+				idx += GRID_W;
+				
+				// Check if we've passed the top of the grid.
+				if(idx >= GRID_BYTES) return;
 			}
 		} else if(JOY_DOWN(player.joy)){
 			idx -= GRID_W;
@@ -232,13 +234,19 @@ static void player_sprite_draw(void){
 }
 
 void player_pick_up(void){
+	// TODO Can't pick up blocks on their first tick?
 	// TODO Update column height.
-	for(idx = player.cursor_idx, iy = 0; GRID[idx]; idx += GRID_W, iy += 1){
-		// Stop when it gets to a block that is matching.
-		if(GRID[idx] & BLOCK_STATUS_UNLOCKED) break;
+	for(idx = player.cursor_idx, iy = 0; idx < GRID_BYTES; idx += GRID_W, iy += 1){
+		if(
+			// Stop for empty spaces...
+			GRID[idx] == BLOCK_EMPTY ||
+			// ... or a block that is already matching.
+			GRID[idx] & BLOCK_STATUS_UNLOCKED
+		) break;
+		
 		
 		player.blocks_held[iy] = GRID[idx];
-		grid_set_block(idx, 0);
+		if(idx < GRID_BYTES - 8) grid_set_block(idx, 0);
 	}
 	
 	player.cursor_idx = 0;
@@ -290,13 +298,16 @@ void player_tick(u8 joy){
 	
 	// Draw cursor.
 	if(player.cursor_idx){
+		// Convert the block index to the base sprite coord.
+		// TODO Should cursor_sprite do this? Meh...
 		ix =  (64 + (u8)((idx & 0x07) << 4));
 		iy = -(48 + (u8)((idx & 0xF8) << 1));
 		
+		// Calculate cursor height into idx.
 		if(player.blocks_held[0]){
-			for(idx = 1; player.blocks_held[idx]; ++idx);
+			for(idx = 1; player.blocks_held[idx] != BLOCK_EMPTY && idx < GRID_H; ++idx);
 		} else {
-			for(idx = player.cursor_idx; GRID[idx]; idx += GRID_W);
+			for(idx = player.cursor_idx; GRID[idx] != BLOCK_EMPTY && idx < GRID_BYTES; idx += GRID_W);
 			idx = (idx - player.cursor_idx)/8;
 		}
 		

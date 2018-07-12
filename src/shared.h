@@ -51,6 +51,7 @@ typedef struct {} GameState;
 
 #define GRID_W 8
 #define GRID_H 12
+#define GRID_BYTES (GRID_W*GRID_H)
 extern u8 GRID[];
 
 #define grid_block_idx(x, y) (u8)(GRID_W*(y) | (x))

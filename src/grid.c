@@ -42,7 +42,7 @@ static u8 DROP_X[] = {
 };
 
 // Block values in the grid.
-u8 GRID[GRID_W*GRID_H];
+u8 GRID[GRID_BYTES];
 
 // Height of each stacked column.
 static u8 COLUMN_HEIGHT[GRID_W];

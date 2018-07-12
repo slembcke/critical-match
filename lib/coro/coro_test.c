@@ -21,17 +21,13 @@ void log_stack(const char *msg){
 }
 
 void func2(uintptr_t n){
-//	log_stack("in func2");
 	n = coro_yield(n);
 	n = coro_yield(n);
 }
 
 uintptr_t func(uintptr_t n){
-//	log_stack("in func");
 	n = coro_yield(n);
-//	log_stack("after_yield");
 	n = coro_yield(n);
-//	log_stack("after_yield");
 	
 	func2(n);
 	
@@ -42,17 +38,19 @@ uintptr_t func(uintptr_t n){
 	return 0;
 }
 
+uint8_t buff[16];
+
 int main(void){
 	static uint8_t n;
 	
 	log_stack("before start");
-	coro_start(func);
+	coro_init(func, buff, sizeof(buff));
 	
 	for(n = 1; n < 20; ++n){
 		uintptr_t value;
 		value = coro_resume(n);
 		printf("main() n: %d, value: %d\n", n, value);
-		log_stack("after resume");
+		// log_stack("after resume");
 		
 		if(value == 0) break;
 	}

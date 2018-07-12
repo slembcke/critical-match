@@ -269,6 +269,8 @@ uintptr_t grid_update_coro(uintptr_t _){
 	return false;
 }
 
+static u8 coro_buff[16];
+
 void grid_init(void){
 	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
 	
@@ -279,7 +281,7 @@ void grid_init(void){
 	
 	grid.drop_counter = 0;
 	
-	coro_start(grid_update_coro);
+	coro_init(grid_update_coro, coro_buff, sizeof(coro_buff));
 }
 
 void grid_update(void){

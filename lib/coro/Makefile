@@ -16,4 +16,4 @@ test: coro_test
 	ca65 -g $< -o $@
 
 coro_test: coro_test.o coro.o
-	ld65 -t sim6502 -vm -m link.log $^ sim6502.lib -o $@
+	ld65 -C ld65.cfg -vm -m link.log $^ sim6502.lib -o $@

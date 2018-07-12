@@ -3,6 +3,6 @@ TODO:
 * Push player to top of stack.
 * Grab/drop fixes column height.
 * Keys don't match with keys.
-* Drops can be grabbed before they fully appear.
+* Player can esape the game.
 * Coins.
 * Combo.

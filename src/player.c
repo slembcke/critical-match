@@ -234,7 +234,6 @@ static void player_sprite_draw(void){
 }
 
 void player_pick_up(void){
-	// TODO Can't pick up blocks on their first tick?
 	// TODO Update column height.
 	for(iy = 0, idx = player.cursor_idx; idx < GRID_BYTES; ++iy, idx += GRID_W){
 		if(

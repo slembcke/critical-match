@@ -4,7 +4,7 @@ clean:
 	rm -rf *.o coro_test link.log
 
 test: coro_test
-	sim65 $<
+	sim65 -cv $<
 
 # Cancel built in rules.
 %.o: %.c

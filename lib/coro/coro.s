@@ -17,22 +17,24 @@ CORO_ABORT = _abort
 ; CORO_BUFF_PTR: .res 2
 CORO_BUFF_PTR = regbank
 
-CORO_SP: .res 2 ; Yield/resume stack pointer.
 CORO_S: .res 1 ; S register adjust value.
 
 .code
 
 .proc coro_swap_sp
+	ldy #0
+	lda (CORO_BUFF_PTR), y
 	ldx sp+0
-	ldy sp+1
-	
-	lda CORO_SP+0
 	sta sp+0
-	lda CORO_SP+1
-	sta sp+1
+	txa
+	sta (CORO_BUFF_PTR), y
 	
-	stx CORO_SP+0
-	sty CORO_SP+1
+	iny
+	lda (CORO_BUFF_PTR), y
+	ldx sp+1
+	sta sp+1
+	txa
+	sta (CORO_BUFF_PTR), y
 	
 	rts
 .endproc
@@ -53,10 +55,12 @@ CORO_S: .res 1 ; S register adjust value.
 	
 	; Store the end address into the stack pointer.
 	add size+0
-	sta CORO_SP+0
+	ldy #0
+	sta (CORO_BUFF_PTR), y
 	txa
 	adc size+1
-	sta CORO_SP+1
+	iny
+	sta (CORO_BUFF_PTR), y
 	
 	; Subtract 1 from the function address due to how jsr/ret work.
 	jsr popax

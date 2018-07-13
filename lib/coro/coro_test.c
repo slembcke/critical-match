@@ -27,9 +27,9 @@ void func2(uintptr_t n){
 
 uintptr_t func(uintptr_t n){
 	// log_stack("In func(). n: %d\n");
-	printf("In func(). n: %04X\n", n);
+	// printf("In func(). n: %04X\n", n);
 	n = coro_yield(n);
-	printf("Back in func(). %n\n", n);
+	// printf("Back in func(). %n\n", n);
 	n = coro_yield(n);
 	
 	func2(n);
@@ -46,26 +46,13 @@ uint8_t buff[32];
 int main(void){
 	static uintptr_t n;
 	
-	printf("func: $%04X\n", func);
-	
 	// log_stack("before start");
 	coro_init(func, buff, sizeof(buff));
-	printf("Coroutine intialized.\n");
-	
-	printf("buff: ");
-	for(n = 0; n < sizeof(buff); ++n){
-		printf(" $%02X", buff[n]);
-	}
-	printf("\n");
-	
-	n = coro_resume(0xABCD);
-	printf("Back in main(). n: $%04X\n", n);
 	
 	for(n = 1; n < 20; ++n){
 		uintptr_t value;
 		value = coro_resume(n);
 		printf("main() n: %d, value: %d\n", n, value);
-		// log_stack("after resume");
 		
 		if(value == 0) break;
 	}

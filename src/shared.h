@@ -55,7 +55,6 @@ typedef struct {} GameState;
 extern u8 GRID[];
 extern u8 COLUMN_HEIGHT[];
 
-
 #define grid_block_idx(x, y) (u8)(GRID_W*(y) | (x))
 
 void grid_set_block(u8 index, u8 block);

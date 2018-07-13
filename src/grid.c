@@ -45,7 +45,7 @@ static u8 DROP_X[] = {
 u8 GRID[GRID_BYTES];
 
 // Height of each stacked column.
-static u8 COLUMN_HEIGHT[GRID_W];
+u8 COLUMN_HEIGHT[GRID_W];
 
 // Aliases for left/right/up/down from current block.
 #define GRID_L (GRID + -1)

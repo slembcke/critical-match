@@ -10,6 +10,7 @@
 #define PLAYER_MAX_FALL (6*PLAYER_MAX_SPEED/2)
 #define PLAYER_JUMP 0x03C0
 #define PLAYER_JUMP_TICKS 5
+#define MAX_Y ((16 << 8)*(GRID_H - 2))
 
 void player_sprite(u8 x, u8 y, u8 frame);
 void block_sprite(u8 x, u8 y, u8 block);
@@ -71,11 +72,17 @@ static void player_update_motion(void){
 }
 
 static void player_collide(void){
-	// Ground detection.
-	player.grounded = false;
+	ix = (player.pos_x >> 8)/16;
+	iy = 16*COLUMN_HEIGHT[ix] + 16;
+	if(player.pos_y < 256*iy) player.pos_y = 256*iy;
+	if(player.pos_y > MAX_Y) player.pos_y = MAX_Y;
 	
 	ix = (player.pos_x >> 8);
 	iy = (player.pos_y >> 8) - 1;
+	
+	// Ground detection.
+	player.grounded = false;
+	
 	idx = grid_block_at(ix, iy);
 	block = GRID[idx];
 	by = ((iy << 8) & 0xF000) + 0x1000;

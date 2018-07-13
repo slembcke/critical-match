@@ -1,7 +1,7 @@
 TODO:
-* Garbage blocks?
-* Push player to top of stack.
-* Keys don't match with keys.
-* Player can esape the game.
-* Coins.
+* Randomize drops.
+* Score.
 * Combo.
+* Coins.
+* Keys don't match with keys.
+* Garbage blocks?

@@ -19,7 +19,7 @@ CORO_BUFF_PTR: .res 2
 
 .code
 
-.proc coro_swap_sp
+.proc naco_swap_sp
 	ldy #0
 	lda (CORO_BUFF_PTR), y
 	ldx sp+0
@@ -37,8 +37,8 @@ CORO_BUFF_PTR: .res 2
 	rts
 .endproc
 
-.export _coro_init
-.proc _coro_init ; coro_func func, u8 *coro_buffer, size_t buffer_size -> void
+.export _naco_init
+.proc _naco_init ; naco_func func, u8 *naco_buffer, size_t buffer_size -> void
 	func = ptr1
 	size = sreg
 	
@@ -69,14 +69,14 @@ CORO_BUFF_PTR: .res 2
 	:
 	stx func+1
 	
-	jsr coro_swap_sp
+	jsr naco_swap_sp
 	
 	lda func+1
 	ldx func+0
 	jsr pushax
 	
-	lda #>(coro_catch - 1)
-	ldx #<(coro_catch - 1)
+	lda #>(naco_catch - 1)
+	ldx #<(naco_catch - 1)
 	jsr pushax
 	
 	lda #2
@@ -84,10 +84,10 @@ CORO_BUFF_PTR: .res 2
 	sta (CORO_BUFF_PTR), y
 	
 	; Restore the stack.
-	jmp coro_swap_sp
+	jmp naco_swap_sp
 .endproc
 
-.proc coro_finish
+.proc naco_finish
 	value = sreg
 	
 	; Pop the resume address from the coroutine stack.
@@ -103,8 +103,8 @@ CORO_BUFF_PTR: .res 2
 	rts
 .endproc
 
-.export _coro_resume
-.proc _coro_resume ; void *coro_buffer, u16 value -> u16
+.export _naco_resume
+.proc _naco_resume ; void *naco_buffer, u16 value -> u16
 	value = sreg
 	tmp = tmp1
 	
@@ -122,7 +122,7 @@ CORO_BUFF_PTR: .res 2
 	pla
 	jsr pushax
 	
-	jsr coro_swap_sp
+	jsr naco_swap_sp
 	
 	; Stash the stack register.
 	tsx
@@ -143,11 +143,11 @@ CORO_BUFF_PTR: .res 2
 	txa
 	sta (CORO_BUFF_PTR), y
 	
-	jmp coro_finish
+	jmp naco_finish
 .endproc
 
-.export _coro_yield
-.proc _coro_yield ; u16 value -> u16
+.export _naco_yield
+.proc _naco_yield ; u16 value -> u16
 	value = sreg
 	
 	; Save the resume value;
@@ -177,11 +177,11 @@ CORO_BUFF_PTR: .res 2
 		cpy #0
 		bne :-
 	
-	jsr coro_swap_sp
-	jmp coro_finish
+	jsr naco_swap_sp
+	jmp naco_finish
 .endproc
 
-.proc coro_catch ; u16 -> u16
+.proc naco_catch ; u16 -> u16
 	value = sreg
 	
 	; Save the resume value;
@@ -198,6 +198,6 @@ CORO_BUFF_PTR: .res 2
 	ldy #2
 	sta (CORO_BUFF_PTR), y
 	
-	jsr coro_swap_sp
-	jmp coro_finish
+	jsr naco_swap_sp
+	jmp naco_finish
 .endproc

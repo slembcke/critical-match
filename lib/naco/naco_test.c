@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "coro.h"
+#include "naco.h"
 
 #define CPU_STACK ((uint8_t *)0x0100)
 
@@ -21,21 +21,21 @@ void log_stack(const char *msg){
 }
 
 void func2(uintptr_t n){
-	n = coro_yield(n);
-	n = coro_yield(n);
+	n = naco_yield(n);
+	n = naco_yield(n);
 }
 
 uintptr_t func(uintptr_t n){
 	// log_stack("In func(). n: %d\n");
 	// printf("In func(). n: %04X\n", n);
-	n = coro_yield(n);
+	n = naco_yield(n);
 	// printf("Back in func(). %n\n", n);
-	n = coro_yield(n);
+	n = naco_yield(n);
 	
 	func2(n);
 	
-	n = coro_yield(n);
-	n = coro_yield(n);
+	n = naco_yield(n);
+	n = naco_yield(n);
 	
 	return 0;
 }
@@ -46,11 +46,11 @@ int main(void){
 	static uintptr_t n;
 	
 	// log_stack("before start");
-	coro_init(func, buff, sizeof(buff));
+	naco_init(func, buff, sizeof(buff));
 	
 	for(n = 1; n < 20; ++n){
 		uintptr_t value;
-		value = coro_resume(buff, n);
+		value = naco_resume(buff, n);
 		printf("main() n: %d, value: %d\n", n, value);
 		
 		if(value == 0) break;

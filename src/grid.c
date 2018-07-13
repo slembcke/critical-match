@@ -3,7 +3,7 @@
 #include <lz4.h>
 
 #include "pixler/pixler.h"
-#include "coro/coro.h"
+#include "naco/naco.h"
 #include "shared.h"
 
 static const u8 DROPS[] = {
@@ -247,11 +247,11 @@ uintptr_t grid_update_coro(uintptr_t _){
 				grid.state_timer = 0;
 			}
 			
-			coro_yield(true);
+			naco_yield(true);
 		}
 		
 		grid_tick();
-		coro_yield(true);
+		naco_yield(true);
 		
 		// Blit the blocks to the screen over several frames.
 		for(grid.state_timer = 1; grid.state_timer < GRID_H - 1; ++grid.state_timer){
@@ -262,14 +262,14 @@ uintptr_t grid_update_coro(uintptr_t _){
 				grid_set_block(idx, GRID[idx]);
 			}
 			
-			coro_yield(true);
+			naco_yield(true);
 		}
 	}
 	
 	return false;
 }
 
-static u8 coro_buff[16];
+static u8 update_coro[16];
 
 void grid_init(void){
 	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
@@ -281,10 +281,10 @@ void grid_init(void){
 	
 	grid.drop_counter = 0;
 	
-	coro_init(grid_update_coro, coro_buff, sizeof(coro_buff));
+	naco_init(grid_update_coro, update_coro, sizeof(update_coro));
 }
 
 void grid_update(void){
 	// TODO bind coroutine.
-	coro_resume(coro_buff, 0);
+	naco_resume(update_coro, 0);
 }

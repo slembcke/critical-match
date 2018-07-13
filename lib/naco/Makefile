@@ -1,9 +1,9 @@
 .PHONY: clean test
 
 clean:
-	rm -rf *.o coro_test link.log
+	rm -rf *.o naco_test link.log
 
-test: coro_test
+test: naco_test
 	sim65 -cv $<
 
 # Cancel built in rules.
@@ -15,5 +15,5 @@ test: coro_test
 %.o: %.s
 	ca65 -g $< -o $@
 
-coro_test: coro_test.o coro.o
+naco_test: naco_test.o naco.o
 	ld65 -C ld65.cfg -vm -m link.log $^ sim6502.lib -o $@

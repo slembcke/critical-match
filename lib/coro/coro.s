@@ -1,4 +1,4 @@
-; TODO implement context switching.
+; TODO Save CORO_BUFF_PTR so coroutines can call coroutines?
 
 .include "zeropage.inc"
 .macpack generic
@@ -6,14 +6,15 @@
 .import pusha, popa
 .import pushax, popax
 .import addysp, subysp
-.import incsp2
 
-; What to call when resuming a coroutine that has finished.
+; Error handler to call when resuming a coroutine that has finished.
 .import _exit
 CORO_ABORT = _exit
 
 .zeropage
 
+; Pointer to the currently running coroutine.
+; TODO document buffer layout.
 CORO_BUFF_PTR: .res 2
 
 .code
@@ -78,19 +79,38 @@ CORO_BUFF_PTR: .res 2
 	ldx #<(coro_catch - 1)
 	jsr pushax
 	
-	ldy #2
 	lda #2
+	tay
 	sta (CORO_BUFF_PTR), y
 	
 	; Restore the stack.
 	jmp coro_swap_sp
 .endproc
 
+.proc coro_finish
+	value = sreg
+	
+	; Pop the resume address from the coroutine stack.
+	jsr popax
+	pha
+	txa
+	pha
+	
+	; Load the return value.
+	lda value+0
+	ldx value+1
+	
+	rts
+.endproc
+
 .export _coro_resume
 .proc _coro_resume ; void *coro_buffer, u16 value -> u16
+	value = sreg
+	tmp = tmp1
+	
 	; Save the resume value;
-	sta sreg+0
-	stx sreg+1
+	sta value+0
+	stx value+1
 	
 	jsr popax
 	sta CORO_BUFF_PTR+0
@@ -109,40 +129,30 @@ CORO_BUFF_PTR: .res 2
 	
 	ldy #2
 	lda (CORO_BUFF_PTR), y
-	sta tmp1
-	beq @skip_copy
-		ldy #0
-		:	lda (sp), y
-			pha
-			iny
-			cpy tmp1
-			bne :-
-		jsr addysp
-	@skip_copy:
+	sta tmp
+	ldy #0
+	:	lda (sp), y
+		pha
+		iny
+		cpy tmp
+		bne :-
+	jsr addysp
 	
 	; Save the old stack register value.
 	ldy #2
 	txa
 	sta (CORO_BUFF_PTR), y
 	
-	; Pop the resume addres from the coroutine stack.
-	jsr popax
-	pha
-	txa
-	pha
-	
-	; Load the return value.
-	lda sreg+0
-	ldx sreg+1
-	
-	rts
+	jmp coro_finish
 .endproc
 
 .export _coro_yield
 .proc _coro_yield ; u16 value -> u16
+	value = sreg
+	
 	; Save the resume value;
-	sta sreg+0
-	stx sreg+1
+	sta value+0
+	stx value+1
 	
 	; Push the resume address onto the coroutine's stack.
 	pla
@@ -151,65 +161,43 @@ CORO_BUFF_PTR: .res 2
 	jsr pushax
 	
 	; Calculate stack offset. -(s - stack_offset)
-	ldy #2
+	clc
 	tsx
 	txa
-	clc
+	ldy #2
 	sbc (CORO_BUFF_PTR), y
 	eor #$FF
 	sta (CORO_BUFF_PTR), y
 	tay
 	
-	cmp #0
-	beq @skip_copy
-		jsr subysp
-		:	dey
-			pla
-			sta (sp), y
-			cpy #0
-			bne :-
-	@skip_copy:
-	
+	jsr subysp
+	:	dey
+		pla
+		sta (sp), y
+		cpy #0
+		bne :-
 	
 	jsr coro_swap_sp
-	
-	jsr popax
-	pha
-	txa
-	pha
-	
-	; Load the return value.
-	lda sreg+0
-	ldx sreg+1
-	
-	rts
+	jmp coro_finish
 .endproc
 
 .proc coro_catch ; u16 -> u16
-	; Save the resume value;
-	sta sreg+0
-	stx sreg+1
+	value = sreg
 	
-	; Invalidate the resume stack/address.
+	; Save the resume value;
+	sta value+0
+	stx value+1
+	
+	; Push error func.
+	lda #>(CORO_ABORT - 1)
+	ldx #<(CORO_ABORT - 1)
+	jsr pushax
+	
+	; Zero out the stack offset.
 	lda #0
 	ldy #2
 	sta (CORO_BUFF_PTR), y
 	
-	lda #<(CORO_ABORT - 1)
-	sta ptr1+0
-	lda #>(CORO_ABORT - 1)
-	sta ptr1+1
-	
 	jsr coro_swap_sp
-	
-	jsr popax
-	pha
-	txa
-	pha
-	
-	; Load the return value.
-	lda sreg+0
-	ldx sreg+1
-	
-	rts
+	jmp coro_finish
 .endproc

@@ -286,5 +286,5 @@ void grid_init(void){
 
 void grid_update(void){
 	// TODO bind coroutine.
-	coro_resume(0);
+	coro_resume(coro_buff, 0);
 }

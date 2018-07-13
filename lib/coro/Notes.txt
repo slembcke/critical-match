@@ -12,8 +12,3 @@ Caller stack:
 * BOTTOM (+ normal stack space)
 * Yield address.
 *TOP
-
-1493 cycles to boot.
-1923 cycles to init. ~430
-2538 cycles to resume/yield 1x. ~615
-3120 cycles to resume/yield 2x. ~580

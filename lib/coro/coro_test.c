@@ -50,7 +50,7 @@ int main(void){
 	
 	for(n = 1; n < 20; ++n){
 		uintptr_t value;
-		value = coro_resume(n);
+		value = coro_resume(buff, n);
 		printf("main() n: %d, value: %d\n", n, value);
 		
 		if(value == 0) break;

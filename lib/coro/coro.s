@@ -14,8 +14,7 @@ CORO_ABORT = _exit
 
 .zeropage
 
-CORO_BUFF_PTR = regbank
-; CORO_BUFF_PTR: .res 2
+CORO_BUFF_PTR: .res 2
 
 .code
 
@@ -88,10 +87,14 @@ CORO_BUFF_PTR = regbank
 .endproc
 
 .export _coro_resume
-.proc _coro_resume ; u16 -> u16
+.proc _coro_resume ; void *coro_buffer, u16 value -> u16
 	; Save the resume value;
 	sta sreg+0
 	stx sreg+1
+	
+	jsr popax
+	sta CORO_BUFF_PTR+0
+	stx CORO_BUFF_PTR+1
 	
 	; Push the yield address to the caller's stack.
 	pla
@@ -136,7 +139,7 @@ CORO_BUFF_PTR = regbank
 .endproc
 
 .export _coro_yield
-.proc _coro_yield ; 16 -> u16
+.proc _coro_yield ; u16 value -> u16
 	; Save the resume value;
 	sta sreg+0
 	stx sreg+1

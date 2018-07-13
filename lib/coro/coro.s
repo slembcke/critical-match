@@ -9,15 +9,13 @@
 .import incsp2
 
 ; What to call when resuming a coroutine that has finished.
-.import _abort
-CORO_ABORT = _abort
+.import _exit
+CORO_ABORT = _exit
 
-.data
+.zeropage
 
-; CORO_BUFF_PTR: .res 2
 CORO_BUFF_PTR = regbank
-
-CORO_S: .res 1 ; S register adjust value.
+; CORO_BUFF_PTR: .res 2
 
 .code
 
@@ -81,8 +79,9 @@ CORO_S: .res 1 ; S register adjust value.
 	ldx #<(coro_catch - 1)
 	jsr pushax
 	
+	ldy #2
 	lda #2
-	sta CORO_S ; TODO
+	sta (CORO_BUFF_PTR), y
 	
 	; Restore the stack.
 	jmp coro_swap_sp
@@ -105,19 +104,23 @@ CORO_S: .res 1 ; S register adjust value.
 	; Stash the stack register.
 	tsx
 	
-	lda CORO_S
+	ldy #2
+	lda (CORO_BUFF_PTR), y
+	sta tmp1
 	beq @skip_copy
 		ldy #0
 		:	lda (sp), y
 			pha
 			iny
-			cpy CORO_S
+			cpy tmp1
 			bne :-
 		jsr addysp
 	@skip_copy:
 	
 	; Save the old stack register value.
-	stx CORO_S
+	ldy #2
+	txa
+	sta (CORO_BUFF_PTR), y
 	
 	; Pop the resume addres from the coroutine stack.
 	jsr popax
@@ -144,13 +147,14 @@ CORO_S: .res 1 ; S register adjust value.
 	pla
 	jsr pushax
 	
-	; Calculate stack offset. -(s - CORO_S)
+	; Calculate stack offset. -(s - stack_offset)
+	ldy #2
 	tsx
 	txa
 	clc
-	sbc CORO_S
+	sbc (CORO_BUFF_PTR), y
 	eor #$FF
-	sta CORO_S
+	sta (CORO_BUFF_PTR), y
 	tay
 	
 	cmp #0
@@ -179,14 +183,14 @@ CORO_S: .res 1 ; S register adjust value.
 .endproc
 
 .proc coro_catch ; u16 -> u16
-	jmp _abort
 	; Save the resume value;
 	sta sreg+0
 	stx sreg+1
 	
 	; Invalidate the resume stack/address.
 	lda #0
-	sta CORO_S
+	ldy #2
+	sta (CORO_BUFF_PTR), y
 	
 	lda #<(CORO_ABORT - 1)
 	sta ptr1+0

@@ -37,11 +37,10 @@ uintptr_t func(uintptr_t n){
 	n = coro_yield(n);
 	n = coro_yield(n);
 	
-	coro_yield(0);
 	return 0;
 }
 
-uint8_t buff[32];
+uint8_t buff[64];
 
 int main(void){
 	static uintptr_t n;

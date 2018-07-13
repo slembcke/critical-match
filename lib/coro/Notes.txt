@@ -1,0 +1,13 @@
+Coroutine stack:
+* BOTTOM (+ normal stack space)
+* Resume address.
+* CPU stack items (including catch func)
+* TOP
+* ... empty space
+* ???
+* END
+
+Caller stack:
+* BOTTOM (+ normal stack space)
+* Yield address.
+*TOP

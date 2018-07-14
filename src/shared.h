@@ -52,8 +52,18 @@ typedef struct {} GameState;
 #define GRID_W 8
 #define GRID_H 12
 #define GRID_BYTES (GRID_W*GRID_H)
+
 extern u8 GRID[];
 extern u8 COLUMN_HEIGHT[];
+
+// Aliases for left/right/up/down from current block.
+#define GRID_L (GRID + -1)
+#define GRID_R (GRID +  1)
+#define GRID_U (GRID +  GRID_W)
+#define GRID_D (GRID + -GRID_W)
+
+#define COLUMN_HEIGHT_L (COLUMN_HEIGHT + -1)
+#define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
 
 #define grid_block_idx(x, y) (u8)(GRID_W*(y) | (x))
 

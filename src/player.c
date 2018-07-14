@@ -141,16 +141,16 @@ static void player_cursor_update(void){
 		} else if(JOY_DOWN(player.joy)){
 			// Place blocks in the character's current square, do nothing.
 		} else {
-			// Start down a row + left/right.
-			if(player.facingRight){
-				idx += -GRID_W + 1;
-			} else {
-				idx += -GRID_W - 1;
-			}
+			// Start at the left/right block.
+			idx += (player.facingRight ? 1 : -1);
 			
-			// Move up twice to look for clear locations.
-			if(GRID[idx] != 0) idx += GRID_W;
-			if(GRID[idx] != 0) idx += GRID_W;
+			if(GRID[idx] == BLOCK_EMPTY){
+				// If that block is empty, try the blok below it too.
+				if((GRID - GRID_W)[idx] == BLOCK_EMPTY) idx -= GRID_W;
+			} else {
+				// Try moving up a block to loop for a clear spot.
+				idx += GRID_W;
+			}
 		}
 	} else {
 		if(JOY_UP(player.joy)){

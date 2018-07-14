@@ -12,15 +12,6 @@ u8 GRID[GRID_BYTES];
 // Height of each stacked column.
 u8 COLUMN_HEIGHT[GRID_W];
 
-// Aliases for left/right/up/down from current block.
-#define GRID_L (GRID + -1)
-#define GRID_R (GRID +  1)
-#define GRID_U (GRID +  GRID_W)
-#define GRID_D (GRID + -GRID_W)
-
-#define COLUMN_HEIGHT_L (COLUMN_HEIGHT + -1)
-#define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
-
 typedef struct {
 	u8 drop_cursor;
 	u8 column_cursor;

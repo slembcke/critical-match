@@ -22,7 +22,9 @@ u8 COLUMN_HEIGHT[GRID_W];
 #define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
 
 typedef struct {
-	u8 drop_counter;
+	u8 drop_cursor;
+	u8 column_cursor;
+	
 	u8 state_timer;
 } Grid;
 
@@ -160,37 +162,12 @@ static bool grid_any_falling(void){
 	return false;
 }
 
-uint8_t lfsr8(void);
-
-static uint8_t shuffle_cursor;
-static uint8_t DROPS[] = {
-	0, 1, 2, 3,
-	0, 1, 2, 3,
-	0, 1, 2, 3,
-	0, 1, 2, 3,
-	4, 5, 6, 7,
-	0, 1, 2, 3,
-	0, 1, 2, 3,
-	0, 1, 2, 3,
-	0, 1, 2, 3,
-	4, 5, 6, 7,
-};
-
-static const u8 BLOCKS[] = {
-	BLOCK_CHEST | BLOCK_COLOR_BLUE,
-	BLOCK_CHEST | BLOCK_COLOR_RED,
-	BLOCK_CHEST | BLOCK_COLOR_GREEN,
-	BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_KEY | BLOCK_COLOR_BLUE,
-	BLOCK_KEY | BLOCK_COLOR_RED,
-	BLOCK_KEY | BLOCK_COLOR_GREEN,
-	BLOCK_KEY | BLOCK_COLOR_PURPLE,
-};
+u8 lfsr8(void);
 
 // TODO rewrite in asm?
-static uint8_t lru_shuffle(register uint8_t *arr, uint8_t size, uint8_t mask, register uint8_t *cursor){
-	uint8_t value;
-	uint8_t idx = (*cursor) + (lfsr8() & mask);
+static u8 lru_shuffle(register u8 *arr, u8 size, u8 mask, register u8 *cursor){
+	u8 value;
+	u8 idx = (*cursor) + (lfsr8() & mask);
 	if(idx >= size) idx -= size;
 	
 	value = arr[idx];
@@ -203,8 +180,37 @@ static uint8_t lru_shuffle(register uint8_t *arr, uint8_t size, uint8_t mask, re
 	return value;
 }
 
-static uint8_t get_shuffled_block(void){
-	return BLOCKS[lru_shuffle(DROPS, sizeof(DROPS), 0x7, &shuffle_cursor)];
+static u8 get_shuffled_block(void){
+	static u8 DROPS[] = {
+		0, 1, 2, 3,
+		0, 1, 2, 3,
+		0, 1, 2, 3,
+		0, 1, 2, 3,
+		4, 5, 6, 7,
+		0, 1, 2, 3,
+		0, 1, 2, 3,
+		0, 1, 2, 3,
+		0, 1, 2, 3,
+		4, 5, 6, 7,
+	};
+
+	static const u8 BLOCKS[] = {
+		BLOCK_CHEST | BLOCK_COLOR_BLUE,
+		BLOCK_CHEST | BLOCK_COLOR_RED,
+		BLOCK_CHEST | BLOCK_COLOR_GREEN,
+		BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+		BLOCK_KEY | BLOCK_COLOR_BLUE,
+		BLOCK_KEY | BLOCK_COLOR_RED,
+		BLOCK_KEY | BLOCK_COLOR_GREEN,
+		BLOCK_KEY | BLOCK_COLOR_PURPLE,
+	};
+	
+	return BLOCKS[lru_shuffle(DROPS, sizeof(DROPS), 0x7, &grid.drop_cursor)];
+}
+
+static u8 get_shuffled_column(void){
+	static u8 COLUMNS[] = {1, 2, 3, 4, 5, 6};
+	return lru_shuffle(COLUMNS, sizeof(COLUMNS), 0x3, &grid.column_cursor);
 }
 
 static void grid_tick(void){
@@ -230,7 +236,7 @@ static void grid_tick(void){
 	if(!grid_any_falling()){
 		u8 block;
 		
-		ix = 3;
+		ix = get_shuffled_column();
 		
 		// Push the first block directly onto the screen.
 		block = get_shuffled_block();
@@ -240,9 +246,6 @@ static void grid_tick(void){
 		block = get_shuffled_block();
 		idx = grid_block_idx(ix, GRID_H - 1);
 		GRID[idx] = block;
-		
-		grid.drop_counter += 1;
-		// TODO wrap drop counter.
 	}
 }
 
@@ -288,10 +291,11 @@ void grid_init(void){
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
 	memset(GRID, BLOCK_BORDER, 8);
 	
-	grid.drop_counter = 0;
-	{
-		register unsigned loops;
-		for(loops = 0; loops < 2048; ++loops) get_shuffled_block();
+	grid.drop_cursor = 0;
+	for(idx = 255; idx > 0; --idx){
+		get_shuffled_block();
+		get_shuffled_block();
+		get_shuffled_column();
 	}
 	
 	naco_init(grid_update_coro, update_coro, sizeof(update_coro));

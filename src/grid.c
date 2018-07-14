@@ -163,32 +163,47 @@ static bool grid_any_falling(void){
 uint8_t lfsr8(void);
 
 static uint8_t shuffle_cursor;
-static uint8_t BLOCKS[] = {
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_KEY   | BLOCK_COLOR_BLUE, BLOCK_KEY   | BLOCK_COLOR_RED, BLOCK_KEY   | BLOCK_COLOR_GREEN, BLOCK_KEY   | BLOCK_COLOR_PURPLE,
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_KEY   | BLOCK_COLOR_BLUE, BLOCK_KEY   | BLOCK_COLOR_RED, BLOCK_KEY   | BLOCK_COLOR_GREEN, BLOCK_KEY   | BLOCK_COLOR_PURPLE,
+static uint8_t DROPS[] = {
+	0, 1, 2, 3,
+	0, 1, 2, 3,
+	0, 1, 2, 3,
+	0, 1, 2, 3,
+	4, 5, 6, 7,
+	0, 1, 2, 3,
+	0, 1, 2, 3,
+	0, 1, 2, 3,
+	0, 1, 2, 3,
+	4, 5, 6, 7,
 };
 
-static uint8_t get_shuffled_block(void){
-	uint8_t block;
-	uint8_t idx = shuffle_cursor + (lfsr8() & 0x7);
-	if(idx >= sizeof(BLOCKS)) idx -= sizeof(BLOCKS);
+static const u8 BLOCKS[] = {
+	BLOCK_CHEST | BLOCK_COLOR_BLUE,
+	BLOCK_CHEST | BLOCK_COLOR_RED,
+	BLOCK_CHEST | BLOCK_COLOR_GREEN,
+	BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_KEY | BLOCK_COLOR_BLUE,
+	BLOCK_KEY | BLOCK_COLOR_RED,
+	BLOCK_KEY | BLOCK_COLOR_GREEN,
+	BLOCK_KEY | BLOCK_COLOR_PURPLE,
+};
 
-	block = BLOCKS[idx];
-	BLOCKS[idx] = BLOCKS[shuffle_cursor];
-	BLOCKS[shuffle_cursor] = block;
+static uint8_t shuffle(void){
+	uint8_t value;
+	uint8_t idx = shuffle_cursor + (lfsr8() & 0x7);
+	if(idx >= sizeof(DROPS)) idx -= sizeof(DROPS);
+
+	value = DROPS[idx];
+	DROPS[idx] = DROPS[shuffle_cursor];
+	DROPS[shuffle_cursor] = value;
 	
 	++shuffle_cursor;
-	if(shuffle_cursor >= sizeof(BLOCKS)) shuffle_cursor = 0;
+	if(shuffle_cursor >= sizeof(DROPS)) shuffle_cursor = 0;
 	
-	return block;
+	return value;
+}
+
+static uint8_t get_shuffled_block(void){
+	return BLOCKS[shuffle()];
 }
 
 static void grid_tick(void){

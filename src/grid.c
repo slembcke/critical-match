@@ -187,23 +187,24 @@ static const u8 BLOCKS[] = {
 	BLOCK_KEY | BLOCK_COLOR_PURPLE,
 };
 
-static uint8_t shuffle(void){
+// TODO rewrite in asm?
+static uint8_t lru_shuffle(register uint8_t *arr, uint8_t size, uint8_t mask, register uint8_t *cursor){
 	uint8_t value;
-	uint8_t idx = shuffle_cursor + (lfsr8() & 0x7);
-	if(idx >= sizeof(DROPS)) idx -= sizeof(DROPS);
-
-	value = DROPS[idx];
-	DROPS[idx] = DROPS[shuffle_cursor];
-	DROPS[shuffle_cursor] = value;
+	uint8_t idx = (*cursor) + (lfsr8() & mask);
+	if(idx >= size) idx -= size;
 	
-	++shuffle_cursor;
-	if(shuffle_cursor >= sizeof(DROPS)) shuffle_cursor = 0;
+	value = arr[idx];
+	arr[idx] = arr[*cursor];
+	arr[*cursor] = value;
+	
+	++(*cursor);
+	if(*cursor >= size) *cursor = 0;
 	
 	return value;
 }
 
 static uint8_t get_shuffled_block(void){
-	return BLOCKS[shuffle()];
+	return BLOCKS[lru_shuffle(DROPS, sizeof(DROPS), 0x7, &shuffle_cursor)];
 }
 
 static void grid_tick(void){

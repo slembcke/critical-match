@@ -1,7 +1,8 @@
 TODO:
-* Randomize drops.
+* You can put down a stock thats taller than the screen.
 * Score.
 * Combo.
+* Speedup.
 * Coins.
 * Keys don't match with keys.
 * Garbage blocks?

@@ -6,41 +6,6 @@
 #include "naco/naco.h"
 #include "shared.h"
 
-static const u8 DROPS[] = {
-	0x33, 0x12, 0x20, 0x42, 0x17, 0x00, 0x01, 0x51, 0x70, 0x22, 0x03, 0x26, 0x23, 0x10, 0x04, 0x11, 0x31, 0x13, 0x35, 0x62, 0x31, 0x03, 0x22, 0x30,
-	0x12, 0x13, 0x63, 0x23, 0x51, 0x11, 0x32, 0x12, 0x70, 0x21, 0x36, 0x00, 0x35, 0x22, 0x23, 0x00, 0x40, 0x14, 0x03, 0x27, 0x02, 0x01, 0x30, 0x31,
-	0x50, 0x00, 0x20, 0x03, 0x34, 0x20, 0x11, 0x12, 0x71, 0x10, 0x33, 0x21, 0x03, 0x35, 0x27, 0x11, 0x22, 0x61, 0x36, 0x32, 0x02, 0x13, 0x43, 0x02,
-	0x10, 0x16, 0x32, 0x11, 0x33, 0x02, 0x62, 0x13, 0x04, 0x41, 0x25, 0x20, 0x21, 0x70, 0x51, 0x23, 0x02, 0x33, 0x00, 0x37, 0x12, 0x31, 0x00, 0x23,
-	0x30, 0x02, 0x22, 0x33, 0x62, 0x01, 0x25, 0x52, 0x00, 0x26, 0x10, 0x03, 0x10, 0x23, 0x71, 0x14, 0x12, 0x07, 0x33, 0x21, 0x41, 0x31, 0x10, 0x33,
-	0x10, 0x37, 0x01, 0x23, 0x20, 0x13, 0x02, 0x10, 0x31, 0x52, 0x01, 0x02, 0x36, 0x25, 0x74, 0x63, 0x13, 0x22, 0x40, 0x32, 0x00, 0x11, 0x33, 0x21,
-	0x10, 0x21, 0x21, 0x02, 0x42, 0x11, 0x25, 0x27, 0x10, 0x11, 0x03, 0x31, 0x63, 0x53, 0x00, 0x00, 0x30, 0x34, 0x72, 0x33, 0x36, 0x23, 0x12, 0x02,
-	0x23, 0x20, 0x17, 0x03, 0x14, 0x05, 0x00, 0x31, 0x51, 0x33, 0x63, 0x41, 0x02, 0x11, 0x20, 0x32, 0x10, 0x12, 0x32, 0x32, 0x21, 0x06, 0x70, 0x23,
-};
-
-static const u8 DROP_BLOCKS[] = {
-	BLOCK_CHEST | BLOCK_COLOR_BLUE,
-	BLOCK_CHEST | BLOCK_COLOR_RED,
-	BLOCK_CHEST | BLOCK_COLOR_GREEN,
-	BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-	BLOCK_KEY | BLOCK_COLOR_BLUE,
-	BLOCK_KEY | BLOCK_COLOR_RED,
-	BLOCK_KEY | BLOCK_COLOR_GREEN,
-	BLOCK_KEY | BLOCK_COLOR_PURPLE,
-};
-
-static u8 DROP_X[] = {
-	4, 5, 6, 2, 3, 1,
-	3, 2, 1, 5, 4, 6,
-	1, 4, 2, 6, 5, 3,
-	4, 1, 6, 5, 3, 2,
-	4, 5, 2, 6, 1, 3,
-	2, 6, 4, 1, 3, 5,
-	5, 2, 6, 1, 3, 4,
-	2, 3, 4, 5, 1, 6,
-	6, 1, 3, 4, 2, 5,
-	1, 3, 2, 4, 5, 6,
-};
-
 // Block values in the grid.
 u8 GRID[GRID_BYTES];
 
@@ -195,6 +160,37 @@ static bool grid_any_falling(void){
 	return false;
 }
 
+uint8_t lfsr8(void);
+
+static uint8_t shuffle_cursor;
+static uint8_t BLOCKS[] = {
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_KEY   | BLOCK_COLOR_BLUE, BLOCK_KEY   | BLOCK_COLOR_RED, BLOCK_KEY   | BLOCK_COLOR_GREEN, BLOCK_KEY   | BLOCK_COLOR_PURPLE,
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_CHEST | BLOCK_COLOR_BLUE, BLOCK_CHEST | BLOCK_COLOR_RED, BLOCK_CHEST | BLOCK_COLOR_GREEN, BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+	BLOCK_KEY   | BLOCK_COLOR_BLUE, BLOCK_KEY   | BLOCK_COLOR_RED, BLOCK_KEY   | BLOCK_COLOR_GREEN, BLOCK_KEY   | BLOCK_COLOR_PURPLE,
+};
+
+static uint8_t get_shuffled_block(void){
+	uint8_t block;
+	uint8_t idx = shuffle_cursor + (lfsr8() & 0x7);
+	if(idx >= sizeof(BLOCKS)) idx -= sizeof(BLOCKS);
+
+	block = BLOCKS[idx];
+	BLOCKS[idx] = BLOCKS[shuffle_cursor];
+	BLOCKS[shuffle_cursor] = block;
+	
+	++shuffle_cursor;
+	if(shuffle_cursor >= sizeof(BLOCKS)) shuffle_cursor = 0;
+	
+	return block;
+}
+
 static void grid_tick(void){
 	// Make blocks fall.
 	for(iy = 1; iy < GRID_H - 1; ++iy){
@@ -216,19 +212,16 @@ static void grid_tick(void){
 	// TODO fail if column height prevents adding block?
 	// Drop in new blocks if the field is clear.
 	if(!grid_any_falling()){
-		u8 drop = DROPS[grid.drop_counter];
 		u8 block;
 		
-		ix = DROP_X[grid.drop_counter];
+		ix = 3;
 		
 		// Push the first block directly onto the screen.
-		idx = (drop >> 0) & 0x7;
-		block = DROP_BLOCKS[idx];
+		block = get_shuffled_block();
 		grid_set_block(grid_block_idx(ix, GRID_H - 2), block);
 		
 		// Write the second block into GRID and let it fall onto the screen.
-		idx = (drop >> 4) & 0x7;
-		block = DROP_BLOCKS[idx];
+		block = get_shuffled_block();
 		idx = grid_block_idx(ix, GRID_H - 1);
 		GRID[idx] = block;
 		
@@ -280,6 +273,10 @@ void grid_init(void){
 	memset(GRID, BLOCK_BORDER, 8);
 	
 	grid.drop_counter = 0;
+	{
+		register unsigned loops;
+		for(loops = 0; loops < 2048; ++loops) get_shuffled_block();
+	}
 	
 	naco_init(grid_update_coro, update_coro, sizeof(update_coro));
 }

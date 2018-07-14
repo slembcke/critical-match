@@ -27,6 +27,7 @@ ASMSRC = \
 	gfx/gfx.s \
 	dat/data.s \
 	lib/naco/naco.s \
+	lib/pixler/lfsr8.s \
 	lib/pixler/pixler_boot.s \
 	lib/pixler/pixler_zeropage.s \
 	lib/pixler/pixler_nmi.s \

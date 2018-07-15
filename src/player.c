@@ -177,10 +177,15 @@ static void player_cursor_update(void){
 	}
 	
 	if(player.blocks_held[0] != BLOCK_EMPTY){
-		// We are holding a block.
-		// Need to make sure enough space is clear to drop it.
+		// We are holding a block, and need to make sure enough space is clear to drop it.
+		// Abusing ix to copy idx.
 		for(iy = 0, ix = idx; player.blocks_held[iy]; ++iy, ix += GRID_W){
-			if(GRID[ix] != BLOCK_EMPTY) return;
+			if(
+				// Don't allow blocks to be placed above the top row of the board.
+				ix > GRID_BYTES - GRID_W ||
+				// Don't allow blocks to be placed where other blocks are falling.
+				GRID[ix] != BLOCK_EMPTY
+			) return;
 		}
 		
 		player.cursor_idx = idx;

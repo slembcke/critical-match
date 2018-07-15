@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <lz4.h>
 
 #include "pixler/pixler.h"
@@ -16,6 +17,8 @@ u8 COLUMN_HEIGHT[GRID_W];
 #define MIN_FALL_TICKS 15
 #define FALL_TICKS_DEC 5
 #define DROPS_PER_SPEEDUP 16
+#define COMBO_TIMEOUT 8
+#define MAX_COMBO 5
 
 typedef struct {
 	u8 drop_cursor;
@@ -23,8 +26,12 @@ typedef struct {
 	
 	u8 speedup_counter;
 	u8 block_fall_ticks;
-	u8 state_timer;
 	
+	u8 combo;
+	u8 combo_ticks;
+	u16 score;
+	
+	u8 state_timer;
 	u8 update_coro[16];
 } Grid;
 
@@ -213,50 +220,89 @@ static u8 get_shuffled_column(void){
 	return lru_shuffle(COLUMNS, sizeof(COLUMNS), 0x3, &grid.column_cursor);
 }
 
-static void grid_tick(void){
-	// Make blocks fall.
+static void grid_drop_block(void){
+	// TODO fail if column height prevents adding block?
+
+	u8 block;
+	
+	ix = get_shuffled_column();
+	
+	// Push the first block directly onto the screen.
+	block = get_shuffled_block();
+	grid_set_block(grid_block_idx(ix, GRID_H - 2), block);
+	
+	// Write the second block into GRID and let it fall onto the screen.
+	block = get_shuffled_block();
+	idx = grid_block_idx(ix, GRID_H - 1);
+	GRID[idx] = block;
+}
+
+static void grid_update_fall_speed(void){
+	--grid.speedup_counter;
+	if(grid.speedup_counter == 0){
+		grid.block_fall_ticks -= FALL_TICKS_DEC;
+		if(grid.block_fall_ticks < MIN_FALL_TICKS){
+			grid.block_fall_ticks = MIN_FALL_TICKS;
+		}
+		
+		grid.speedup_counter = DROPS_PER_SPEEDUP;
+	}
+}
+
+static void grid_blocks_tick(void){
+	register u8 matched_blocks = 0;
+	
 	for(iy = 1; iy < GRID_H - 1; ++iy){
 		for(ix = 1; ix < GRID_W - 1; ++ix){
 			idx = grid_block_idx(ix, iy);
 			
 			if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
+				// Block is unsupported, make it fall.
 				GRID[idx] = GRID_U[idx];
 				GRID_U[idx] = BLOCK_EMPTY;
 			} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
-				// Remove unlocked blocks.
+				// Match out unlocked blocks.
+				if(GRID[idx] & BLOCK_TYPE_CHEST) ++matched_blocks;
 				GRID[idx] = BLOCK_EMPTY;
 			}
 		}
 	}
 	
-	grid_update_column_height();
+	if(matched_blocks > 0){
+		grid.score += matched_blocks*grid.combo;
+		if(grid.combo < MAX_COMBO) ++grid.combo;
+		grid.combo_ticks = COMBO_TIMEOUT;
+	} else if(grid.combo_ticks == 0){
+		grid.combo = 1;
+	} else {
+		--grid.combo_ticks;
+	}
 	
-	// TODO fail if column height prevents adding block?
-	// Drop in new blocks if the field is clear.
+	{
+		static const char HEX[] = "0123456789ABCDEF";
+		px_buffer_inc(PX_INC1);
+		px_buffer_data(8, NT_ADDR(0, 0, 0));
+		
+		PX.buffer[0] = HEX[(grid.score >> 12) & 0xF];
+		PX.buffer[1] = HEX[(grid.score >>  8) & 0xF];
+		PX.buffer[2] = HEX[(grid.score >>  4) & 0xF];
+		PX.buffer[3] = HEX[(grid.score >>  0) & 0xF];
+		PX.buffer[4] = 'x';
+		PX.buffer[5] = HEX[grid.combo];
+		PX.buffer[6] = '@';
+		PX.buffer[7] = HEX[grid.combo_ticks];
+	}
+	
+	grid_update_column_height();
+}
+
+static void grid_tick(void){
+	grid_blocks_tick();
+	
+	// Drop in new blocks if the field has settled.
 	if(!grid_any_falling()){
-		u8 block;
-		
-		ix = get_shuffled_column();
-		
-		// Push the first block directly onto the screen.
-		block = get_shuffled_block();
-		grid_set_block(grid_block_idx(ix, GRID_H - 2), block);
-		
-		// Write the second block into GRID and let it fall onto the screen.
-		block = get_shuffled_block();
-		idx = grid_block_idx(ix, GRID_H - 1);
-		GRID[idx] = block;
-		
-		// Update the falling speed.
-		--grid.speedup_counter;
-		if(grid.speedup_counter == 0){
-			grid.block_fall_ticks -= FALL_TICKS_DEC;
-			if(grid.block_fall_ticks < MIN_FALL_TICKS){
-				grid.block_fall_ticks = MIN_FALL_TICKS;
-			}
-			
-			grid.speedup_counter = DROPS_PER_SPEEDUP;
-		}
+		grid_drop_block();
+		grid_update_fall_speed();
 	}
 }
 
@@ -274,6 +320,7 @@ uintptr_t grid_update_coro(uintptr_t _){
 		}
 		
 		grid_tick();
+		// debug_hex((grid.combo << 4) | (grid.combo_ticks << 0));
 		naco_yield(true);
 		
 		// Blit the blocks to the screen over several frames.
@@ -310,6 +357,10 @@ void grid_init(void){
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_ticks = 60;
+	
+	grid.combo = 1;
+	grid.combo_ticks = 0;
+	grid.score = 0;
 	
 	naco_init(grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 }

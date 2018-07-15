@@ -172,14 +172,20 @@ static void player_cursor_update(void){
 			}
 			
 			// Move down a row if it's empty.
-			if(GRID[idx] == 0) idx -= GRID_W;
+			if(GRID[idx] == BLOCK_EMPTY) idx -= GRID_W;
 		}
 	}
 	
-	block = GRID[idx];
-	if(!player.blocks_held[0] && block > BLOCK_BORDER){
+	if(player.blocks_held[0] != BLOCK_EMPTY){
+		// We are holding a block.
+		// Need to make sure enough space is clear to drop it.
+		for(iy = 0, ix = idx; player.blocks_held[iy]; ++iy, ix += GRID_W){
+			if(GRID[ix] != BLOCK_EMPTY) return;
+		}
+		
 		player.cursor_idx = idx;
-	} else if(player.blocks_held[0] && block == 0){
+	} else if(GRID[idx] > BLOCK_BORDER){
+		// Not holding a block, and there is one to pick up.
 		player.cursor_idx = idx;
 	}
 }
@@ -269,27 +275,23 @@ void player_pick_up(void){
 }
 
 void player_drop(void){
-	for(iy = 0, idx = player.cursor_idx; player.blocks_held[iy]; ++iy, idx += GRID_W){
-		if(GRID[idx] != 0){
-			// Area not clear, can't put down the stack.
-			// TODO sound?
-			return;
+	if(player.cursor_idx){
+		for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, iy += 1){
+			grid_set_block(idx, player.blocks_held[iy]);
+			player.blocks_held[iy] = 0;
+			
+			if(JOY_DOWN(player.joy)) player.pos_y += 16*256;
 		}
-	}
-	
-	for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, iy += 1){
-		grid_set_block(idx, player.blocks_held[iy]);
-		player.blocks_held[iy] = 0;
 		
-		if(JOY_DOWN(player.joy)) player.pos_y += 16*256;
+		player.cursor_idx = 0;
+		
+		grid_update_column_height();
+		
+		// Wait for the PPU buffer to flush.
+		px_wait_nmi();
+	} else {
+		// TODO play "denied" sound?
 	}
-	
-	player.cursor_idx = 0;
-	
-	grid_update_column_height();
-	
-	// Wait for the PPU buffer to flush.
-	px_wait_nmi();
 }
 
 void player_tick(u8 joy){

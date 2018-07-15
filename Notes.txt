@@ -1,7 +1,6 @@
 TODO:
 * Score.
 * Combo.
-* Speedup.
 * Coins.
 * Keys don't match with keys.
 * Garbage blocks?

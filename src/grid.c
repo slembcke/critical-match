@@ -12,11 +12,20 @@ u8 GRID[GRID_BYTES];
 // Height of each stacked column.
 u8 COLUMN_HEIGHT[GRID_W];
 
+#define MAX_FALL_TICKS 60
+#define MIN_FALL_TICKS 15
+#define FALL_TICKS_DEC 5
+#define DROPS_PER_SPEEDUP 16
+
 typedef struct {
 	u8 drop_cursor;
 	u8 column_cursor;
 	
+	u8 speedup_counter;
+	u8 block_fall_ticks;
 	u8 state_timer;
+	
+	u8 update_coro[16];
 } Grid;
 
 static Grid grid;
@@ -237,6 +246,17 @@ static void grid_tick(void){
 		block = get_shuffled_block();
 		idx = grid_block_idx(ix, GRID_H - 1);
 		GRID[idx] = block;
+		
+		// Update the falling speed.
+		--grid.speedup_counter;
+		if(grid.speedup_counter == 0){
+			grid.block_fall_ticks -= FALL_TICKS_DEC;
+			if(grid.block_fall_ticks < MIN_FALL_TICKS){
+				grid.block_fall_ticks = MIN_FALL_TICKS;
+			}
+			
+			grid.speedup_counter = DROPS_PER_SPEEDUP;
+		}
 	}
 }
 
@@ -244,7 +264,7 @@ uintptr_t grid_update_coro(uintptr_t _){
 	while(true){
 		// Look for matches while waiting for the next tick.
 		// TODO magic frame number.
-		for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer){
+		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_ticks; ++grid.state_timer){
 			if(grid_open_chests()){
 				// Prevent the timer from advancing as long as matches are happening.
 				grid.state_timer = 0;
@@ -272,8 +292,6 @@ uintptr_t grid_update_coro(uintptr_t _){
 	return false;
 }
 
-static u8 update_coro[16];
-
 void grid_init(void){
 	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
 	
@@ -283,16 +301,19 @@ void grid_init(void){
 	memset(GRID, BLOCK_BORDER, 8);
 	
 	grid.drop_cursor = 0;
+	grid.column_cursor = 0;
 	for(idx = 255; idx > 0; --idx){
 		get_shuffled_block();
 		get_shuffled_block();
 		get_shuffled_column();
 	}
 	
-	naco_init(grid_update_coro, update_coro, sizeof(update_coro));
+	grid.speedup_counter = DROPS_PER_SPEEDUP;
+	grid.block_fall_ticks = 60;
+	
+	naco_init(grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 }
 
 void grid_update(void){
-	// TODO bind coroutine.
-	naco_resume(update_coro, 0);
+	naco_resume(grid.update_coro, 0);
 }

@@ -227,7 +227,7 @@ static void grid_drop_block(void){
 	idx = grid_block_idx(ix, GRID_H - 2);
 	
 	// Game over if the drop location isn't clear.
-	if(GRID[idx] != BLOCK_EMPTY) exit(0);
+	if(GRID[idx] != BLOCK_EMPTY) game_over();
 	
 	// Push the first block directly onto the screen.
 	block = get_shuffled_block();

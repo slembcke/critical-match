@@ -43,6 +43,8 @@ static GameState loop(void){
 }
 
 GameState board(void){
+	px_ppu_disable();
+	
 	player_init();
 	grid_init();
 
@@ -93,6 +95,19 @@ GameState board(void){
 	// }
 
 	return loop();
+}
+
+GameState game_over(void){
+	static const char *msg = "GAME OVER";
+	px_ppu_disable();
+	
+	px_addr(NT_ADDR(0, 0, 0));
+	px_fill(32*30, 0x00);
+	
+	px_addr(NT_ADDR(0, 10, 12));
+	px_blit(strlen(msg), msg);
+	
+	debug_freeze();
 }
 
 extern u8 gfx_neschar_lz4chr[];

@@ -7,19 +7,17 @@
 #include "pixler/pixler.h"
 #include "shared.h"
 
-GameState debug_crash(){
-	// TODO need to implement a reset vector.
-	return debug_crash();
+void debug_crash(){
+	while(true){}
 }
 
-GameState debug_freeze(){
+void debug_freeze(){
+	// Finish the current frame.
 	px_ppu_enable();
 	px_wait_nmi();
 	
-	
+	// Thene loop forever.
 	while(true){}
-	
-	return debug_freeze();
 }
 
 void debug_hex(u16 value){
@@ -29,11 +27,6 @@ void debug_hex(u16 value){
 	PX.buffer[2] = _hextab[(value >> 0x4) & 0xF];
 	PX.buffer[1] = _hextab[(value >> 0x8) & 0xF];
 	PX.buffer[0] = _hextab[(value >> 0xC) & 0xF];
-}
-
-GameState debug_display(void){
-	px_ppu_enable();
-	return debug_freeze();
 }
 
 GameState debug_palette(){

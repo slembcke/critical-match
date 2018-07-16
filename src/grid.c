@@ -136,6 +136,9 @@ static bool grid_open_chests(void){
 		if((block & BLOCK_TYPE_MASK) == BLOCK_TYPE_CHEST){
 			// Change chests into open chests.
 			block ^= BLOCK_TYPE_CHEST ^ BLOCK_TYPE_OPEN;
+			
+			// Emit a coin.
+			coin_at(idx);
 		}
 		
 		grid_set_block(idx, block | BLOCK_STATUS_MATCHING | BLOCK_STATUS_UNLOCKED);

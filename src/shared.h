@@ -75,6 +75,8 @@ void grid_update_column_height(void);
 void player_init(void);
 void player_tick(u8 joy);
 
+void coin_at(u8 idx);
+
 GameState main_menu(void);
 GameState board(void);
 GameState pause(void);

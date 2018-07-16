@@ -308,7 +308,6 @@ static void grid_tick(void){
 uintptr_t grid_update_coro(uintptr_t _){
 	while(true){
 		// Look for matches while waiting for the next tick.
-		// TODO magic frame number.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_ticks; ++grid.state_timer){
 			if(grid_open_chests()){
 				// Prevent the timer from advancing as long as matches are happening.

@@ -3,7 +3,7 @@ TODO:
 * Coin particles.
 * Show next block/location.
 * Grappling hook.
-* Animate chest unlocking slower.
+* Animate chest unlocking more slowly.
 * "Also on Switch" screen.
 * Attract mode.
 

@@ -8,6 +8,9 @@ extern u8 ix, iy, idx;
 #pragma zpsym("iy");
 #pragma zpsym("idx");
 
+extern u8 joy0, joy1;
+extern const u8 GAME_PALETTE[];
+
 typedef struct {} Music;
 extern const Music MUSIC[];
 
@@ -16,10 +19,9 @@ void music_play(u8 song);
 void music_pause();
 void music_stop();
 
-extern u8 joy0, joy1;
-extern const u8 GAME_PALETTE[];
-
-typedef struct {} GameState;
+void player_sprite(u8 x, u8 y, u8 frame);
+void block_sprite(u8 x, u8 y, u8 block);
+void cursor_sprite(u8 x, u8 y, u8 height);
 
 // Block color.
 #define BLOCK_COLOR_MASK 0x03
@@ -40,6 +42,7 @@ typedef struct {} GameState;
 #define BLOCK_STATUS_MATCHABLE 0x10
 #define BLOCK_STATUS_MATCHING 0x20
 #define BLOCK_STATUS_UNLOCKED 0x40
+#define BLOCK_GFX_MASK (~BLOCK_STATUS_MASK)
 
 // Misc block defs.
 #define BLOCK_EMPTY 0x00
@@ -71,14 +74,17 @@ void grid_set_block(u8 index, u8 block);
 void grid_init(void);
 void grid_update(void);
 void grid_update_column_height(void);
+void grid_draw_garbage(void);
 
 void player_init(void);
-void player_tick(u8 joy);
+void player_update(u8 joy);
+void player_draw(void);
 
 void coins_init(void);
 void coins_draw(void);
 void coins_add_at(u8 idx);
 
+typedef struct {} GameState;
 GameState main_menu(void);
 GameState board(void);
 GameState pause(void);

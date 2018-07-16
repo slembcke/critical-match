@@ -70,7 +70,7 @@ static GameState debug_sprites(){
 		joy0 = joy_read(0);
 		if(JOY_START(joy0)) break;
 		
-		player_tick(joy0);
+		player_update(joy0);
 		// cursor_sprite(64, 128);
 		
 		px_spr_end();

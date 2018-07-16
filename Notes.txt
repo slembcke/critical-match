@@ -14,7 +14,6 @@ Needed:
 * Splash screen.
 * Game over screen.
 
-
 BUGS:
 * Keys don't match with keys.
 * Manipulating large stacks causes PPU glitches.

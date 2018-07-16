@@ -24,6 +24,9 @@ typedef struct {
 	u8 drop_cursor;
 	u8 column_cursor;
 	
+	u8 garbage_cursor;
+	u8 garbage_mask;
+	
 	u8 speedup_counter;
 	u8 block_fall_ticks;
 	
@@ -354,6 +357,8 @@ void grid_init(void){
 		get_shuffled_column();
 	}
 	
+	grid.garbage_mask = 0x7E;
+	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_ticks = 60;
 	
@@ -362,6 +367,17 @@ void grid_init(void){
 	grid.score = 0;
 	
 	naco_init(grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
+}
+
+static const u8 MASK_BITS[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+void grid_draw_garbage(){
+	ix = grid.garbage_cursor;
+	if(grid.garbage_mask & MASK_BITS[ix]){
+		iy = COLUMN_HEIGHT[ix];
+		block_sprite(64 + ix*16, 190 - iy*16, BLOCK_GARBAGE);
+	}
+	
+	if(++grid.garbage_cursor == GRID_W) grid.garbage_cursor = 1;
 }
 
 void grid_update(void){

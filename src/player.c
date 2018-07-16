@@ -12,10 +12,6 @@
 #define PLAYER_JUMP_TICKS 5
 #define MAX_Y ((16 << 8)*(GRID_H - 2))
 
-void player_sprite(u8 x, u8 y, u8 frame);
-void block_sprite(u8 x, u8 y, u8 block);
-void cursor_sprite(u8 x, u8 y, u8 height);
-
 typedef struct {
 	u16 pos_x, pos_y;
 	s16 vel_x, vel_y;
@@ -207,7 +203,7 @@ static void player_facing_update(void){
 	}
 }
 
-static void player_sprite_draw(void){
+void player_draw(void){
 	ix = player.pos_x >> 8;
 	iy = player.pos_y >> 8;
 	
@@ -300,7 +296,7 @@ void player_drop(void){
 	}
 }
 
-void player_tick(u8 joy){
+void player_update(u8 joy){
 	player.joy = joy;
 	
 	// Update player state.
@@ -340,11 +336,9 @@ void player_tick(u8 joy){
 	ix = ( 64 -  8) + (player.pos_x >> 8);
 	iy = (224 - 32) - (player.pos_y >> 8);
 	for(idx = 0; player.blocks_held[idx]; ++idx){
-		block_sprite(ix, iy, player.blocks_held[idx] & ~BLOCK_STATUS_MASK);
+		block_sprite(ix, iy, player.blocks_held[idx] & BLOCK_GFX_MASK);
 		iy -= 16;
 	}
-	
-	player_sprite_draw();
 	
 	player.prev_joy = player.joy;
 }

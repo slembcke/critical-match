@@ -38,8 +38,10 @@ static GameState loop(void){
 		if(JOY_START(joy0)) return pause();
 		
 		grid_update();
-		player_tick(joy0);
+		player_update(joy0);
 		
+		player_draw();
+		grid_draw_garbage();
 		coins_draw();
 		
 		px_spr_end();

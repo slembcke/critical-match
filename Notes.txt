@@ -2,6 +2,7 @@ TODO:
 * Garbage blocks.
 * Coin particles.
 * Show next block/location.
+* Grappling hook.
 * "Also on Switch" screen.
 
 Needed:

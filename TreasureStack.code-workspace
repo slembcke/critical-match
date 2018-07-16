@@ -17,7 +17,8 @@
 			"string.h": "c",
 			"lz4.h": "c",
 			"stdlib.h": "c",
-			"type_traits": "c"
+			"type_traits": "c",
+			"shared.h": "c"
 		}
 	}
 }

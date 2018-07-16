@@ -15,11 +15,13 @@ GameState debug_freeze(){
 	return debug_freeze();
 }
 
-void debug_hex(u8 value){
+void debug_hex(u16 value){
 	px_buffer_inc(PX_INC1);
-	px_buffer_data(2, NT_ADDR(0, 2, 2));
-	PX.buffer[1] = HEX[(value >> 0) & 0xF];
-	PX.buffer[0] = HEX[(value >> 4) & 0xF];
+	px_buffer_data(4, NT_ADDR(0, 2, 2));
+	PX.buffer[3] = HEX[(value >> 0x0) & 0xF];
+	PX.buffer[2] = HEX[(value >> 0x4) & 0xF];
+	PX.buffer[1] = HEX[(value >> 0x8) & 0xF];
+	PX.buffer[0] = HEX[(value >> 0xC) & 0xF];
 }
 
 GameState debug_display(void){

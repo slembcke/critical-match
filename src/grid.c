@@ -268,6 +268,9 @@ static void grid_blocks_tick(void){
 		}
 	}
 	
+	grid_update_column_height();
+	
+	// Update score.
 	if(matched_blocks > 0){
 		grid.score += matched_blocks*grid.combo;
 		if(grid.combo < MAX_COMBO) ++grid.combo;
@@ -278,22 +281,16 @@ static void grid_blocks_tick(void){
 		--grid.combo_ticks;
 	}
 	
-	{
-		static const char HEX[] = "0123456789ABCDEF";
-		px_buffer_inc(PX_INC1);
-		px_buffer_data(8, NT_ADDR(0, 0, 0));
-		
-		PX.buffer[0] = HEX[(grid.score >> 12) & 0xF];
-		PX.buffer[1] = HEX[(grid.score >>  8) & 0xF];
-		PX.buffer[2] = HEX[(grid.score >>  4) & 0xF];
-		PX.buffer[3] = HEX[(grid.score >>  0) & 0xF];
-		PX.buffer[4] = 'x';
-		PX.buffer[5] = HEX[grid.combo];
-		PX.buffer[6] = '@';
-		PX.buffer[7] = HEX[grid.combo_ticks];
-	}
+	// Copy score to the screen.
+	px_buffer_inc(PX_INC1);
+	px_buffer_data(8, NT_ADDR(0, 10, 4));
+	memset(PX.buffer, 0, 8);
 	
-	grid_update_column_height();
+	ultoa(grid.score, PX.buffer, 10);
+	PX.buffer[4] = 'x';
+	PX.buffer[5] = _hextab[grid.combo];
+	PX.buffer[6] = '@';
+	PX.buffer[7] = _hextab[grid.combo_ticks];
 }
 
 static void grid_tick(void){

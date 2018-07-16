@@ -77,6 +77,9 @@ void player_tick(u8 joy);
 
 GameState board(void);
 
+// Defined by cc65
+extern const unsigned char _hextab[];
+
 #ifdef DEBUG
 	#define DEBUG_PROFILE_START() px_profile_start()
 	#define DEBUG_PROFILE_END() px_profile_end()
@@ -87,6 +90,6 @@ GameState board(void);
 
 GameState debug_chr(void);
 GameState debug_freeze(void);
-void debug_hex(u8 value);
+void debug_hex(u16 value);
 
 #endif

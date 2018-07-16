@@ -2,6 +2,8 @@ TODO:
 * Garbage blocks.
 * Coin particles.
 * Show next block/location.
+* Grappling hook.
+* Animate chest unlocking slower.
 * "Also on Switch" screen.
 
 Needed:

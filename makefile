@@ -16,6 +16,7 @@ SRC = \
 	src/main.c \
 	src/grid.c \
 	src/player.c \
+	src/coins.c \
 	src/debug.c \
 	lib/pixler/pixler.c
 
@@ -63,7 +64,7 @@ run-mac: $(ROM)
 	open -a Nestopia $(ROM)
 
 run-linux: $(ROM)
-	nestopia -d -w -l 1 -n -s 4 -t $(ROM)
+	nestopia -d -w -l 0 -n -s 1 -t $(ROM)
 
 tools/png2chr:
 	make -C tools png2chr

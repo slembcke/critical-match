@@ -1,13 +1,16 @@
 TODO:
 * Garbage blocks.
+* Coin particles.
 * Show next block/location.
+* "Also on Switch" screen.
+
+Needed:
+* Music.
+* Sounds.
 * Game screen.
 * Splash screen.
 * Game over screen.
-* "Also on Switch" screen.
-* Coin particles.
-* Music.
-* Sounds.
+
 
 BUGS:
 * Keys don't match with keys.

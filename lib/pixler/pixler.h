@@ -18,6 +18,8 @@ typedef int16_t s16;
 typedef uint8_t u8;
 typedef uint16_t u16;
 
+extern u8 OAM[256];
+
 #define MIN(a, b) (a < b ? a : b)
 #define MAX(a, b) (a > b ? a : b)
 #define CLAMP(x, min, max) MAX(min, MIN(x, max))
@@ -80,6 +82,7 @@ void decompress_lz4_to_ram(void *dst, void *src, u16 len);
 void decompress_lz4_to_vram(u16 addr, void *src, u16 len);
 
 extern u16 rand_seed;
+#pragma zpsym("rand_seed");
 u8 rand8();
 
 #endif

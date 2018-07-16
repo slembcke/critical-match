@@ -1,6 +1,16 @@
 TODO:
+* Garbage blocks.
+* Pausing.
 * Show next block/location.
-* Keys don't match with keys.
-* Garbage blocks?
-* Manipulating large stacks causes PPU glitches.
+* Game screen.
+* Splash screen.
+* Seed (RNG)
+* Game over screen.
+* "Also on Switch" screen.
 * Coin particles.
+* Music.
+* Sounds.
+
+BUGS:
+* Keys don't match with keys.
+* Manipulating large stacks causes PPU glitches.

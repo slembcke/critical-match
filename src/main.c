@@ -12,16 +12,16 @@ u8 joy0, joy1;
 
 #define BG_COLOR 0x1D
 
-const u8 PALETTE[] = {
-	BG_COLOR, 0x1D, 0x28, 0x12, // blue
-	BG_COLOR, 0x1D, 0x28, 0x06, // red
-	BG_COLOR, 0x1D, 0x28, 0x19, // green
-	BG_COLOR, 0x1D, 0x28, 0x14, // purple
+const u8 GAME_PALETTE[] = {
+	BG_COLOR, 0x1D, 0x28, 0x11, // blue
+	BG_COLOR, 0x1D, 0x28, 0x16, // red
+	BG_COLOR, 0x1D, 0x28, 0x1A, // green
+	BG_COLOR, 0x1D, 0x28, 0x13, // purple
 
-	BG_COLOR, 0x1E, 0x28, 0x12, // blue
-	BG_COLOR, 0x1E, 0x28, 0x06, // red
-	BG_COLOR, 0x1E, 0x28, 0x19, // green
-	BG_COLOR, 0x1E, 0x28, 0x14, // purple
+	BG_COLOR, 0x1D, 0x28, 0x11, // blue
+	BG_COLOR, 0x1D, 0x28, 0x16, // red
+	BG_COLOR, 0x1D, 0x28, 0x1A, // green
+	BG_COLOR, 0x1D, 0x28, 0x13, // purple
 };
 
 static GameState loop(void){
@@ -52,7 +52,7 @@ GameState board(void){
 	// Set the palette.
 	px_inc(PX_INC1);
 	px_addr(PAL_ADDR);
-	px_blit(32, (u8 *)PALETTE);
+	px_blit(32, (u8 *)GAME_PALETTE);
 
 	px_inc(PX_INC1);
 	px_addr(NT_ADDR(0, 0, 0));
@@ -123,7 +123,7 @@ GameState main(void){
 	decompress_lz4_to_vram(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
 
 	px_addr(PAL_ADDR);
-	px_blit(32, (u8 *)PALETTE);
+	px_blit(32, (u8 *)GAME_PALETTE);
 	
 	// music_init(MUSIC);
 	// music_play(0);

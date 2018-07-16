@@ -47,7 +47,7 @@ GameState debug_palette(){
 		
 		px_inc(PX_INC1);
 		px_buffer_data(4, PAL_ADDR);
-		memcpy(PX.buffer, PALETTE + 4*pal, 4);
+		memcpy(PX.buffer, GAME_PALETTE + 4*pal, 4);
 		
 		// Wait until button up.
 		while(joy_read(0)) px_wait_nmi();

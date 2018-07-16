@@ -17,7 +17,7 @@ void music_pause();
 void music_stop();
 
 extern u8 joy0, joy1;
-extern const u8 PALETTE[];
+extern const u8 GAME_PALETTE[];
 
 typedef struct {} GameState;
 

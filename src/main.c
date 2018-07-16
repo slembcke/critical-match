@@ -98,6 +98,31 @@ GameState board(void){
 	return loop();
 }
 
+GameState main_menu(void){
+	static const char *msg = "MAIN MENU";
+	px_ppu_disable();
+	
+	px_addr(NT_ADDR(0, 0, 0));
+	px_fill(32*30, 0x00);
+	
+	px_addr(NT_ADDR(0, 10, 12));
+	px_blit(strlen(msg), msg);
+	
+	px_ppu_enable();
+	
+	// Randomize the seed based on start time.
+	while(true){
+		for(idx = 0; idx < 255; ++idx){
+			++rand_seed;
+			if(joy_read(0)) return board();
+		}
+		
+		px_wait_nmi();
+	}
+	
+	return board();
+}
+
 GameState game_over(void){
 	static const char *msg = "GAME OVER";
 	px_ppu_disable();
@@ -129,5 +154,5 @@ GameState main(void){
 	// music_play(0);
 
 	// return debug_chr();
-	return board();
+	return main_menu();
 }

@@ -169,12 +169,10 @@ static bool grid_any_falling(void){
 	return false;
 }
 
-u8 lfsr8(void);
-
 // TODO rewrite in asm?
 static u8 lru_shuffle(register u8 *arr, u8 size, u8 mask, register u8 *cursor){
 	u8 value;
-	u8 idx = (*cursor) + (lfsr8() & mask);
+	u8 idx = (*cursor) + (rand8() & mask);
 	if(idx >= size) idx -= size;
 	
 	value = arr[idx];

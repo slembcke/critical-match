@@ -79,4 +79,7 @@ void px_wait_nmi(void);
 void decompress_lz4_to_ram(void *dst, void *src, u16 len);
 void decompress_lz4_to_vram(u16 addr, void *src, u16 len);
 
+extern u16 rand_seed;
+u8 rand8();
+
 #endif

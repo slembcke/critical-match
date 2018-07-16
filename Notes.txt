@@ -4,7 +4,6 @@ TODO:
 * Show next block/location.
 * Game screen.
 * Splash screen.
-* Seed (RNG)
 * Game over screen.
 * "Also on Switch" screen.
 * Coin particles.

@@ -24,6 +24,10 @@ const u8 GAME_PALETTE[] = {
 	BG_COLOR, 0x1D, 0x28, 0x13, // purple
 };
 
+static void wait_noinput(void){
+	while(joy_read(0) || joy_read(1)){}
+}
+
 static GameState loop(void){
 	px_ppu_enable();
 	
@@ -109,12 +113,14 @@ GameState main_menu(void){
 	px_blit(strlen(msg), msg);
 	
 	px_ppu_enable();
+	px_wait_nmi();
+	wait_noinput();
 	
 	// Randomize the seed based on start time.
 	while(true){
 		for(idx = 0; idx < 255; ++idx){
 			++rand_seed;
-			if(joy_read(0)) return board();
+			if(JOY_START(joy_read(0))) return board();
 		}
 		
 		px_wait_nmi();
@@ -132,6 +138,12 @@ GameState game_over(void){
 	
 	px_addr(NT_ADDR(0, 10, 12));
 	px_blit(strlen(msg), msg);
+	
+	wait_noinput();
+	px_wait_nmi();
+	
+	// Wait until start is pressed.
+	while(!JOY_START(joy_read(0))){}
 	
 	debug_freeze();
 }

@@ -75,7 +75,9 @@ void grid_update_column_height(void);
 void player_init(void);
 void player_tick(u8 joy);
 
+GameState main_menu(void);
 GameState board(void);
+GameState pause(void);
 GameState game_over(void);
 
 // Defined by cc65

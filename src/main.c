@@ -35,6 +35,7 @@ static GameState loop(void){
 		DEBUG_PROFILE_START();
 		
 		joy0 = joy_read(0);
+		if(JOY_START(joy0)) return pause();
 
 		grid_update();
 		player_tick(joy0);
@@ -99,6 +100,15 @@ GameState board(void){
 	// 	}
 	// }
 
+	return loop();
+}
+
+static GameState pause(void){
+	wait_noinput();
+	
+	while(!JOY_START(joy_read(0))){}
+	
+	wait_noinput();
 	return loop();
 }
 

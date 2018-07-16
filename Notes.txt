@@ -1,6 +1,5 @@
 TODO:
 * Garbage blocks.
-* Pausing.
 * Show next block/location.
 * Game screen.
 * Splash screen.

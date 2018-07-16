@@ -6,6 +6,7 @@
 
 #include "pixler/pixler.h"
 #include "shared.h"
+#include "gfx/gfx.h"
 
 u8 joy0, joy1;
 
@@ -109,10 +110,6 @@ GameState game_over(void){
 	
 	debug_freeze();
 }
-
-extern u8 gfx_neschar_lz4chr[];
-extern u8 gfx_sheet1_lz4chr[];
-extern u8 gfx_squidman_lz4chr[];
 
 GameState main(void){
 	joy_install(joy_static_stddrv);

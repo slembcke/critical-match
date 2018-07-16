@@ -77,7 +77,7 @@ void player_tick(u8 joy);
 
 void coins_init(void);
 void coins_draw(void);
-void coin_at(u8 idx);
+void coins_add_at(u8 idx);
 
 GameState main_menu(void);
 GameState board(void);

@@ -10,7 +10,7 @@
 
 u8 joy0, joy1;
 
-#define BG_COLOR 0x01
+#define BG_COLOR 0x1D
 
 const u8 GAME_PALETTE[] = {
 	BG_COLOR, 0x1D, 0x28, 0x11, // blue

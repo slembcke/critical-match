@@ -5,6 +5,7 @@ TODO:
 * Grappling hook.
 * Animate chest unlocking slower.
 * "Also on Switch" screen.
+* Attract mode.
 
 Needed:
 * Music.

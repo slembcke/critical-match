@@ -84,15 +84,15 @@ $(ROM): ld65.cfg $(OBJS)
 	tools/png2chr $< $@
 
 %.lz4chr: %.chr tools/lz4x
-	tools/lz4x -9 $< $@
+	tools/lz4x -f9 $< $@
 
 %.bin: %.hex
 	xxd -r -c 8 $< > $@
 
 %.lz4: %.bin tools/lz4x
-	tools/lz4x -9 $< $@
+	tools/lz4x -f9 $< $@
 
-gfx/gfx.s: $(GFX:.png=.lz4chr)
+gfx/gfx.o: $(GFX:.png=.lz4chr)
 
 dat/data.s:
 

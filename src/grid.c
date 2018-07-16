@@ -221,15 +221,17 @@ static u8 get_shuffled_column(void){
 }
 
 static void grid_drop_block(void){
-	// TODO fail if column height prevents adding block?
-
 	u8 block;
 	
 	ix = get_shuffled_column();
+	idx = grid_block_idx(ix, GRID_H - 2);
+	
+	// Game over if the drop location isn't clear.
+	if(GRID[idx] != BLOCK_EMPTY) exit(0);
 	
 	// Push the first block directly onto the screen.
 	block = get_shuffled_block();
-	grid_set_block(grid_block_idx(ix, GRID_H - 2), block);
+	grid_set_block(idx, block);
 	
 	// Write the second block into GRID and let it fall onto the screen.
 	block = get_shuffled_block();

@@ -478,11 +478,15 @@ static void grid_place_garbage(void){
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		if(grid.garbage_mask & MASK_BITS[ix]){
 			iy = COLUMN_HEIGHT[ix] + 1;
+			
+			// idx = grid_block_idx(ix, iy);
+			// GRID[idx] = BLOCK_GARBAGE;
 			grid_set_block(grid_block_idx(ix, iy), BLOCK_GARBAGE);
 		}
 	}
 	
 	grid.garbage_mask = 0x00;
+	px_wait_nmi();
 }
 
 void grid_update(void){

@@ -150,6 +150,7 @@ GameState game_over(void){
 	px_blit(strlen(msg), msg);
 	
 	wait_noinput();
+	px_ppu_enable();
 	px_wait_nmi();
 	
 	// Wait until start is pressed.

@@ -175,7 +175,7 @@ static bool grid_any_falling(void){
 	return false;
 }
 
-// TODO rewrite in asm?
+// TODO This generates terrible code. Rewrite in asm?
 static u8 lru_shuffle(register u8 *arr, u8 size, u8 mask, register u8 *cursor){
 	u8 value;
 	u8 idx = (*cursor) + (rand8() & mask);
@@ -256,6 +256,7 @@ static void grid_update_fall_speed(void){
 }
 
 static void grid_blocks_tick(void){
+	register u8 block;
 	register u8 matched_blocks = 0;
 	
 	for(iy = 1; iy < GRID_H - 1; ++iy){
@@ -264,7 +265,8 @@ static void grid_blocks_tick(void){
 			
 			if(GRID[idx] == BLOCK_EMPTY && GRID_U[idx] != BLOCK_EMPTY){
 				// Block is unsupported, make it fall.
-				GRID[idx] = GRID_U[idx];
+				block = GRID_U[idx];
+				GRID[idx] = block;
 				GRID_U[idx] = BLOCK_EMPTY;
 			} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
 				// Match out unlocked blocks.
@@ -292,11 +294,14 @@ static void grid_blocks_tick(void){
 	px_buffer_data(8, NT_ADDR(0, 10, 4));
 	memset(PX.buffer, 0, 8);
 	
-	ultoa(grid.score, PX.buffer, 10);
-	PX.buffer[4] = 'x';
-	PX.buffer[5] = _hextab[grid.combo];
-	PX.buffer[6] = '@';
-	PX.buffer[7] = _hextab[grid.combo_ticks];
+	{
+		ultoa(grid.score, PX.buffer, 10);
+		
+		PX.buffer[4] = 'x';
+		PX.buffer[5] = _hextab[grid.combo];
+		PX.buffer[6] = '@';
+		PX.buffer[7] = _hextab[grid.combo_ticks];
+	}
 }
 
 static void grid_tick(void){
@@ -341,6 +346,19 @@ uintptr_t grid_update_coro(void){
 	return false;
 }
 
+static const u8 MASK_BITS[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+
+// TODO Can be fairly expensive.
+static void grid_shuffle_garbage(u8 count){
+	while(count){
+		ix = get_shuffled_column();
+		if((grid.garbage_mask & MASK_BITS[ix]) == 0){
+			grid.garbage_mask |= MASK_BITS[ix];
+			--count;
+		}
+	}
+}
+
 void grid_init(void){
 	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
 	
@@ -357,7 +375,7 @@ void grid_init(void){
 		get_shuffled_column();
 	}
 	
-	grid.garbage_mask = 0x7E;
+	grid.garbage_mask = 0;
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_ticks = 60;

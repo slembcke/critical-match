@@ -1,6 +1,4 @@
 TODO:
-* Garbage blocks.
-* Coin particles.
 * Show next block/location.
 * Grappling hook.
 * Animate chest unlocking more slowly.
@@ -15,5 +13,4 @@ Needed:
 * Game over screen.
 
 BUGS:
-* Keys don't match with keys.
 * Manipulating large stacks causes PPU glitches.

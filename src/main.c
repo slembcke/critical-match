@@ -89,21 +89,16 @@ GameState board(void){
 	// Enable rendering.
 	px_ppu_enable();
 	
-	// {
-	// 	u8 color = 0;
-	// 	u8 counter = 0;
-		
-	// 	for(iy = 4; iy < GRID_H - 4; ++iy){
-	// 		for(ix = 1; ix <= 5; ++ix){
-	// 			// grid_set_block(grid_block_idx(ix, iy), (counter == 0 ? BLOCK_KEY : BLOCK_CHEST) | color);
-	// 			GRID[grid_block_idx(ix, iy)] = (counter == 0 ? BLOCK_KEY : BLOCK_CHEST) | color;
-				
-	// 			color = (color + 1) & BLOCK_COLOR_MASK;
-	// 			if(++counter == 7) counter = 0;
-	// 		}
-	// 		px_wait_nmi();
-	// 	}
-	// }
+	// GRID[grid_block_idx(1, 1)] = BLOCK_GARBAGE;
+	// GRID[grid_block_idx(3, 1)] = BLOCK_KEY | BLOCK_COLOR_BLUE;
+	// GRID[grid_block_idx(4, 1)] = BLOCK_KEY | BLOCK_COLOR_RED;
+	// GRID[grid_block_idx(5, 1)] = BLOCK_KEY | BLOCK_COLOR_GREEN;
+	// GRID[grid_block_idx(6, 1)] = BLOCK_KEY | BLOCK_COLOR_PURPLE;
+	
+	// GRID[grid_block_idx(3, 4)] = BLOCK_CHEST | BLOCK_COLOR_BLUE;
+	// GRID[grid_block_idx(4, 4)] = BLOCK_CHEST | BLOCK_COLOR_RED;
+	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
+	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 
 	return loop();
 }

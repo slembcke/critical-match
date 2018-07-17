@@ -115,36 +115,43 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
-// Only care about color and the 'matching' bit.
-#define BLOCK_MATCH_MASK (BLOCK_COLOR_MASK | BLOCK_STATUS_MATCHABLE | BLOCK_STATUS_MATCHING)
+// XOR a block with a neighbor and compare using a mask.
+// Only the 'matching' bit should be left.
+#define BLOCK_MATCH(block, cmp, mask, expect) (((block ^ cmp) & mask) == expect)
 
-// XOR a block with a neighbor.
-// The color should be equal (zeroed bits), and the 'matching' bit should not.
-// Ignoring other bits with a mask should leave only the 'matching' bit.
-#define BLOCK_MATCH(block, cmp) (((block ^ cmp) & BLOCK_MATCH_MASK) == BLOCK_STATUS_MATCHING)
-
-static bool grid_open_chests(void){
+static bool grid_match_blocks(void){
 	static u8 queue[8];
 	register u8 cursor = 0;
 	register u8 block;
+	register u8 mask, expect;
 	
 	for(ix = 1; ix < GRID_W - 1; ++ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
 			idx = grid_block_idx(ix, iy);
-			block = GRID[idx];
+			
+			// For simplicity sake, never consider the current block as matching.
+			block = GRID[idx] & ~BLOCK_STATUS_MATCHING;
+			
+			if(block & BLOCK_STATUS_UNLOCKED){
+				continue; // Skip blocks that are already unlocked.
+			} else if((block & BLOCK_TYPE_MASK) != BLOCK_TYPE_OTHER){
+				// Color must match, and neighbor should be matching.
+				mask = BLOCK_COLOR_MASK | BLOCK_STATUS_MATCHING;
+				expect = BLOCK_STATUS_MATCHING;
+			} else if(block == BLOCK_GARBAGE){
+				// Neighbor must be actively matching and already unlocked.
+				mask = BLOCK_STATUS_UNLOCKED | BLOCK_STATUS_MATCHING;
+				expect = mask;
+			} else {
+				// Skip other types of blocks. (empty, border)
+				continue;
+			}
 			
 			if(
-				// Skip blocks that are already unlocked.
-				(block & BLOCK_STATUS_UNLOCKED) ||
-				// Skip blocks that are unmatchable (empty, border, etc)
-				(block & BLOCK_STATUS_MATCHABLE) == 0
-			) continue;
-			
-			if(
-				BLOCK_MATCH(block, GRID_D[idx]) ||
-				(COLUMN_HEIGHT[ix] > iy && BLOCK_MATCH(block, GRID_U[idx])) ||
-				(COLUMN_HEIGHT_L[ix] >= iy && BLOCK_MATCH(block, GRID_L[idx])) ||
-				(COLUMN_HEIGHT_R[ix] >= iy && BLOCK_MATCH(block, GRID_R[idx])) ||
+				BLOCK_MATCH(block, GRID_D[idx], mask, expect) ||
+				(COLUMN_HEIGHT[ix] > iy && BLOCK_MATCH(block, GRID_U[idx], mask, expect)) ||
+				(COLUMN_HEIGHT_L[ix] >= iy && BLOCK_MATCH(block, GRID_L[idx], mask, expect)) ||
+				(COLUMN_HEIGHT_R[ix] >= iy && BLOCK_MATCH(block, GRID_R[idx], mask, expect)) ||
 				false
 			){
 				queue[cursor] = idx;
@@ -165,14 +172,20 @@ static bool grid_open_chests(void){
 		block = GRID[idx];
 		
 		if((block & BLOCK_TYPE_MASK) == BLOCK_TYPE_CHEST){
-			// Change chests into open chests.
+			// Flip bits to change chests into open chests.
 			block ^= BLOCK_TYPE_CHEST ^ BLOCK_TYPE_OPEN;
+			
+			// Set them to match against other blocks too.
+			mask = BLOCK_STATUS_UNLOCKED | BLOCK_STATUS_MATCHING;
 			
 			// Emit coins.
 			coins_add_at(idx);
+		} else {
+			// Keys and garbage only unlock.
+			mask = BLOCK_STATUS_UNLOCKED;
 		}
 		
-		grid_set_block(idx, block | BLOCK_STATUS_MATCHING | BLOCK_STATUS_UNLOCKED);
+		grid_set_block(idx, block | mask);
 	}
 	
 	return true;
@@ -392,7 +405,7 @@ uintptr_t grid_update_coro(void){
 	while(true){
 		// Look for matches while waiting for the next tick.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
-			if(grid_open_chests()){
+			if(grid_match_blocks()){
 				// Prevent the timer from advancing as long as matches are happening.
 				grid.state_timer = 0;
 			}

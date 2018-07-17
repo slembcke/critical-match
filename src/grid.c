@@ -13,8 +13,11 @@ u8 GRID[GRID_BYTES];
 // Height of each stacked column.
 u8 COLUMN_HEIGHT[GRID_W];
 
-#define MAX_FALL_TICKS 60
-#define MIN_FALL_TICKS 15
+// Time taken by tick + blitting.
+#define OVERHEAD_TICKS (1 + GRID_H - 2)
+
+#define MAX_FALL_TICKS (60 - OVERHEAD_TICKS)
+#define MIN_FALL_TICKS (15 - OVERHEAD_TICKS)
 #define FALL_TICKS_DEC 5
 #define DROPS_PER_SPEEDUP 16
 #define COMBO_TIMEOUT 8

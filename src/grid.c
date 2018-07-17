@@ -309,7 +309,7 @@ static void grid_tick(void){
 	}
 }
 
-uintptr_t grid_update_coro(uintptr_t _){
+uintptr_t grid_update_coro(void){
 	while(true){
 		// Look for matches while waiting for the next tick.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_ticks; ++grid.state_timer){
@@ -366,10 +366,9 @@ void grid_init(void){
 	grid.combo_ticks = 0;
 	grid.score = 0;
 	
-	naco_init(grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
+	naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 }
 
-static const u8 MASK_BITS[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 void grid_draw_garbage(){
 	ix = grid.garbage_cursor;
 	if(grid.garbage_mask & MASK_BITS[ix]){

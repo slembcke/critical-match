@@ -14,11 +14,11 @@ u8 GRID[GRID_BYTES];
 u8 COLUMN_HEIGHT[GRID_W];
 
 // Time taken by tick + blitting.
-#define OVERHEAD_TICKS (1 + GRID_H - 2)
+#define OVERHEAD_FRAMES (1 + GRID_H - 2)
 
 // Min/Max waiting ticks before triggering the next fall.
-#define MIN_FALL_TICKS (15 - OVERHEAD_TICKS)
-#define MAX_FALL_TICKS (60 - OVERHEAD_TICKS)
+#define MIN_FALL_FRAMES (15 - OVERHEAD_FRAMES)
+#define MAX_FALL_FRAMES (60 - OVERHEAD_FRAMES)
 
 // How many drops happen before speeding up.
 #define DROPS_PER_SPEEDUP 16
@@ -29,20 +29,34 @@ u8 COLUMN_HEIGHT[GRID_W];
 #define COMBO_TIMEOUT 8
 #define MAX_COMBO 5
 
-// How many ticks pass before adding a garbage block to the meter.
-#define GARBAGE_BLOCK_TICKS 40
+// How many frames pass before adding garbage blocks to the board.
+#define GARBAGE_METER_TICKS 40
+
+// How many frames garbage blocks preview for.
+#define GARBAGE_PREVIEW_TIMEOUT 180
 
 typedef struct {
+	// Cursor values used for shuffling.
 	u8 drop_cursor;
 	u8 column_cursor;
 	
-	u8 garbage_block_ticks;
+	// Game timing.
+	u8 speedup_counter;
+	u8 block_fall_timeout;
+	
+	// How many ticks left before adding garbage.
 	u8 garbage_meter_ticks;
+	// Frame counter for adding a garbage block to the meter.
+	u8 garbage_block_timeout;
+	// Queued blocks of garbage to add.
+	u8 garbage_blocks;
+	// +/- points to adjust garbage with.
+	u8 garbage_pos_points;
+	u8 garbage_neg_points;
+	// Values used for previewing garbage placement.
+	u8 garbage_preview_timeout;
 	u8 garbage_cursor;
 	u8 garbage_mask;
-	
-	u8 speedup_counter;
-	u8 block_fall_ticks;
 	
 	u8 combo;
 	u8 combo_ticks;
@@ -260,9 +274,9 @@ static void grid_drop_block(void){
 static void grid_update_fall_speed(void){
 	--grid.speedup_counter;
 	if(grid.speedup_counter == 0){
-		grid.block_fall_ticks -= FALL_TICKS_DEC;
-		if(grid.block_fall_ticks < MIN_FALL_TICKS){
-			grid.block_fall_ticks = MIN_FALL_TICKS;
+		grid.block_fall_timeout -= FALL_TICKS_DEC;
+		if(grid.block_fall_timeout < MIN_FALL_FRAMES){
+			grid.block_fall_timeout = MIN_FALL_FRAMES;
 		}
 		
 		grid.speedup_counter = DROPS_PER_SPEEDUP;
@@ -272,15 +286,31 @@ static void grid_update_fall_speed(void){
 static void grid_blit(void){
 	// Copy score to the screen.
 	px_buffer_inc(PX_INC1);
-	px_buffer_data(8, NT_ADDR(0, 10, 4));
-	memset(PX.buffer, 0, 8);
+	px_buffer_data(16, NT_ADDR(0, 8, 4));
+	memset(PX.buffer, 0, 16);
 	
+	// Score
 	ultoa(grid.score, PX.buffer, 10);
 	
-	PX.buffer[4] = 'x';
-	PX.buffer[5] = _hextab[grid.combo];
-	PX.buffer[6] = '@';
-	PX.buffer[7] = _hextab[grid.combo_ticks];
+	// Combo info.
+	PX.buffer[5] = 'x';
+	PX.buffer[6] = _hextab[grid.combo];
+	PX.buffer[8] = '@';
+	PX.buffer[9] = _hextab[grid.combo_ticks];
+	
+	// Garbage info.
+	PX.buffer[11] = 'G';
+	PX.buffer[12] = _hextab[grid.garbage_blocks];
+	PX.buffer[14] = '@';
+	PX.buffer[15] = _hextab[grid.garbage_meter_ticks/4];
+}
+
+static void grid_remove_garbage(u8 score){
+	grid.garbage_neg_points += score;
+	while(grid.garbage_neg_points > MAX_COMBO){
+		grid.garbage_neg_points -= MAX_COMBO;
+		if(grid.garbage_blocks > 1) --grid.garbage_blocks;
+	}
 }
 
 static void grid_blocks_tick(void){
@@ -308,7 +338,11 @@ static void grid_blocks_tick(void){
 	
 	// Update score.
 	if(matched_blocks > 0){
-		grid.score += matched_blocks*grid.combo;
+		u8 score = matched_blocks*grid.combo;
+		grid.score += score;
+		
+		grid_remove_garbage(score);
+		
 		if(grid.combo < MAX_COMBO) ++grid.combo;
 		grid.combo_ticks = COMBO_TIMEOUT;
 	} else if(grid.combo_ticks == 0){
@@ -320,6 +354,19 @@ static void grid_blocks_tick(void){
 	grid_blit();
 }
 
+static const u8 MASK_BITS[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+
+// TODO Can be fairly expensive.
+static void grid_shuffle_garbage(u8 count){
+	while(count){
+		ix = get_shuffled_column();
+		if((grid.garbage_mask & MASK_BITS[ix]) == 0){
+			grid.garbage_mask |= MASK_BITS[ix];
+			--count;
+		}
+	}
+}
+
 static void grid_tick(void){
 	grid_blocks_tick();
 	
@@ -329,15 +376,22 @@ static void grid_tick(void){
 		grid_update_fall_speed();
 	}
 	
-	if(++grid.garbage_block_ticks >= GARBAGE_BLOCK_TICKS){
-		grid.garbage_block_ticks = 0;
+	if(grid.garbage_blocks > 0){
+		if(++grid.garbage_meter_ticks >= GARBAGE_METER_TICKS){
+			grid.garbage_meter_ticks = 0;
+			
+			grid.garbage_preview_timeout = GARBAGE_PREVIEW_TIMEOUT;
+			grid_shuffle_garbage(grid.garbage_blocks);
+		}
+	} else {
+		grid.garbage_meter_ticks = 0;
 	}
 }
 
 uintptr_t grid_update_coro(void){
 	while(true){
 		// Look for matches while waiting for the next tick.
-		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_ticks; ++grid.state_timer){
+		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
 			if(grid_open_chests()){
 				// Prevent the timer from advancing as long as matches are happening.
 				grid.state_timer = 0;
@@ -366,19 +420,6 @@ uintptr_t grid_update_coro(void){
 	return false;
 }
 
-static const u8 MASK_BITS[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
-
-// TODO Can be fairly expensive.
-static void grid_shuffle_garbage(u8 count){
-	while(count){
-		ix = get_shuffled_column();
-		if((grid.garbage_mask & MASK_BITS[ix]) == 0){
-			grid.garbage_mask |= MASK_BITS[ix];
-			--count;
-		}
-	}
-}
-
 void grid_init(void){
 	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
 	
@@ -395,13 +436,13 @@ void grid_init(void){
 		get_shuffled_column();
 	}
 	
-	grid.garbage_block_ticks = 0;
+	grid.speedup_counter = DROPS_PER_SPEEDUP;
+	grid.block_fall_timeout = MAX_FALL_FRAMES;
+	
 	grid.garbage_meter_ticks = 0;
+	grid.garbage_block_timeout = 4*MAX_FALL_FRAMES;
 	grid.garbage_cursor = 0;
 	grid.garbage_mask = 0;
-	
-	grid.speedup_counter = DROPS_PER_SPEEDUP;
-	grid.block_fall_ticks = 60;
 	
 	grid.combo = 1;
 	grid.combo_ticks = 0;
@@ -420,6 +461,26 @@ void grid_draw_garbage(){
 	if(++grid.garbage_cursor == GRID_W) grid.garbage_cursor = 1;
 }
 
+static void grid_place_garbage(void){
+	for(ix = 1; ix < GRID_W - 1; ++ix){
+		if(grid.garbage_mask & MASK_BITS[ix]){
+			iy = COLUMN_HEIGHT[ix] + 1;
+			grid_set_block(grid_block_idx(ix, iy), BLOCK_GARBAGE);
+		}
+	}
+	
+	grid.garbage_mask = 0x00;
+}
+
 void grid_update(void){
+	if(grid.garbage_preview_timeout > 0){
+		if(--grid.garbage_preview_timeout == 0){
+			grid_place_garbage();
+		}
+	} else if(--grid.garbage_block_timeout == 0){
+		if(grid.garbage_blocks < 6) ++grid.garbage_blocks;
+		grid.garbage_block_timeout = 8*grid.block_fall_timeout;
+	}
+	
 	naco_resume(grid.update_coro, 0);
 }

@@ -118,7 +118,7 @@ GameState pause(void){
 }
 
 GameState main_menu(void){
-	static const char *msg = "MAIN MENU";
+	static const char *msg = "MAIN  MENU";
 	px_ppu_disable();
 	
 	px_addr(NT_ADDR(0, 0, 0));

@@ -16,17 +16,28 @@ u8 COLUMN_HEIGHT[GRID_W];
 // Time taken by tick + blitting.
 #define OVERHEAD_TICKS (1 + GRID_H - 2)
 
-#define MAX_FALL_TICKS (60 - OVERHEAD_TICKS)
+// Min/Max waiting ticks before triggering the next fall.
 #define MIN_FALL_TICKS (15 - OVERHEAD_TICKS)
-#define FALL_TICKS_DEC 5
+#define MAX_FALL_TICKS (60 - OVERHEAD_TICKS)
+
+// How many drops happen before speeding up.
 #define DROPS_PER_SPEEDUP 16
+// How many ticks to speed up the timout by.
+#define FALL_TICKS_DEC 5
+
+// How many ticks pass before the combo resets and the max value.
 #define COMBO_TIMEOUT 8
 #define MAX_COMBO 5
+
+// How many ticks pass before adding a garbage block to the meter.
+#define GARBAGE_BLOCK_TICKS 40
 
 typedef struct {
 	u8 drop_cursor;
 	u8 column_cursor;
 	
+	u8 garbage_block_ticks;
+	u8 garbage_meter_ticks;
 	u8 garbage_cursor;
 	u8 garbage_mask;
 	
@@ -258,6 +269,20 @@ static void grid_update_fall_speed(void){
 	}
 }
 
+static void grid_blit(void){
+	// Copy score to the screen.
+	px_buffer_inc(PX_INC1);
+	px_buffer_data(8, NT_ADDR(0, 10, 4));
+	memset(PX.buffer, 0, 8);
+	
+	ultoa(grid.score, PX.buffer, 10);
+	
+	PX.buffer[4] = 'x';
+	PX.buffer[5] = _hextab[grid.combo];
+	PX.buffer[6] = '@';
+	PX.buffer[7] = _hextab[grid.combo_ticks];
+}
+
 static void grid_blocks_tick(void){
 	register u8 block;
 	register u8 matched_blocks = 0;
@@ -292,19 +317,7 @@ static void grid_blocks_tick(void){
 		--grid.combo_ticks;
 	}
 	
-	// Copy score to the screen.
-	px_buffer_inc(PX_INC1);
-	px_buffer_data(8, NT_ADDR(0, 10, 4));
-	memset(PX.buffer, 0, 8);
-	
-	{
-		ultoa(grid.score, PX.buffer, 10);
-		
-		PX.buffer[4] = 'x';
-		PX.buffer[5] = _hextab[grid.combo];
-		PX.buffer[6] = '@';
-		PX.buffer[7] = _hextab[grid.combo_ticks];
-	}
+	grid_blit();
 }
 
 static void grid_tick(void){
@@ -314,6 +327,10 @@ static void grid_tick(void){
 	if(!grid_any_falling()){
 		grid_drop_block();
 		grid_update_fall_speed();
+	}
+	
+	if(++grid.garbage_block_ticks >= GARBAGE_BLOCK_TICKS){
+		grid.garbage_block_ticks = 0;
 	}
 }
 
@@ -378,6 +395,9 @@ void grid_init(void){
 		get_shuffled_column();
 	}
 	
+	grid.garbage_block_ticks = 0;
+	grid.garbage_meter_ticks = 0;
+	grid.garbage_cursor = 0;
 	grid.garbage_mask = 0;
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;

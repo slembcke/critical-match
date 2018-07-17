@@ -405,7 +405,11 @@ uintptr_t grid_update_coro(void){
 	while(true){
 		// Look for matches while waiting for the next tick.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
-			if(grid_match_blocks()){
+			if(
+				// Check every other frame to animate matching nicely.
+				(grid.state_timer & 0x1) == 0 &&
+				grid_match_blocks()
+			){
 				// Prevent the timer from advancing as long as matches are happening.
 				grid.state_timer = 0;
 			}

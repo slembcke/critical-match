@@ -1,7 +1,6 @@
 TODO:
 * Show next block/location.
 * Grappling hook.
-* Animate chest unlocking more slowly.
 * Game over animation.
 * "Also on Switch" screen.
 * Attract mode.

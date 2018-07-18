@@ -40,6 +40,7 @@ ASMSRC = \
 	lib/famitone2/famitone2.s
 
 GFX = \
+	gfx/pixelakes.png \
 	gfx/neschar.png \
 	gfx/sheet1.png \
 	gfx/squidman.png

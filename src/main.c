@@ -80,6 +80,7 @@ static GameState game_loop(void){
 		player_update(joy0);
 		
 		player_draw();
+		grid_draw_combo();
 		grid_draw_garbage();
 		coins_draw();
 		

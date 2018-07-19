@@ -28,6 +28,7 @@ u8 COLUMN_HEIGHT[GRID_W];
 // How many ticks pass before the combo resets and the max value.
 #define COMBO_TIMEOUT 8
 #define MAX_COMBO 5
+#define COMBO_LABEL_TIMEOUT 180
 
 // How many frames pass before adding garbage blocks to the board.
 #define GARBAGE_METER_TICKS 40
@@ -60,6 +61,8 @@ typedef struct {
 	
 	u8 combo;
 	u8 combo_ticks;
+	u8 combo_label_location;
+	u8 combo_label_timeout;
 	u16 score;
 	
 	u8 state_timer;
@@ -343,6 +346,9 @@ static void grid_blocks_tick(void){
 				// Match out unlocked blocks.
 				if(GRID[idx] & BLOCK_TYPE_CHEST) ++matched_blocks;
 				GRID[idx] = BLOCK_EMPTY;
+				
+				grid.combo_label_location = idx;
+				grid.combo_label_timeout = COMBO_LABEL_TIMEOUT;
 			}
 		}
 	}
@@ -468,6 +474,16 @@ void grid_init(void){
 	naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 }
 
+void grid_draw_combo(void){
+	if(grid.combo_label_timeout > 0){
+		ix = grid_block_x(grid.combo_label_location,  4);
+		iy = grid_block_y(grid.combo_label_location, -4 + (grid.combo_label_timeout - COMBO_LABEL_TIMEOUT)/4);
+		px_spr(ix, iy, (px_ticks >> 2) & 0x3, 0x7A + grid.combo);
+		
+		--grid.combo_label_timeout;
+	}
+}
+
 void grid_draw_garbage(){
 	ix = grid.garbage_cursor;
 	if(grid.garbage_mask & MASK_BITS[ix]){
@@ -483,13 +499,12 @@ static void grid_place_garbage(void){
 		if(grid.garbage_mask & MASK_BITS[ix]){
 			iy = COLUMN_HEIGHT[ix] + 1;
 			
-			// idx = grid_block_idx(ix, iy);
-			// GRID[idx] = BLOCK_GARBAGE;
 			grid_set_block(grid_block_idx(ix, iy), BLOCK_GARBAGE);
 		}
 	}
 	
 	grid.garbage_mask = 0x00;
+	grid_update_column_height();
 	px_wait_nmi();
 }
 

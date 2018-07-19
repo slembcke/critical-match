@@ -41,6 +41,10 @@ typedef struct {
 	u8 drop_cursor;
 	u8 column_cursor;
 	
+	// Where and what to drop next.
+	u8 queued_column;
+	u8 queued_drops[2];
+	
 	// Game timing.
 	u8 speedup_counter;
 	u8 block_fall_timeout;
@@ -270,23 +274,30 @@ static u8 get_shuffled_column(void){
 	return lru_shuffle(COLUMNS, sizeof(COLUMNS), 0x3, &grid.column_cursor);
 }
 
-static void grid_drop_block(void){
-	u8 block;
+static void grid_shuffle_next_drop(){
+	grid.queued_column = get_shuffled_column();
+	grid.queued_drops[0] = get_shuffled_block();
+	grid.queued_drops[1] = get_shuffled_block();
+	// TODO column
 	
-	ix = get_shuffled_column();
-	idx = grid_block_idx(ix, GRID_H - 2);
+	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 6));
+	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 4));
+}
+
+static void grid_drop_block(void){
+	idx = grid_block_idx(grid.queued_column, GRID_H - 2);
 	
 	// Game over if the drop location isn't clear.
 	if(GRID[idx] != BLOCK_EMPTY) naco_yield(false);
 	
 	// Push the first block directly onto the screen.
-	block = get_shuffled_block();
-	grid_set_block(idx, block);
+	grid_set_block(idx, grid.queued_drops[0]);
 	
 	// Write the second block into GRID and let it fall onto the screen.
-	block = get_shuffled_block();
-	idx = grid_block_idx(ix, GRID_H - 1);
-	GRID[idx] = block;
+	idx = grid_block_idx(grid.queued_column, GRID_H - 1);
+	GRID[idx] = grid.queued_drops[1];
+	
+	grid_shuffle_next_drop();
 }
 
 static void grid_update_fall_speed(void){
@@ -309,12 +320,6 @@ static void grid_blit(void){
 	
 	// Score
 	ultoa(grid.score, PX.buffer, 10);
-	
-	// // Combo info.
-	// PX.buffer[5] = 'x';
-	// PX.buffer[6] = _hextab[grid.combo];
-	// PX.buffer[8] = '@';
-	// PX.buffer[9] = _hextab[grid.combo_ticks];
 }
 
 static void grid_remove_garbage(u8 score){
@@ -469,6 +474,7 @@ void grid_init(void){
 		get_shuffled_block();
 		get_shuffled_column();
 	}
+	grid_shuffle_next_drop();
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
@@ -504,6 +510,8 @@ void grid_draw_indicators(void){
 	if(COLUMN_HEIGHT[grid.flicker_column] >= GRID_H - 4){
 		px_spr(68 + 16*grid.flicker_column, 48, 0x00, 0x03);
 	}
+	
+	px_spr(68 + 16*grid.queued_column, 42 + (px_ticks/8 & 0x3), 0x02, 'v');
 }
 
 void grid_draw_garbage(){

@@ -1,7 +1,5 @@
 TODO:
 * Combo meter.
-* Warning signs for tall columns.
-* Show next block/location.
 * Grappling hook.
 * Game over animation.
 * "Also on Switch" screen.

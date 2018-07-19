@@ -175,9 +175,13 @@ static GameState pixelakes_screen(void){
 }
 
 GameState main(void){
+	// Install the cc65 static joystick driver.
 	joy_install(joy_static_stddrv);
 	
-	px_bank_select(0);
+	// Set an initial random seed that's not just zero.
+	// The main menu increments this constantly until the player starts the game.
+	rand_seed = 0x0D8E;
 	
-	return pixelakes_screen();
+	game_loop();
+	// pixelakes_screen();
 }

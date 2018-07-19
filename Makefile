@@ -52,7 +52,9 @@ MAPS = \
 
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
-.PHONY: clean rom run-mac run-linux
+.PHONY: default clean rom run-mac run-linux
+
+default: rom
 
 clean:
 	rm -rf $(ROM)

@@ -12,17 +12,22 @@ u8 joy0, joy1;
 
 #define BG_COLOR 0x1D
 
-const u8 GAME_PALETTE[] = {
-	BG_COLOR, 0x1D, 0x28, 0x11, // blue
-	BG_COLOR, 0x1D, 0x28, 0x16, // red
-	BG_COLOR, 0x1D, 0x28, 0x1A, // green
-	BG_COLOR, 0x1D, 0x28, 0x13, // purple
+static void blit_palette(void){
+	const u8 PALETTE[] = {
+		BG_COLOR, 0x1D, 0x28, 0x11, // blue
+		BG_COLOR, 0x1D, 0x28, 0x16, // red
+		BG_COLOR, 0x1D, 0x28, 0x1A, // green
+		BG_COLOR, 0x1D, 0x28, 0x13, // purple
 
-	BG_COLOR, 0x1D, 0x28, 0x11, // blue
-	BG_COLOR, 0x1D, 0x28, 0x16, // red
-	BG_COLOR, 0x1D, 0x28, 0x1A, // green
-	BG_COLOR, 0x1D, 0x28, 0x13, // purple
-};
+		BG_COLOR, 0x1D, 0x28, 0x11, // blue
+		BG_COLOR, 0x1D, 0x28, 0x16, // red
+		BG_COLOR, 0x1D, 0x28, 0x1A, // green
+		BG_COLOR, 0x1D, 0x28, 0x13, // purple
+	};
+	
+	px_addr(PAL_ADDR);
+	px_blit(sizeof(PALETTE), PALETTE);
+}
 
 static void wait_noinput(void){
 	while(joy_read(0) || joy_read(1)){}
@@ -59,11 +64,12 @@ GameState board(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
-		// Set the palette.
-		px_addr(PAL_ADDR);
-		px_blit(32, (u8 *)GAME_PALETTE);
-
-		px_inc(PX_INC1);
+		blit_palette();
+		
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
+		
 		px_addr(NT_ADDR(0, 0, 0));
 		px_fill(32*30, 0x00);
 
@@ -116,12 +122,9 @@ GameState main_menu(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
+		blit_palette();
+		
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
-
-		px_addr(PAL_ADDR);
-		px_blit(32, GAME_PALETTE);
 		
 		px_addr(NT_ADDR(0, 0, 0));
 		px_fill(32*30, 0x00);
@@ -167,7 +170,7 @@ GameState game_over(void){
 	debug_freeze();
 }
 
-GameState pixelakes_screen(void){
+static GameState pixelakes_screen(void){
 	static const u8 PALETTE[] = {
 		0x2D, 0x1D, 0x20, 0x06,
 		0x2D, 0x1D, 0x10, 0x06,
@@ -188,7 +191,7 @@ GameState pixelakes_screen(void){
 	wait_noinput();
 	while(!JOY_START(joy_read(0))){}
 	
-	main_menu();
+	return main_menu();
 }
 
 GameState main(void){

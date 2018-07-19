@@ -9,7 +9,6 @@ extern u8 ix, iy, idx;
 #pragma zpsym("idx");
 
 extern u8 joy0, joy1;
-extern const u8 GAME_PALETTE[];
 
 typedef struct {} Music;
 extern const Music MUSIC[];

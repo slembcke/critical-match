@@ -4,6 +4,7 @@ TODO:
 * Game over animation.
 * "Also on Switch" screen.
 * Attract mode.
+* Animate splash screen.
 
 Needed:
 * Music.

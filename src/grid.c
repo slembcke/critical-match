@@ -304,7 +304,7 @@ static void grid_update_fall_speed(void){
 static void grid_blit(void){
 	// Copy score to the screen.
 	px_buffer_inc(PX_INC1);
-	px_buffer_data(5, NT_ADDR(0, 8, 4));
+	px_buffer_data(5, NT_ADDR(0, 12, 4));
 	memset(PX.buffer, 0, 16);
 	
 	// Score

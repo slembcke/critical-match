@@ -1,4 +1,5 @@
 TODO:
+* Warning signs for tall columns.
 * Show next block/location.
 * Grappling hook.
 * Game over animation.

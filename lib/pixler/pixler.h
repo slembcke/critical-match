@@ -34,11 +34,19 @@ extern u8 px_ctrl;
 #define PX_MASK_SPRITE_ENABLE 0x10
 #define PX_MASK_RENDER_ENABLE (PX_MASK_SPRITE_ENABLE | PX_MASK_BG_ENABLE)
 
+#define PX_CTRL_BASE_NAMETABLE_ADDR 0x03
+#define PX_CTRL_VRAM_INC 0x04
+#define PX_CTRL_SPR_TABLE_ADDR 0X08
+#define PX_CTRL_BG_TABLE_ADDR 0x10
+
 #define px_profile_start() {px_mask |= PX_MASK_GRAY; PPU.mask = px_mask;}
 #define px_profile_end() {px_mask &= ~PX_MASK_GRAY; PPU.mask = px_mask;}
 
 #define px_ppu_enable() {px_mask |= PX_MASK_RENDER_ENABLE; PPU.mask = px_mask;}
 #define px_ppu_disable() {px_mask &= ~PX_MASK_RENDER_ENABLE; PPU.mask = px_mask;}
+
+#define px_spr_table(tbl) {px_ctrl |= (tbl ? 0xFF : 0x00) & PX_CTRL_SPR_TABLE_ADDR; PPU.control = px_ctrl;}
+#define px_bg_table(tbl) {px_ctrl |= (tbl ? 0xFF : 0x00) & PX_CTRL_BG_TABLE_ADDR; PPU.control = px_ctrl;}
 
 extern u8 OAM[];
 

@@ -66,9 +66,14 @@ GameState board(void){
 	px_ppu_disable(); {
 		blit_palette();
 		
+		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
+		
+		px_spr_table(1);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
 		
 		px_addr(NT_ADDR(0, 0, 0));
 		px_fill(32*30, 0x00);
@@ -124,6 +129,7 @@ GameState main_menu(void){
 	px_ppu_disable(); {
 		blit_palette();
 		
+		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
 		
 		px_addr(NT_ADDR(0, 0, 0));
@@ -182,6 +188,7 @@ static GameState pixelakes_screen(void){
 		px_addr(PAL_ADDR);
 		px_blit(4, PALETTE + 0);
 		
+		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_pixelakes_lz4chr, 128*16);
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_pixelakes_lz4, 1024);
 		
@@ -196,7 +203,7 @@ static GameState pixelakes_screen(void){
 
 GameState main(void){
 	joy_install(joy_static_stddrv);
-
+	
 	px_bank_select(0);
 	
 	return pixelakes_screen();

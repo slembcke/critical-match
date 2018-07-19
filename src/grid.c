@@ -329,8 +329,9 @@ static void grid_remove_garbage(u8 score){
 }
 
 static void grid_blocks_tick(void){
-	register u8 block;
+	// High bit marks any block. Low 7 count unlocked chests.
 	register u8 matched_blocks = 0;
+	register u8 block;
 	
 	for(iy = 1; iy < GRID_H - 1; ++iy){
 		for(ix = 1; ix < GRID_W - 1; ++ix){
@@ -343,10 +344,11 @@ static void grid_blocks_tick(void){
 				GRID_U[idx] = BLOCK_EMPTY;
 			} else if(GRID[idx] & BLOCK_STATUS_UNLOCKED){
 				// Match out unlocked blocks.
-				if(GRID[idx] & BLOCK_TYPE_CHEST) ++matched_blocks;
-				GRID[idx] = BLOCK_EMPTY;
-				
 				grid.combo_label_location = idx;
+				matched_blocks |= 0x80;
+				if(GRID[idx] & BLOCK_TYPE_CHEST) ++matched_blocks;
+				
+				GRID[idx] = BLOCK_EMPTY;
 			}
 		}
 	}
@@ -355,7 +357,7 @@ static void grid_blocks_tick(void){
 	
 	// Update score.
 	if(matched_blocks > 0){
-		u8 score = matched_blocks*grid.combo;
+		u8 score = (matched_blocks & 0x7F)*grid.combo;
 		grid.score += score;
 		
 		grid_remove_garbage(score);

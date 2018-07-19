@@ -315,11 +315,15 @@ static void grid_update_fall_speed(void){
 static void grid_blit(void){
 	// Copy score to the screen.
 	px_buffer_inc(PX_INC1);
-	px_buffer_data(5, NT_ADDR(0, 12, 4));
-	memset(PX.buffer, 0, 16);
+	px_buffer_data(5, NT_ADDR(0, 11, 4));
+	memset(PX.buffer, 0, 5);
 	
 	// Score
 	ultoa(grid.score, PX.buffer, 10);
+	
+	// Combo
+	px_buffer_data(1, NT_ADDR(0, 21, 4));
+	PX.buffer[0] = _hextab[grid.combo];
 }
 
 static void grid_remove_garbage(u8 score){
@@ -511,7 +515,15 @@ void grid_draw_indicators(void){
 		px_spr(68 + 16*grid.flicker_column, 48, 0x00, 0x03);
 	}
 	
+	// TODO replace temporary sprite.
 	px_spr(68 + 16*grid.queued_column, 42 + (px_ticks/8 & 0x3), 0x02, 'v');
+	
+	{// Combo meter.
+		static const u8 SPR0[] = {0x00, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C};
+		
+		idx = grid.combo_ticks;
+		px_spr(183, 27, 0x00, SPR0[idx]);
+	}
 }
 
 void grid_draw_garbage(){

@@ -474,14 +474,20 @@ void grid_init(void){
 	naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 }
 
-void grid_draw_combo(void){
+void grid_draw_indicators(void){
 	if(grid.combo_label_timeout > 0){
 		ix = grid_block_x(grid.combo_label_location,  4);
-		iy = grid_block_y(grid.combo_label_location, -4 + (grid.combo_label_timeout - COMBO_LABEL_TIMEOUT)/4);
+		iy = grid_block_y(grid.combo_label_location, -4);
+		iy -= (u8)(COMBO_LABEL_TIMEOUT - grid.combo_label_timeout)/4;
 		px_spr(ix, iy, (px_ticks >> 2) & 0x3, 0x7A + grid.combo);
 		
 		--grid.combo_label_timeout;
 	}
+	
+	// ticks * 2.5
+	iy = grid.garbage_meter_ticks;
+	iy = (u8)(4*iy + iy)/2;
+	px_spr(40, 156 - iy, 0x00, 0x02);
 }
 
 void grid_draw_garbage(){

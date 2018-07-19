@@ -73,7 +73,7 @@ void grid_set_block(u8 index, u8 block);
 void grid_init(void);
 bool grid_update(void);
 void grid_update_column_height(void);
-void grid_draw_combo(void);
+void grid_draw_indicators(void);
 void grid_draw_garbage(void);
 
 void player_init(void);

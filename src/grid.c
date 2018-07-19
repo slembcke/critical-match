@@ -56,7 +56,6 @@ typedef struct {
 	u8 garbage_neg_points;
 	// Values used for previewing garbage placement.
 	u8 garbage_preview_timeout;
-	u8 garbage_cursor;
 	u8 garbage_mask;
 	
 	u8 combo;
@@ -67,6 +66,7 @@ typedef struct {
 	u8 combo_label_location;
 	u8 combo_label_timeout;
 	
+	u8 flicker_column;
 	u8 state_timer;
 	u8 update_coro[16];
 } Grid;
@@ -409,7 +409,7 @@ static void grid_tick(void){
 			grid.garbage_blocks = 0;
 			for(idx = 0; idx < 6; ++idx){
 				buffer_set_metatile(BLOCK_EMPTY, NT_ADDR(0, 6, 20 - 2*idx));
-		}
+			}
 			
 			px_wait_nmi();
 		}
@@ -475,7 +475,7 @@ void grid_init(void){
 	
 	grid.garbage_meter_ticks = 0;
 	grid.garbage_block_timeout = 4*MAX_FALL_FRAMES;
-	grid.garbage_cursor = 0;
+	grid.flicker_column = 1;
 	grid.garbage_mask = 0;
 	
 	grid.combo = 1;
@@ -499,16 +499,20 @@ void grid_draw_indicators(void){
 	iy = grid.garbage_meter_ticks;
 	iy = (u8)(4*iy + iy)/2;
 	px_spr(40, 172 - iy, 0x00, 0x02);
+	
+	// Column warnings.
+	if(COLUMN_HEIGHT[grid.flicker_column] >= GRID_H - 4){
+		px_spr(68 + 16*grid.flicker_column, 48, 0x00, 0x03);
+	}
 }
 
 void grid_draw_garbage(){
-	ix = grid.garbage_cursor;
+	ix = grid.flicker_column;
 	if(grid.garbage_mask & MASK_BITS[ix]){
 		iy = COLUMN_HEIGHT[ix];
 		block_sprite(64 + ix*16, 190 - iy*16, BLOCK_GARBAGE);
 	}
 	
-	if(++grid.garbage_cursor == GRID_W) grid.garbage_cursor = 1;
 }
 
 static void grid_place_garbage(void){
@@ -526,6 +530,8 @@ static void grid_place_garbage(void){
 }
 
 bool grid_update(void){
+	if(++grid.flicker_column == GRID_W - 1) grid.flicker_column = 1;
+	
 	if(grid.garbage_preview_timeout > 0){
 		if(--grid.garbage_preview_timeout == 0){
 			grid_place_garbage();

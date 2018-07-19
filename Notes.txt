@@ -1,5 +1,4 @@
 TODO:
-* Combo meter.
 * Grappling hook.
 * Game over animation.
 * "Also on Switch" screen.

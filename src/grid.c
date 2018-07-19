@@ -323,7 +323,7 @@ static void grid_remove_garbage(u8 score){
 		grid.garbage_neg_points -= MAX_COMBO;
 		if(grid.garbage_blocks > 1){
 			--grid.garbage_blocks;
-			buffer_set_metatile(BLOCK_EMPTY, NT_ADDR(0, 6, 18 - 2*grid.garbage_blocks));
+			buffer_set_metatile(BLOCK_EMPTY, NT_ADDR(0, 6, 20 - 2*grid.garbage_blocks));
 		}
 	}
 }
@@ -490,7 +490,7 @@ void grid_draw_indicators(void){
 	// ticks * 2.5
 	iy = grid.garbage_meter_ticks;
 	iy = (u8)(4*iy + iy)/2;
-	px_spr(40, 156 - iy, 0x00, 0x02);
+	px_spr(40, 172 - iy, 0x00, 0x02);
 }
 
 void grid_draw_garbage(){
@@ -524,7 +524,7 @@ bool grid_update(void){
 		}
 	} else if(--grid.garbage_block_timeout == 0){
 		if(grid.garbage_blocks < 6){
-			buffer_set_metatile(BLOCK_GARBAGE, NT_ADDR(0, 6, 18 - 2*grid.garbage_blocks));
+			buffer_set_metatile(BLOCK_GARBAGE, NT_ADDR(0, 6, 20 - 2*grid.garbage_blocks));
 			++grid.garbage_blocks;
 		}
 		grid.garbage_block_timeout = 8*grid.block_fall_timeout;

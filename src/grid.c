@@ -325,7 +325,10 @@ static void grid_remove_garbage(u8 score){
 	grid.garbage_neg_points += score;
 	while(grid.garbage_neg_points > MAX_COMBO){
 		grid.garbage_neg_points -= MAX_COMBO;
-		if(grid.garbage_blocks > 1) --grid.garbage_blocks;
+		if(grid.garbage_blocks > 1){
+			--grid.garbage_blocks;
+			buffer_set_metatile(BLOCK_EMPTY, NT_ADDR(0, 6, 18 - 2*grid.garbage_blocks));
+		}
 	}
 }
 
@@ -520,7 +523,10 @@ bool grid_update(void){
 			grid_place_garbage();
 		}
 	} else if(--grid.garbage_block_timeout == 0){
-		if(grid.garbage_blocks < 6) ++grid.garbage_blocks;
+		if(grid.garbage_blocks < 6){
+			buffer_set_metatile(BLOCK_GARBAGE, NT_ADDR(0, 6, 18 - 2*grid.garbage_blocks));
+			++grid.garbage_blocks;
+		}
 		grid.garbage_block_timeout = 8*grid.block_fall_timeout;
 	}
 	

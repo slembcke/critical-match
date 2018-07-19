@@ -157,13 +157,13 @@ sprite_pal = tmp3
 	asl a
 	asl a
 	asl a
-	sub #2
+	sub #6
 	sta tmp1
 	
 	; Set y-values.
 	ldy #0
 	lda (sp), y
-	add #10
+	add #8
 	sta OAM_Y+ 8, x
 	sta OAM_Y+12, x
 	sub tmp1
@@ -173,15 +173,15 @@ sprite_pal = tmp3
 	; Set x-values.
 	ldy #1
 	lda (sp), y
-	sub #3
+	sub #1
 	sta OAM_X+ 0, x
 	sta OAM_X+ 8, x
-	add #14
+	add #10
 	sta OAM_X+ 4, x
 	sta OAM_X+12, x
 	
 	; Set chr.
-	lda #$14
+	lda #$04
 	sta OAM_CHR+ 0, x
 	sta OAM_CHR+ 4, x
 	sta OAM_CHR+ 8, x

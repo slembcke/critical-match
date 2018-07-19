@@ -33,34 +33,24 @@ static void wait_noinput(void){
 	while(joy_read(0) || joy_read(1)){}
 }
 
-static GameState loop(void){
-	px_ppu_enable();
-	
-	while(true){
-		DEBUG_PROFILE_START();
-		
-		joy0 = joy_read(0);
-		if(JOY_START(joy0)) return pause();
-		
-		grid_update();
-		player_update(joy0);
-		
-		player_draw();
-		grid_draw_garbage();
-		coins_draw();
-		
-		px_spr_end();
-		DEBUG_PROFILE_END();
-		px_wait_nmi();
-	}
+static GameState pause(void);
+static GameState game_over(void);
 
-	return loop();
-}
-
-GameState board(void){
+static GameState game_loop(void){
 	player_init();
 	grid_init();
 	coins_init();
+	
+	// GRID[grid_block_idx(1, 1)] = BLOCK_GARBAGE;
+	// GRID[grid_block_idx(3, 1)] = BLOCK_KEY | BLOCK_COLOR_BLUE;
+	// GRID[grid_block_idx(4, 1)] = BLOCK_KEY | BLOCK_COLOR_RED;
+	// GRID[grid_block_idx(5, 1)] = BLOCK_KEY | BLOCK_COLOR_GREEN;
+	// GRID[grid_block_idx(6, 1)] = BLOCK_KEY | BLOCK_COLOR_PURPLE;
+	
+	// GRID[grid_block_idx(3, 4)] = BLOCK_CHEST | BLOCK_COLOR_BLUE;
+	// GRID[grid_block_idx(4, 4)] = BLOCK_CHEST | BLOCK_COLOR_RED;
+	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
+	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
@@ -80,30 +70,57 @@ GameState board(void){
 		px_wait_nmi();
 	} px_ppu_enable();
 	
-	// GRID[grid_block_idx(1, 1)] = BLOCK_GARBAGE;
-	// GRID[grid_block_idx(3, 1)] = BLOCK_KEY | BLOCK_COLOR_BLUE;
-	// GRID[grid_block_idx(4, 1)] = BLOCK_KEY | BLOCK_COLOR_RED;
-	// GRID[grid_block_idx(5, 1)] = BLOCK_KEY | BLOCK_COLOR_GREEN;
-	// GRID[grid_block_idx(6, 1)] = BLOCK_KEY | BLOCK_COLOR_PURPLE;
-	
-	// GRID[grid_block_idx(3, 4)] = BLOCK_CHEST | BLOCK_COLOR_BLUE;
-	// GRID[grid_block_idx(4, 4)] = BLOCK_CHEST | BLOCK_COLOR_RED;
-	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
-	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+	while(true){
+		DEBUG_PROFILE_START();
+		
+		joy0 = joy_read(0);
+		if(JOY_START(joy0)) return pause();
+		
+		if(!grid_update()) break;
+		player_update(joy0);
+		
+		player_draw();
+		grid_draw_garbage();
+		coins_draw();
+		
+		px_spr_end();
+		DEBUG_PROFILE_END();
+		px_wait_nmi();
+	}
 
-	return loop();
+	return game_over();
 }
 
-GameState pause(void){
+static GameState pause(void){
 	wait_noinput();
 	
 	while(!JOY_START(joy_read(0))){}
 	
 	wait_noinput();
-	return loop();
+	return game_loop();
 }
 
-GameState main_menu(void){
+static GameState game_over(void){
+	static const char *msg = "GAME OVER";
+	px_ppu_disable(); {
+		px_addr(NT_ADDR(0, 0, 0));
+		px_fill(32*30, 0x00);
+		
+		px_addr(NT_ADDR(0, 10, 12));
+		px_blit(strlen(msg), msg);
+		
+		px_wait_nmi();
+	} px_ppu_enable();
+	
+	wait_noinput();
+	
+	// Wait until start is pressed.
+	while(!JOY_START(joy_read(0))){}
+	
+	debug_freeze();
+}
+
+static GameState main_menu(void){
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
 		blit_palette();
@@ -122,33 +139,13 @@ GameState main_menu(void){
 	while(true){
 		for(idx = 0; idx < 255; ++idx){
 			++rand_seed;
-			if(JOY_START(joy_read(0))) return board();
+			if(JOY_START(joy_read(0))) return game_loop();
 		}
 		
 		px_wait_nmi();
 	}
 	
-	return board();
-}
-
-GameState game_over(void){
-	static const char *msg = "GAME OVER";
-	px_ppu_disable(); {
-		px_addr(NT_ADDR(0, 0, 0));
-		px_fill(32*30, 0x00);
-		
-		px_addr(NT_ADDR(0, 10, 12));
-		px_blit(strlen(msg), msg);
-		
-		px_wait_nmi();
-	} px_ppu_enable();
-	
-	wait_noinput();
-	
-	// Wait until start is pressed.
-	while(!JOY_START(joy_read(0))){}
-	
-	debug_freeze();
+	return game_loop();
 }
 
 static GameState pixelakes_screen(void){

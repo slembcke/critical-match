@@ -272,7 +272,7 @@ static void grid_drop_block(void){
 	idx = grid_block_idx(ix, GRID_H - 2);
 	
 	// Game over if the drop location isn't clear.
-	if(GRID[idx] != BLOCK_EMPTY) game_over();
+	if(GRID[idx] != BLOCK_EMPTY) naco_yield(false);
 	
 	// Push the first block directly onto the screen.
 	block = get_shuffled_block();
@@ -493,7 +493,7 @@ static void grid_place_garbage(void){
 	px_wait_nmi();
 }
 
-void grid_update(void){
+bool grid_update(void){
 	if(grid.garbage_preview_timeout > 0){
 		if(--grid.garbage_preview_timeout == 0){
 			grid_place_garbage();
@@ -503,5 +503,5 @@ void grid_update(void){
 		grid.garbage_block_timeout = 8*grid.block_fall_timeout;
 	}
 	
-	naco_resume(grid.update_coro, 0);
+	return naco_resume(grid.update_coro, 0);
 }

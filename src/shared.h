@@ -69,7 +69,7 @@ extern u8 COLUMN_HEIGHT[];
 
 void grid_set_block(u8 index, u8 block);
 void grid_init(void);
-void grid_update(void);
+bool grid_update(void);
 void grid_update_column_height(void);
 void grid_draw_garbage(void);
 
@@ -82,10 +82,6 @@ void coins_draw(void);
 void coins_add_at(u8 idx);
 
 typedef struct {} GameState;
-GameState main_menu(void);
-GameState board(void);
-GameState pause(void);
-GameState game_over(void);
 
 // Defined by cc65
 extern const unsigned char _hextab[];

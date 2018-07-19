@@ -404,6 +404,14 @@ static void grid_tick(void){
 			
 			grid.garbage_preview_timeout = GARBAGE_PREVIEW_TIMEOUT;
 			grid_shuffle_garbage(grid.garbage_blocks);
+			
+			// Clear out the meter
+			grid.garbage_blocks = 0;
+			for(idx = 0; idx < 6; ++idx){
+				buffer_set_metatile(BLOCK_EMPTY, NT_ADDR(0, 6, 20 - 2*idx));
+		}
+			
+			px_wait_nmi();
 		}
 	} else {
 		grid.garbage_meter_ticks = 0;

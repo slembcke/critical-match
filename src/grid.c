@@ -61,9 +61,11 @@ typedef struct {
 	
 	u8 combo;
 	u8 combo_ticks;
+	u16 score;
+	
+	u8 combo_label_value;
 	u8 combo_label_location;
 	u8 combo_label_timeout;
-	u16 score;
 	
 	u8 state_timer;
 	u8 update_coro[16];
@@ -302,23 +304,17 @@ static void grid_update_fall_speed(void){
 static void grid_blit(void){
 	// Copy score to the screen.
 	px_buffer_inc(PX_INC1);
-	px_buffer_data(16, NT_ADDR(0, 8, 4));
+	px_buffer_data(5, NT_ADDR(0, 8, 4));
 	memset(PX.buffer, 0, 16);
 	
 	// Score
 	ultoa(grid.score, PX.buffer, 10);
 	
-	// Combo info.
-	PX.buffer[5] = 'x';
-	PX.buffer[6] = _hextab[grid.combo];
-	PX.buffer[8] = '@';
-	PX.buffer[9] = _hextab[grid.combo_ticks];
-	
-	// Garbage info.
-	PX.buffer[11] = 'G';
-	PX.buffer[12] = _hextab[grid.garbage_blocks];
-	PX.buffer[14] = '@';
-	PX.buffer[15] = _hextab[grid.garbage_meter_ticks/4];
+	// // Combo info.
+	// PX.buffer[5] = 'x';
+	// PX.buffer[6] = _hextab[grid.combo];
+	// PX.buffer[8] = '@';
+	// PX.buffer[9] = _hextab[grid.combo_ticks];
 }
 
 static void grid_remove_garbage(u8 score){
@@ -351,7 +347,6 @@ static void grid_blocks_tick(void){
 				GRID[idx] = BLOCK_EMPTY;
 				
 				grid.combo_label_location = idx;
-				grid.combo_label_timeout = COMBO_LABEL_TIMEOUT;
 			}
 		}
 	}
@@ -364,6 +359,9 @@ static void grid_blocks_tick(void){
 		grid.score += score;
 		
 		grid_remove_garbage(score);
+		
+		grid.combo_label_value = grid.combo;
+		grid.combo_label_timeout = COMBO_LABEL_TIMEOUT;
 		
 		if(grid.combo < MAX_COMBO) ++grid.combo;
 		grid.combo_ticks = COMBO_TIMEOUT;
@@ -482,7 +480,7 @@ void grid_draw_indicators(void){
 		ix = grid_block_x(grid.combo_label_location,  4);
 		iy = grid_block_y(grid.combo_label_location, -4);
 		iy -= (u8)(COMBO_LABEL_TIMEOUT - grid.combo_label_timeout)/4;
-		px_spr(ix, iy, (px_ticks >> 2) & 0x3, 0x7A + grid.combo);
+		px_spr(ix, iy, (px_ticks >> 2) & 0x3, 0x7A + grid.combo_label_value);
 		
 		--grid.combo_label_timeout;
 	}

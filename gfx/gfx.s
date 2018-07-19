@@ -17,3 +17,7 @@ _gfx_sheet1_lz4chr:
 .export _gfx_squidman_lz4chr
 _gfx_squidman_lz4chr:
 	.incbin "squidman.lz4chr", lz4_header_bytes
+
+.export _gfx_pixelakes_lz4
+_gfx_pixelakes_lz4:
+	.incbin "pixelakes.lz4", lz4_header_bytes

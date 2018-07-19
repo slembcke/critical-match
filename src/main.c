@@ -53,41 +53,40 @@ static GameState loop(void){
 }
 
 GameState board(void){
-	px_ppu_disable();
-	
 	player_init();
 	grid_init();
 	coins_init();
-
-	// Set the palette.
+	
 	px_inc(PX_INC1);
-	px_addr(PAL_ADDR);
-	px_blit(32, (u8 *)GAME_PALETTE);
+	px_ppu_disable(); {
+		// Set the palette.
+		px_addr(PAL_ADDR);
+		px_blit(32, (u8 *)GAME_PALETTE);
 
-	px_inc(PX_INC1);
-	px_addr(NT_ADDR(0, 0, 0));
-	px_fill(32*30, 0x00);
+		px_inc(PX_INC1);
+		px_addr(NT_ADDR(0, 0, 0));
+		px_fill(32*30, 0x00);
 
-	// Top edge.
-	px_addr(NT_ADDR(0, 9, 5));
-	px_fill(14, 0x09);
+		// Top edge.
+		px_addr(NT_ADDR(0, 9, 5));
+		px_fill(14, 0x09);
 
-	// Bottom edge.
-	px_addr(NT_ADDR(0, 9, 26));
-	px_fill(14, 0x09);
+		// Bottom edge.
+		px_addr(NT_ADDR(0, 9, 26));
+		px_fill(14, 0x09);
 
-	px_inc(PX_INC32);
+		px_inc(PX_INC32);
 
-	// Left edge.
-	px_addr(NT_ADDR(0, 9, 6));
-	px_fill(20, 0x09);
+		// Left edge.
+		px_addr(NT_ADDR(0, 9, 6));
+		px_fill(20, 0x09);
 
-	// Right edge.
-	px_addr(NT_ADDR(0, 22, 6));
-	px_fill(20, 0x09);
-
-	// Enable rendering.
-	px_ppu_enable();
+		// Right edge.
+		px_addr(NT_ADDR(0, 22, 6));
+		px_fill(20, 0x09);
+		
+		px_wait_nmi();
+	} px_ppu_enable();
 	
 	// GRID[grid_block_idx(1, 1)] = BLOCK_GARBAGE;
 	// GRID[grid_block_idx(3, 1)] = BLOCK_KEY | BLOCK_COLOR_BLUE;
@@ -114,16 +113,25 @@ GameState pause(void){
 
 GameState main_menu(void){
 	static const char *msg = "MAIN  MENU";
-	px_ppu_disable();
 	
-	px_addr(NT_ADDR(0, 0, 0));
-	px_fill(32*30, 0x00);
+	px_inc(PX_INC1);
+	px_ppu_disable(); {
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
+
+		px_addr(PAL_ADDR);
+		px_blit(32, GAME_PALETTE);
+		
+		px_addr(NT_ADDR(0, 0, 0));
+		px_fill(32*30, 0x00);
+		
+		px_addr(NT_ADDR(0, 10, 12));
+		px_blit(strlen(msg), msg);
+		
+		px_wait_nmi();
+	} px_ppu_enable();
 	
-	px_addr(NT_ADDR(0, 10, 12));
-	px_blit(strlen(msg), msg);
-	
-	px_ppu_enable();
-	px_wait_nmi();
 	wait_noinput();
 	
 	// Randomize the seed based on start time.
@@ -141,17 +149,17 @@ GameState main_menu(void){
 
 GameState game_over(void){
 	static const char *msg = "GAME OVER";
-	px_ppu_disable();
-	
-	px_addr(NT_ADDR(0, 0, 0));
-	px_fill(32*30, 0x00);
-	
-	px_addr(NT_ADDR(0, 10, 12));
-	px_blit(strlen(msg), msg);
+	px_ppu_disable(); {
+		px_addr(NT_ADDR(0, 0, 0));
+		px_fill(32*30, 0x00);
+		
+		px_addr(NT_ADDR(0, 10, 12));
+		px_blit(strlen(msg), msg);
+		
+		px_wait_nmi();
+	} px_ppu_enable();
 	
 	wait_noinput();
-	px_ppu_enable();
-	px_wait_nmi();
 	
 	// Wait until start is pressed.
 	while(!JOY_START(joy_read(0))){}
@@ -159,23 +167,34 @@ GameState game_over(void){
 	debug_freeze();
 }
 
+GameState pixelakes_screen(void){
+	static const u8 PALETTE[] = {
+		0x2D, 0x1D, 0x20, 0x06,
+		0x2D, 0x1D, 0x10, 0x06,
+		0x2D, 0x1D, 0x00, 0x06,
+	};
+	
+	px_inc(PX_INC1);
+	px_ppu_disable(); {
+		px_addr(PAL_ADDR);
+		px_blit(4, PALETTE + 0);
+		
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_pixelakes_lz4chr, 128*16);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_pixelakes_lz4, 1024);
+		
+		px_wait_nmi();
+	} px_ppu_enable();
+	
+	wait_noinput();
+	while(!JOY_START(joy_read(0))){}
+	
+	main_menu();
+}
+
 GameState main(void){
 	joy_install(joy_static_stddrv);
 
 	px_bank_select(0);
 	
-	px_inc(PX_INC1);
-	
-	decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
-	decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
-	decompress_lz4_to_vram(CHR_ADDR(0, 0xA0), gfx_squidman_lz4chr, 84*16);
-
-	px_addr(PAL_ADDR);
-	px_blit(32, (u8 *)GAME_PALETTE);
-	
-	// music_init(MUSIC);
-	// music_play(0);
-
-	// return debug_chr();
-	return main_menu();
+	return pixelakes_screen();
 }

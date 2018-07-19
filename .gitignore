@@ -2,11 +2,11 @@
 *.s
 *.o
 *.d
+*.bin
+*.lz4
+*.chr
+*lz4chr
 link.log
-gfx/*.chr
-gfx/*lz4chr
-dat/*.bin
-dat/*.lz4
 
 tools/png2chr
 tools/chr2png

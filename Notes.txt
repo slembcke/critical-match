@@ -13,4 +13,6 @@ Needed:
 * Game over screen.
 
 BUGS:
+* Adding garbage should increment column heights.
+* Garbage blocks can be added above screen edge.
 * Manipulating large stacks causes PPU glitches.

@@ -91,10 +91,13 @@ $(ROM): ld65.cfg $(OBJS)
 %.bin: %.hex
 	xxd -r -c 8 $< > $@
 
+%.bin: %.tmx
+	python tools/tmx2bin.py $< > $@
+
 %.lz4: %.bin tools/lz4x
 	tools/lz4x -f9 $< $@
 
-gfx/gfx.o: $(GFX:.png=.lz4chr)
+gfx/gfx.o: $(GFX:.png=.lz4chr) gfx/pixelakes.lz4
 
 dat/data.s:
 

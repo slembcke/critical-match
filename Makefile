@@ -47,6 +47,7 @@ GFX = \
 
 MAPS = \
 	gfx/pixelakes.tmx \
+	gfx/main_menu.tmx \
 	gfx/board.tmx
 
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)

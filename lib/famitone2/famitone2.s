@@ -159,7 +159,7 @@ FT_SFX_BUF			= FT_SFX_BASE_ADR+4	;11 bytes
 
 FT_BASE_SIZE 		= FT_SFX_BUF+11-FT_BASE_ADR
 
-.segment "FAMITONE"
+.bss
 FT_BASE_ADR:
 	.res FT_BASE_SIZE
 

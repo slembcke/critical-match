@@ -60,6 +60,7 @@ clean:
 	rm -rf $(OBJS)
 	rm -rf gfx/*.chr
 	rm -rf gfx/*.lz4chr
+	rm -rf gfx/*.lz4
 	rm -rf dat/*.lz4
 	rm -rf link.log
 	make -C tools clean
@@ -79,7 +80,7 @@ tools/lz4x:
 	make -C tools lz4x
 
 $(ROM): ld65.cfg $(OBJS)
-	$(LD) -C ld65.cfg $(OBJS) nes.lib -vm -m link.log -o $@
+	$(LD) -C ld65.cfg $(OBJS) nes.lib -m link.log -o $@
 
 %.s: %.c
 	$(CC) $(CFLAGS) $< --add-source $(INCLUDE) -o $@

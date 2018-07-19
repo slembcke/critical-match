@@ -14,6 +14,10 @@ _gfx_neschar_lz4chr:
 _gfx_sheet1_lz4chr:
 	.incbin "sheet1.lz4chr", lz4_header_bytes
 
+.export _gfx_explosion_lz4chr
+_gfx_explosion_lz4chr:
+	.incbin "explosion.lz4chr", lz4_header_bytes
+
 .export _gfx_squidman_lz4chr
 _gfx_squidman_lz4chr:
 	.incbin "squidman.lz4chr", lz4_header_bytes

@@ -62,6 +62,7 @@ static GameState game_loop(void){
 		
 		px_spr_table(1);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 36*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
 		
@@ -74,6 +75,7 @@ static GameState game_loop(void){
 		DEBUG_PROFILE_START();
 		
 		joy0 = joy_read(0);
+		joy1 = joy_read(1);
 		if(JOY_START(joy0)) return pause();
 		
 		if(!grid_update()) break;
@@ -174,6 +176,46 @@ static GameState pixelakes_screen(void){
 	return main_menu();
 }
 
+#ifdef DEBUG
+static GameState debug_chr(void){
+	px_ppu_disable(); {
+		blit_palette();
+		
+		px_bg_table(1);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 36*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
+		
+		//Top
+	px_inc(PX_INC1);
+		px_addr(NT_ADDR(0, 8, 6));
+		px_blit(16, _hextab);
+		
+		// Side
+		px_inc(PX_INC32);
+		px_addr(NT_ADDR(0, 6, 8));
+		px_blit(16, _hextab);
+		
+		
+		// Grid
+		px_inc(PX_INC1);
+		for(iy = 0; iy < 16; ++iy){
+			px_addr(NT_ADDR(0, 8, 8 + iy));
+			for(ix = 0; ix < 16; ++ix){
+				PPU.vram.data = ix | 16*iy;
+			}
+		}
+		
+		px_wait_nmi();
+	} px_ppu_enable();
+	
+	
+	
+	debug_freeze();
+}
+#endif
+
 GameState main(void){
 	// Install the cc65 static joystick driver.
 	joy_install(joy_static_stddrv);
@@ -182,6 +224,7 @@ GameState main(void){
 	// The main menu increments this constantly until the player starts the game.
 	rand_seed = 0x0D8E;
 	
+	// debug_chr();
 	game_loop();
 	// pixelakes_screen();
 }

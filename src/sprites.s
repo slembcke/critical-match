@@ -265,3 +265,51 @@ sprite_pal = tmp3
 	
 	jmp incsp2
 .endproc
+
+.export _explosion_sprite
+.proc _explosion_sprite ; u8 x, u8 y, u8 frame
+	ldx px_sprite_cursor
+	
+	; Store chr.
+	asl
+	add #$20
+	sta OAM_CHR+ 0, x
+	adc #1
+	sta OAM_CHR+ 4, x
+	adc #17
+	sta OAM_CHR+ 8, x
+	adc #1
+	sta OAM_CHR+12, x
+	
+	; Store attr.
+	lda #$01
+	sta OAM_ATTR+ 0, x
+	sta OAM_ATTR+ 4, x
+	sta OAM_ATTR+ 8, x
+	sta OAM_ATTR+12, x
+	
+	; Store x-values.
+	ldy #1
+	lda (sp), y
+	sta OAM_X+ 0, x
+	sta OAM_X+ 8, x
+	add #8
+	sta OAM_X+ 4, x
+	sta OAM_X+12, x
+	
+	; Store y-values.
+	ldy #0
+	lda (sp), y
+	sta OAM_Y+ 0, x
+	sta OAM_Y+ 4, x
+	add #8
+	sta OAM_Y+ 8, x
+	sta OAM_Y+12, x
+	
+	; Increment sprite cursor.
+	txa
+	add #16
+	sta px_sprite_cursor
+	
+	jmp incsp2
+.endproc

@@ -19,8 +19,9 @@ void music_pause();
 void music_stop();
 
 void player_sprite(u8 x, u8 y, u8 frame);
-void block_sprite(u8 x, u8 y, u8 block);
 void cursor_sprite(u8 x, u8 y, u8 height);
+void block_sprite(u8 x, u8 y, u8 block);
+void explosion_sprite(u8 x, u8 y, u8 block);
 
 // Block color.
 #define BLOCK_COLOR_MASK 0x03
@@ -97,11 +98,8 @@ extern const unsigned char _hextab[];
 	#define DEBUG_PROFILE_END()
 #endif
 
-GameState debug_chr(void);
-
 // TODO temprary until a crash vector is implemented.
 void debug_crash(void) __attribute__((noreturn));
-
 void debug_freeze(void) __attribute__((noreturn));
 void debug_hex(u16 value);
 

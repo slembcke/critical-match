@@ -1,9 +1,10 @@
 TODO:
-* Grappling hook.
+* Grappling hook animation.
 * Game over animation.
-* "Also on Switch" screen.
+* Drop indicator sprite.
 * Attract mode.
 * Animate splash screen.
+* "Also on Switch" screen?
 
 Needed:
 * Music.
@@ -15,3 +16,4 @@ Needed:
 BUGS:
 * Garbage blocks can be added above screen edge.
 * Manipulating large stacks causes PPU glitches.
+* Unpausing resets the game.

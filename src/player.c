@@ -271,7 +271,6 @@ void player_pick_up(void){
 	grid_update_column_height();
 	
 	// Wait for the PPU buffer to flush.
-	DEBUG_PROFILE_END();
 	px_wait_nmi();
 }
 
@@ -289,7 +288,6 @@ void player_drop(void){
 		grid_update_column_height();
 		
 		// Wait for the PPU buffer to flush.
-		DEBUG_PROFILE_END();
 		px_wait_nmi();
 	} else {
 		// TODO play "denied" sound?

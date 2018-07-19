@@ -43,6 +43,7 @@ GFX = \
 	gfx/pixelakes.png \
 	gfx/neschar.png \
 	gfx/sheet1.png \
+	gfx/explosion.png \
 	gfx/squidman.png
 
 MAPS = \

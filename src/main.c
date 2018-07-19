@@ -75,26 +75,7 @@ GameState board(void){
 		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
 		
-		px_addr(NT_ADDR(0, 0, 0));
-		px_fill(32*30, 0x00);
-
-		// Top edge.
-		px_addr(NT_ADDR(0, 9, 5));
-		px_fill(14, 0x09);
-
-		// Bottom edge.
-		px_addr(NT_ADDR(0, 9, 26));
-		px_fill(14, 0x09);
-
-		px_inc(PX_INC32);
-
-		// Left edge.
-		px_addr(NT_ADDR(0, 9, 6));
-		px_fill(20, 0x09);
-
-		// Right edge.
-		px_addr(NT_ADDR(0, 22, 6));
-		px_fill(20, 0x09);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4, 1024);
 		
 		px_wait_nmi();
 	} px_ppu_enable();

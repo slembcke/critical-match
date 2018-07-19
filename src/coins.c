@@ -37,8 +37,8 @@ void coins_draw(void){
 			iy = COIN_ANIM_Y[t];
 			
 			idx = COIN_BLOCK_IDX[i];
-			ix += ( 68 + (u8)((idx & 0x07) << 4));
-			iy += (210 - (u8)((idx & 0xF8) << 1));
+			ix += (u8)grid_block_x(idx, 4);
+			iy += (u8)grid_block_y(idx, 0);
 			px_spr(ix, iy, 0x00, 0x95);
 			
 			++COIN_TIMEOUT[i];

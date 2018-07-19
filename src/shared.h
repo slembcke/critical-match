@@ -66,6 +66,8 @@ extern u8 COLUMN_HEIGHT[];
 #define COLUMN_HEIGHT_R (COLUMN_HEIGHT +  1)
 
 #define grid_block_idx(x, y) (u8)(GRID_W*(y) | (x))
+#define grid_block_x(idx, offs) ( 64 + offs +  ((idx & 0x07) << 4))
+#define grid_block_y(idx, offs) (214 + offs + ~((idx & 0xF8) << 1))
 
 void grid_set_block(u8 index, u8 block);
 void grid_init(void);

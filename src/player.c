@@ -318,8 +318,8 @@ void player_update(u8 joy){
 	if(player.cursor_idx){
 		// Convert the block index to the base sprite coord.
 		// TODO Should cursor_sprite do this? Meh...
-		ix =  (64 + (u8)((idx & 0x07) << 4));
-		iy = -(48 + (u8)((idx & 0xF8) << 1));
+		ix = grid_block_x(idx,  0);
+		iy = grid_block_y(idx, -5);
 		
 		// Calculate cursor height into idx.
 		if(player.blocks_held[0]){

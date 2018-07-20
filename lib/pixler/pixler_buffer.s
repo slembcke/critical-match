@@ -7,11 +7,6 @@
 .import incsp1
 .import METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
 
-.export px_buffer_exec
-.export _px_buffer_inc
-.export _px_buffer_data
-.export _px_buffer_set_color
-
 .macpack generic
 
 .zeropage
@@ -76,9 +71,18 @@ px_nmi_tmp: .res 4
 	rts
 .endproc
 
+.export _px_buffer_clear
+.proc _px_buffer_clear
+	ldx #0
+	stx px_buffer_cursor
+	
+	rts
+.endproc
+
 ; Execute an update buffer stored in stack.
 ; Idea based on: http://forums.nesdev.com/viewtopic.php?f=2&t=16969
-.proc px_buffer_exec
+.export _px_buffer_exec
+.proc _px_buffer_exec
 	tsx
 	txa
 	
@@ -86,9 +90,7 @@ px_nmi_tmp: .res 4
 	px_buffer_write_arg 0
 	px_buffer_write_func exec_terminator
 	
-	; Reset buffer cursor.
-	ldx #0
-	stx px_buffer_cursor
+	jsr _px_buffer_clear
 	
 	; Manipulate the stack to jump to ($0100)
 	; This is the first display list buffer func.
@@ -97,6 +99,7 @@ px_nmi_tmp: .res 4
 	rts
 .endproc
 
+.export _px_buffer_inc
 .proc _px_buffer_inc ; pxInc direction
 	ldx px_buffer_cursor
 	
@@ -115,6 +118,7 @@ px_nmi_tmp: .res 4
 	rts
 .endproc
 
+.export _px_buffer_data
 .proc _px_buffer_data ; u8 len, u16 addr
 	_len = 0
 	; _addr = x|a
@@ -147,6 +151,7 @@ px_nmi_tmp: .res 4
 	jmp incsp1
 .endproc
 
+.export _px_buffer_set_color
 .proc _px_buffer_set_color ; u8 idx, u8 color
 	_idx = 0
 	; _color = a

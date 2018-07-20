@@ -53,9 +53,9 @@ static GameState game_loop(void){
 	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
 	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	
-	// for(idx = 8; idx < GRID_BYTES - 16; ++idx){
-	// 	GRID[idx] = BLOCK_GARBAGE;
-	// }
+	for(idx = 8; idx < GRID_BYTES - 16; ++idx){
+		GRID[idx] = BLOCK_GARBAGE;
+	}
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
@@ -106,21 +106,12 @@ static void pause(void){
 	wait_noinput();
 }
 
-// TODO Add to pixler.
-static void px_wait_frames(u8 frames){
-	while(frames > 0){
-		px_wait_nmi();
-		--frames;
-	}
-}
-
 // TODO This is pretty terrible.
 static GameState game_over(void){
 	u8 boom[16] = {};
 	register u8 y;
 	
-	// TODO px_spr_clear()?
-	px_spr_end();
+	px_spr_clear();
 	px_wait_nmi();
 	
 	for(ix = 0; ix < 255; ++ix){
@@ -138,18 +129,16 @@ static GameState game_over(void){
 		}
 		
 		px_spr_end();
-		px_wait_nmi();
+		px_wait_frames(2);
 	}
-	
-	// Clear sprites!
-	// px_spr_end() not good enough.
 	
 	px_ppu_disable(); {
 		static const char *msg = "GAME OVER";
 		
 		px_addr(NT_ADDR(0, 0, 0));
 		px_fill(1024, 0x00);
-		
+		px_spr_clear();
+	
 		px_addr(NT_ADDR(0, 10, 12));
 		px_blit(strlen(msg), msg);
 		

@@ -77,14 +77,18 @@ void px_inc(u8 direction);
 void px_fill(u16 len, char chr);
 void px_blit(u16 len, const u8 *src);
 
+void px_buffer_clear(void);
 void px_buffer_inc(u8 direction);
 void px_buffer_data(u8 len, u16 addr);
 void px_buffer_set_color(u8 idx, u8 color);
+void px_buffer_exec(void);
 
+void px_spr_clear(void);
 void px_spr(u8 x, u8 y, u8 attr, u8 chr);
 void px_spr_end(void);
 
 void px_wait_nmi(void);
+void px_wait_frames(u8 frames);
 
 void decompress_lz4_to_ram(void *dst, void *src, u16 len);
 void decompress_lz4_to_vram(u16 addr, void *src, u16 len);

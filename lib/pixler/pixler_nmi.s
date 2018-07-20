@@ -3,11 +3,10 @@
 .importzp px_ticks
 .importzp PX_scroll_x
 .importzp PX_scroll_y
-.import px_buffer_exec
+.import _px_buffer_exec
 .import FamiToneUpdate
 
 .export px_nmi
-.export _px_wait_nmi = px_wait_nmi
 
 .zeropage
 
@@ -35,7 +34,7 @@ px_nmi_ready: .byte 0
 	sta APU_SPR_DMA
 	
 	; Execute the display list buffer.
-	jsr px_buffer_exec
+	jsr _px_buffer_exec
 	
 	; Reset PPU Address
 	lda #0
@@ -62,12 +61,26 @@ px_nmi_ready: .byte 0
 	rti
 .endproc
 
-.proc px_wait_nmi
+.export _px_wait_nmi
+.proc _px_wait_nmi
 	lda #1
 	sta px_nmi_ready
 	:	lda px_nmi_ready
 		bne :-
 	
 	inc px_ticks
+	rts
+.endproc
+
+.export _px_wait_frames
+.proc _px_wait_frames ; u8 frames
+	tax
+	:	cpx #0
+		beq :+
+		jsr _px_wait_nmi
+		dex
+		jmp :-
+	:
+	
 	rts
 .endproc

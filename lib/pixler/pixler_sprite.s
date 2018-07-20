@@ -8,6 +8,14 @@
 .import incsp3
 
 
+.export _px_spr_clear
+.proc _px_spr_clear
+	lda #0
+	sta px_sprite_cursor
+	
+	jmp _px_spr_end
+.endproc
+
 .export _px_spr
 .proc _px_spr ; u8 x, u8, y, u8 attr, u8 chr
 	ldx px_sprite_cursor

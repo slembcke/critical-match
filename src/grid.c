@@ -30,6 +30,9 @@ u8 COLUMN_HEIGHT[GRID_W];
 #define MAX_COMBO 5
 #define COMBO_LABEL_TIMEOUT 180
 
+// Ticks before adding a block to the meter.
+#define GARBAGE_BLOCK_TICKS 10
+
 // How many frames pass before adding garbage blocks to the board.
 #define GARBAGE_METER_TICKS 40
 
@@ -51,8 +54,8 @@ typedef struct {
 	
 	// How many ticks left before adding garbage.
 	u8 garbage_meter_ticks;
-	// Frame counter for adding a garbage block to the meter.
-	u8 garbage_block_timeout;
+	// Ticks per garbage block added to the meter.
+	u8 garbage_block_ticks;
 	// Queued blocks of garbage to add.
 	u8 garbage_blocks;
 	// +/- points to adjust garbage with.
@@ -425,6 +428,14 @@ static void grid_tick(void){
 	} else {
 		grid.garbage_meter_ticks = 0;
 	}
+	
+	if(--grid.garbage_block_ticks == 0){
+		if(grid.garbage_blocks < 6){
+			buffer_set_metatile(BLOCK_GARBAGE, NT_ADDR(0, 6, 20 - 2*grid.garbage_blocks));
+			++grid.garbage_blocks;
+		}
+		grid.garbage_block_ticks = GARBAGE_BLOCK_TICKS;
+	}
 }
 
 uintptr_t grid_update_coro(void){
@@ -484,7 +495,7 @@ void grid_init(void){
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
 	
-	grid.garbage_block_timeout = 4*MAX_FALL_FRAMES;
+	grid.garbage_block_ticks = GARBAGE_BLOCK_TICKS;
 	grid.flicker_column = 1;
 	
 	grid.combo = 1;
@@ -553,12 +564,6 @@ bool grid_update(void){
 		if(--grid.garbage_preview_timeout == 0){
 			grid_place_garbage();
 		}
-	} else if(--grid.garbage_block_timeout == 0){
-		if(grid.garbage_blocks < 6){
-			buffer_set_metatile(BLOCK_GARBAGE, NT_ADDR(0, 6, 20 - 2*grid.garbage_blocks));
-			++grid.garbage_blocks;
-		}
-		grid.garbage_block_timeout = 8*grid.block_fall_timeout;
 	}
 	
 	return naco_resume(grid.update_coro, 0);

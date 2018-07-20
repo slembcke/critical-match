@@ -243,11 +243,19 @@ static GameState debug_chr(void){
 	} px_ppu_enable();
 	
 	{
-		u8 x1 = 128, x2 = 140;
+		u8 x1 = 128, x2 = 100;
 		u8 y1 = 0, y2 = 220;
-		s8 dx = x2 - x1;
-		s8 dy = y2/2 - y1/2;
+		u8 dx = x2 - x1;
+		u8 dy = y2/2 - y1/2;
 		u8 eps = 0;
+		u8 inc;;
+		
+		if(x1 <= x2){
+			inc = 1;
+		} else {
+			dx ^= 0xFF;
+			inc = -1;
+		}
 		
 		px_spr(x1, y1, 0x00, 'O');
 		px_spr(x2, y2, 0x00, 'O');
@@ -257,7 +265,7 @@ static GameState debug_chr(void){
 			px_spr(ix, iy, 0x00, 0x0E);
 			
 			eps += dx;
-			while(eps >= dy/4) ix += 1, eps -= dy/4;
+			while(eps >= dy/4) ix += inc, eps -= dy/4;
 		}
 	}
 	px_spr_end();

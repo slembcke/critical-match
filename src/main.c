@@ -53,9 +53,9 @@ static GameState game_loop(void){
 	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
 	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	
-	for(idx = 8; idx < GRID_BYTES - 16; ++idx){
-		GRID[idx] = BLOCK_GARBAGE;
-	}
+	// for(idx = 8; idx < GRID_BYTES - 16; ++idx){
+	// 	GRID[idx] = BLOCK_GARBAGE;
+	// }
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {

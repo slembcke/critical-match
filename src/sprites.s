@@ -276,7 +276,7 @@ sprite_pal = tmp3
 	sta OAM_CHR+ 0, x
 	adc #1
 	sta OAM_CHR+ 4, x
-	adc #17
+	adc #15
 	sta OAM_CHR+ 8, x
 	adc #1
 	sta OAM_CHR+12, x

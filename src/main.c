@@ -33,6 +33,7 @@ static void wait_noinput(void){
 	while(joy_read(0) || joy_read(1)){}
 }
 
+static GameState main_menu(void);
 static void pause(void);
 static GameState game_over(void);
 
@@ -52,6 +53,10 @@ static GameState game_loop(void){
 	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
 	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	
+	// for(idx = 8; idx < GRID_BYTES - 16; ++idx){
+	// 	GRID[idx] = BLOCK_GARBAGE;
+	// }
+	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
 		blit_palette();
@@ -62,7 +67,7 @@ static GameState game_loop(void){
 		
 		px_spr_table(1);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 36*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
 		
@@ -90,7 +95,8 @@ static GameState game_loop(void){
 		DEBUG_PROFILE_END();
 		px_wait_nmi();
 	}
-
+	
+	px_wait_nmi();
 	return game_over();
 }
 
@@ -100,11 +106,49 @@ static void pause(void){
 	wait_noinput();
 }
 
+// TODO Add to pixler.
+static void px_wait_frames(u8 frames){
+	while(frames > 0){
+		px_wait_nmi();
+		--frames;
+	}
+}
+
+// TODO This is pretty terrible.
 static GameState game_over(void){
-	static const char *msg = "GAME OVER";
+	u8 boom[16] = {};
+	register u8 y;
+	
+	// TODO px_spr_clear()?
+	px_spr_end();
+	px_wait_nmi();
+	
+	for(ix = 0; ix < 255; ++ix){
+		idx = rand8();
+		if(idx - 8 < GRID_BYTES - 16 && (idx & (sizeof(boom) - 1)) - 1 < 6){
+			boom[ix & (sizeof(boom) - 1)] = idx;
+			grid_set_block(idx, BLOCK_EMPTY);
+		} else {
+			boom[ix & (sizeof(boom) - 1)] = 0;
+		}
+		
+		for(iy = 0; iy < sizeof(boom); ++iy){
+			idx = boom[iy];
+			if(idx) explosion_sprite(grid_block_x(idx, 0), grid_block_y(idx, -6), ((ix + iy)/2) & 7);
+		}
+		
+		px_spr_end();
+		px_wait_nmi();
+	}
+	
+	// Clear sprites!
+	// px_spr_end() not good enough.
+	
 	px_ppu_disable(); {
+		static const char *msg = "GAME OVER";
+		
 		px_addr(NT_ADDR(0, 0, 0));
-		px_fill(32*30, 0x00);
+		px_fill(1024, 0x00);
 		
 		px_addr(NT_ADDR(0, 10, 12));
 		px_blit(strlen(msg), msg);
@@ -117,7 +161,7 @@ static GameState game_over(void){
 	// Wait until start is pressed.
 	while(!JOY_START(joy_read(0))){}
 	
-	debug_freeze();
+	return main_menu();
 }
 
 static GameState main_menu(void){
@@ -180,7 +224,7 @@ static GameState debug_chr(void){
 		
 		px_bg_table(1);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 36*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
 		
@@ -222,6 +266,6 @@ GameState main(void){
 	rand_seed = 0x0D8E;
 	
 	// debug_chr();
-	game_loop();
-	// pixelakes_screen();
+	// game_loop();
+	pixelakes_screen();
 }

@@ -33,7 +33,7 @@ static void wait_noinput(void){
 	while(joy_read(0) || joy_read(1)){}
 }
 
-static GameState pause(void);
+static void pause(void);
 static GameState game_over(void);
 
 static GameState game_loop(void){
@@ -76,7 +76,7 @@ static GameState game_loop(void){
 		
 		joy0 = joy_read(0);
 		joy1 = joy_read(1);
-		if(JOY_START(joy0)) return pause();
+		if(JOY_START(joy0)) pause();
 		
 		if(!grid_update()) break;
 		player_update(joy0);
@@ -94,13 +94,10 @@ static GameState game_loop(void){
 	return game_over();
 }
 
-static GameState pause(void){
+static void pause(void){
 	wait_noinput();
-	
 	while(!JOY_START(joy_read(0))){}
-	
 	wait_noinput();
-	return game_loop();
 }
 
 static GameState game_over(void){

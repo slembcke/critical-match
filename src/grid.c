@@ -471,8 +471,9 @@ void grid_init(void){
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
 	memset(GRID, BLOCK_BORDER, 8);
 	
-	grid.drop_cursor = 0;
-	grid.column_cursor = 0;
+	bzero(COLUMN_HEIGHT, sizeof(COLUMN_HEIGHT));
+	
+	bzero(&grid, sizeof(grid));
 	for(idx = 255; idx > 0; --idx){
 		get_shuffled_block();
 		get_shuffled_block();
@@ -483,14 +484,10 @@ void grid_init(void){
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
 	
-	grid.garbage_meter_ticks = 0;
 	grid.garbage_block_timeout = 4*MAX_FALL_FRAMES;
 	grid.flicker_column = 1;
-	grid.garbage_mask = 0;
 	
 	grid.combo = 1;
-	grid.combo_ticks = 0;
-	grid.score = 0;
 	
 	naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 }

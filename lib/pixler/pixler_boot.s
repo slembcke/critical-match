@@ -30,28 +30,25 @@
 	cld ; Disable decimal mode.
 	
 	; Disable interrupts for the APU.
-	ldx #APU_FRAME_COUNTER_IRQ_INHIBIT
-	stx APU_FRAME_COUNTER
+	lda #APU_FRAME_COUNTER_IRQ_INHIBIT
+	sta APU_FRAME_COUNTER
 	
 	; Disable/reset the PPU
-	ldx #0
-	stx PPU_CTRL
-	stx PPU_MASK
+	lda #0
+	sta PPU_CTRL
+	sta PPU_MASK
 	
 	; Disable the DMC.
-	stx APU_MODCTRL
+	sta APU_MODCTRL
 	
-	; Read/discard to reset PPU_STATUS register.
-	lda PPU_STATUS
-	
-	; Wait for the first of two vblanks.
-	jsr _waitvsync
-
 	; Set the stack pointer.
 	ldx #$FF
 	txs
 	
-	; Clear the RAM to a known state.
+	; Wait for the first of two vblanks.
+	jsr _waitvsync
+
+	; Zero the RAM.
 	lda #0
 	tax ; Byte counter.
 	:	sta $00, x
@@ -66,9 +63,8 @@
 		bne :-
 	
 	; Wait for the second of two vblanks.
+	; After this PPU should definitely be warmed up and ready to use!
 	jsr _waitvsync
-	
-	; The PPU should be warmed up and ready to use now!
 	
 	; Clear the nametables.
 	lda #>PPU_NAMETBL0
@@ -84,6 +80,7 @@
 		dey
 		bne :-
 	
+	; TODO px_spr_clear()?
 	; Move sprites offscreen.
 	ldy #64 ; Sprite counter.
 	ldx #0 ; Byte counter.
@@ -97,7 +94,7 @@
 		dey
 		bne :-
 	
-	; Reset sprite address counter.
+	; Reset sprite address register.
 	lda #0
 	sta PPU_SPR_ADDR
 	
@@ -105,32 +102,20 @@
 	lda #>OAM
 	sta APU_SPR_DMA
 	
-	; Reset the PPU address latch.
-	lda PPU_STATUS
-	
-	; Blit CHR RAM
-	lda #0
-	sta PPU_VRAM_ADDR
-	sta PPU_VRAM_ADDR
-	
-	lda #$00
-	sta sreg + 0
+	; Enable the PPU NMI.
 	lda #$80
-	sta sreg + 1
+	sta px_ctrl
+	sta PPU_CTRL
 	
 	; Initialize the C runtime and jump to main().
+	jsr copydata
+	jsr initlib
+	
 	CSTACK_TOP = __CSTACK_START__ + __CSTACK_SIZE__
 	lda #<CSTACK_TOP
 	sta sp + 0
 	lda #>CSTACK_TOP
 	sta sp + 1
-	
-	jsr copydata
-	jsr initlib
-	
-	lda #$80
-	sta px_ctrl
-	sta PPU_CTRL
 	
 	jmp _main
 .endproc

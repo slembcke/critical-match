@@ -16,4 +16,3 @@ Needed:
 BUGS:
 * Garbage blocks can be added above screen edge.
 * Manipulating large stacks causes PPU glitches.
-* Unpausing resets the game.

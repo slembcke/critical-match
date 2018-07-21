@@ -10,7 +10,7 @@
 
 u8 joy0, joy1;
 
-#define BG_COLOR 0x20
+#define BG_COLOR 0x2D
 
 static void blit_palette(void){
 	const u8 PALETTE[] = {
@@ -206,7 +206,6 @@ static GameState pixelakes_screen(void){
 	return main_menu();
 }
 
-#ifdef DEBUG
 static GameState debug_chr(void){
 	px_ppu_disable(); {
 		blit_palette();
@@ -244,7 +243,7 @@ static GameState debug_chr(void){
 	
 	{
 		u8 x1 = 128, x2 = 100;
-		u8 y1 = 0, y2 = 220;
+		u8 y1 = 16, y2 = 220;
 		u8 dx = x2 - x1;
 		u8 dy = y2/2 - y1/2;
 		u8 eps = 0;
@@ -257,15 +256,17 @@ static GameState debug_chr(void){
 			inc = -1;
 		}
 		
-		px_spr(x1, y1, 0x00, 'O');
+		px_spr(x1, y1, 0x00, 0x0F);
 		px_spr(x2, y2, 0x00, 'O');
 		
 		ix = x1;
-		for(iy = y1; iy <= y2; iy += 8){
-			px_spr(ix, iy, 0x00, 0x0E);
-			
+		iy = y1;
+		while(iy <= y2){
+			iy += 8;
 			eps += dx;
 			while(eps >= dy/4) ix += inc, eps -= dy/4;
+			
+			px_spr(ix, iy, 0x01, 0x0E);
 		}
 	}
 	px_spr_end();
@@ -273,7 +274,6 @@ static GameState debug_chr(void){
 	
 	debug_freeze();
 }
-#endif
 
 GameState main(void){
 	// Install the cc65 static joystick driver.

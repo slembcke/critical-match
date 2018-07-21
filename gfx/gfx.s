@@ -2,34 +2,17 @@
 
 lz4_header_bytes = 8
 
-.export _gfx_pixelakes_lz4chr
-_gfx_pixelakes_lz4chr:
-	.incbin "pixelakes.lz4chr", lz4_header_bytes
+.macro inclz4 symbol, file
+	.export symbol
+	symbol:
+		.incbin file, lz4_header_bytes
+.endmacro
 
-.export _gfx_neschar_lz4chr
-_gfx_neschar_lz4chr:
-	.incbin "neschar.lz4chr", lz4_header_bytes
-
-.export _gfx_sheet1_lz4chr
-_gfx_sheet1_lz4chr:
-	.incbin "sheet1.lz4chr", lz4_header_bytes
-
-.export _gfx_explosion_lz4chr
-_gfx_explosion_lz4chr:
-	.incbin "explosion.lz4chr", lz4_header_bytes
-
-.export _gfx_squidman_lz4chr
-_gfx_squidman_lz4chr:
-	.incbin "squidman.lz4chr", lz4_header_bytes
-
-.export _gfx_pixelakes_lz4
-_gfx_pixelakes_lz4:
-	.incbin "pixelakes.lz4", lz4_header_bytes
-
-.export _gfx_main_menu_lz4
-_gfx_main_menu_lz4:
-	.incbin "main_menu.lz4", lz4_header_bytes
-
-.export _gfx_board_lz4
-_gfx_board_lz4:
-	.incbin "board.lz4", lz4_header_bytes
+inclz4 _gfx_pixelakes_lz4chr, "pixelakes.lz4chr"
+inclz4 _gfx_neschar_lz4chr, "neschar.lz4chr"
+inclz4 _gfx_sheet1_lz4chr, "sheet1.lz4chr"
+inclz4 _gfx_explosion_lz4chr, "explosion.lz4chr"
+inclz4 _gfx_squidman_lz4chr, "squidman.lz4chr"
+inclz4 _gfx_pixelakes_lz4, "pixelakes.lz4"
+inclz4 _gfx_main_menu_lz4, "main_menu.lz4"
+inclz4 _gfx_board_lz4, "board.lz4"

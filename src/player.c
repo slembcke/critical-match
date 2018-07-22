@@ -255,7 +255,7 @@ void player_draw(void){
 void player_draw_blocks(void){
 	// Draw blocks.
 	if(player.grapple_y){
-		ix = player.block_x;
+		ix = player.block_x - 5;
 		iy = player.block_y;
 	} else {
 		ix = ( 64 -  8) + (player.pos_x >> 8);
@@ -276,8 +276,8 @@ void player_draw_grapple(void){
 	player_x = 60 + (player.pos_x >> 8);
 	player_y = 208 - ((player.pos_y >> 8) & ~0x7);
 	
-	px_spr(player.block_x, player.block_y, 0x00, 'O');
-	px_spr(player_x, player_y, 0x00, 'O');
+	// px_spr(player.block_x, player.block_y, 0x00, 'O');
+	// px_spr(player_x, player_y, 0x00, 'O');
 	
 	dy = (u8)(player_y - player.block_y)>>4;
 	if(player.block_x <= player_x){
@@ -328,7 +328,7 @@ void player_draw_grapple(void){
 void player_pick_up(void){
 	if(JOY_UP(player.joy)){
 		player.grapple_y = 240;
-		player.block_x = grid_block_x(player.cursor_idx, 0);
+		player.block_x = grid_block_x(player.cursor_idx, 5);
 		player.block_y = grid_block_y(player.cursor_idx, 0);
 	} else {
 		player.grapple_y = 0;

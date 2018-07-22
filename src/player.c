@@ -254,14 +254,19 @@ static u8 block_x = 128, block_y = 64;
 static u8 cursor = 240;
 
 void player_draw_grapple(void){
-	register u8 x1 = block_x, x2 = 60 + (player.pos_x >> 8);
-	register u8 y1 = block_y, y2 = 208 - ((player.pos_y >> 8) & ~0x7);
-	register u8 dx = x2 - x1;
-	register u8 dy = y2/2 - y1/2;
+	register u8 x2 = 60 + (player.pos_x >> 8);
+	register u8 y2 = 208 - ((player.pos_y >> 8) & ~0x7);
+	register u8 dx = x2/2 - block_x/2;
+	register u8 dy = y2/16 - block_y/16;
 	register u8 eps = 0;
 	register u8 inc;
 	
-	if(x1 <= x2){
+	px_spr(block_x, block_y, 0x00, 'O');
+	px_spr(x2, y2, 0x00, 'O');
+	
+	if(block_y > y2) return;
+	
+	if(block_x <= x2){
 		inc = -1;
 	} else {
 		dx ^= 0xFF;
@@ -273,7 +278,10 @@ void player_draw_grapple(void){
 	while(true){
 		iy -= 8;
 		eps += dx;
-		while(eps >= dy/4) ix += inc, eps -= dy/4;
+		while(eps >= dy){
+			ix += inc;
+			eps -= dy;
+		}
 		
 		if(iy <= cursor) break;
 		
@@ -282,8 +290,18 @@ void player_draw_grapple(void){
 	
 	px_spr(ix, iy, 0x00, 0x0F);
 	
-	cursor -= 8;
-	if(cursor <= block_y) cursor = y2;
+	if(cursor >= block_y){
+			cursor -= 8;
+	} else {
+		block_y += 8;
+		cursor += 8;
+		
+		eps += dx;
+		while(eps >= dy/4){
+			block_x -= inc;
+			eps -= dy/4;
+		}
+	}
 }
 
 void player_pick_up(void){

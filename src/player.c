@@ -250,6 +250,42 @@ void player_draw(void){
 	player_sprite(64 + ix, 224 - iy, idx);
 }
 
+static u8 block_x = 128, block_y = 64;
+static u8 cursor = 240;
+
+void player_draw_grapple(void){
+	register u8 x1 = block_x, x2 = 60 + (player.pos_x >> 8);
+	register u8 y1 = block_y, y2 = 208 - ((player.pos_y >> 8) & ~0x7);
+	register u8 dx = x2 - x1;
+	register u8 dy = y2/2 - y1/2;
+	register u8 eps = 0;
+	register u8 inc;
+	
+	if(x1 <= x2){
+		inc = -1;
+	} else {
+		dx ^= 0xFF;
+		inc = 1;
+	}
+	
+	ix = x2;
+	iy = y2;
+	while(true){
+		iy -= 8;
+		eps += dx;
+		while(eps >= dy/4) ix += inc, eps -= dy/4;
+		
+		if(iy <= cursor) break;
+		
+		px_spr(ix, iy, 0x01, 0x0E);
+	}
+	
+	px_spr(ix, iy, 0x00, 0x0F);
+	
+	cursor -= 8;
+	if(cursor <= block_y) cursor = y2;
+}
+
 void player_pick_up(void){
 	for(iy = 0, idx = player.cursor_idx; idx < GRID_BYTES; ++iy, idx += GRID_W){
 		if(

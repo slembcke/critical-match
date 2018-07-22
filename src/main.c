@@ -10,7 +10,7 @@
 
 u8 joy0, joy1;
 
-#define BG_COLOR 0x2D
+#define BG_COLOR 0x1D
 
 static void blit_palette(void){
 	const u8 PALETTE[] = {
@@ -83,13 +83,17 @@ static GameState game_loop(void){
 		joy1 = joy_read(1);
 		if(JOY_START(joy0)) pause();
 		
-		if(!grid_update()) break;
+		// if(!grid_update()) break;
 		player_update(joy0);
 		
 		player_draw();
 		grid_draw_indicators();
 		grid_draw_garbage();
 		coins_draw();
+		
+		// px_profile_start();
+		player_draw_grapple();
+		// px_profile_end();
 		
 		px_spr_end();
 		DEBUG_PROFILE_END();
@@ -275,7 +279,7 @@ static GameState debug_chr(void){
 	debug_freeze();
 }
 
-GameState main(void){
+void main(void){
 	// Install the cc65 static joystick driver.
 	joy_install(joy_static_stddrv);
 	
@@ -283,7 +287,7 @@ GameState main(void){
 	// The main menu increments this constantly until the player starts the game.
 	rand_seed = 0x0D8E;
 	
-	debug_chr();
-	// game_loop();
+	// debug_chr();
+	game_loop();
 	pixelakes_screen();
 }

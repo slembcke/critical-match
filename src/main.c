@@ -83,9 +83,10 @@ static GameState game_loop(void){
 		joy1 = joy_read(1);
 		if(JOY_START(joy0)) pause();
 		
-		// if(!grid_update()) break;
+		if(!grid_update()) break;
 		player_update(joy0);
 		
+		player_draw_blocks();
 		player_draw();
 		grid_draw_indicators();
 		grid_draw_garbage();

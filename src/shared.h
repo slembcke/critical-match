@@ -80,6 +80,7 @@ void grid_draw_garbage(void);
 void player_init(void);
 void player_update(u8 joy);
 void player_draw(void);
+void player_draw_blocks(void);
 void player_draw_grapple(void);
 
 void coins_init(void);

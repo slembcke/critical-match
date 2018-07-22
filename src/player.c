@@ -27,7 +27,7 @@ typedef struct {
 	// Remaining ticks of jump power.
 	u8 jump_ticks;
 	
-	// Selected block under the cursor.
+	// Selected block under the cursor_y.
 	u8 cursor_idx;
 	
 	u8 blocks_held[GRID_H];
@@ -250,30 +250,31 @@ void player_draw(void){
 	player_sprite(64 + ix, 224 - iy, idx);
 }
 
-static u8 block_x = 128, block_y = 64;
-static u8 cursor = 64;
+static u8 block_x = 128, block_y = 32;
+static u8 cursor_y = 240;
 
 void player_draw_grapple(void){
-	u8 x2 = 60 + (player.pos_x >> 8);
-	u8 y2 = 208 - ((player.pos_y >> 8) & ~0x7);
+	u8 player_x = 60 + (player.pos_x >> 8);
+	u8 player_y = 208 - ((player.pos_y >> 8) & ~0x7);
 	u8 dx, dy, eps = 0, x_inc;
 	
-	if(block_y > y2) return;
+	// TODO figure out what offset to use here.
+	if(player_y - 8 <= block_y) return;
 	px_spr(block_x, block_y, 0x00, 'O');
-	px_spr(x2, y2, 0x00, 'O');
+	px_spr(player_x, player_y, 0x00, 'O');
 	
-	if(block_x <= x2){
-		dx = (u8)(x2 - block_x)>>1;
+	if(block_x <= player_x){
+		dx = (u8)(player_x - block_x)>>1;
 		x_inc = -1;
 	} else {
-		dx = (u8)(block_x - x2)>>1;
+		dx = (u8)(block_x - player_x)>>1;
 		x_inc = 1;
 	}
 	
-	dy = (u8)(y2 - block_y)>>4;
+	dy = (u8)(player_y - block_y)>>4;
 	
-	ix = x2;
-	iy = y2;
+	ix = player_x;
+	iy = player_y;
 	while(true){
 		iy -= 8;
 		eps += dx; // Divide this
@@ -282,25 +283,28 @@ void player_draw_grapple(void){
 			eps -= dy;
 		}
 		
-		if(iy <= cursor) break;
+		if(iy <= cursor_y) break;
 		
 		px_spr(ix, iy, 0x01, 0x0E);
 	}
 	
 	px_spr(ix, iy, 0x00, 0x0F);
 	
-	// if(cursor >= block_y){
-	// 		cursor -= 8;
-	// } else {
-	// 	block_y += 8;
-	// 	cursor += 8;
+	if(cursor_y >= block_y){
+			cursor_y -= 8;
+	} else {
+		block_y += 8;
+		cursor_y += 8;
 		
-	// 	eps += dx;
-	// 	while(eps >= dy){
-	// 		block_x -= x_inc;
-	// 		eps -= dy;
-	// 	}
-	// }
+		eps += dx;
+		while(eps >= dy){
+			block_x -= x_inc;
+			eps -= dy;
+		}
+	}
+	
+	// block_y += 1;
+	// cursor_y = block_y;
 }
 
 void player_pick_up(void){

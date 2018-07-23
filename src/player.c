@@ -301,10 +301,8 @@ void player_draw_grapple(void){
 		iy -= 8;
 		eps += dx;
 		while(eps >= dy){
-	px_profile_start();
 			ix += x_inc;
 			eps -= dy;
-	px_profile_end();
 		}
 		
 		if(iy <= player.grapple_y) break;

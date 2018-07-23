@@ -92,9 +92,7 @@ static GameState game_loop(void){
 		grid_draw_garbage();
 		coins_draw();
 		
-		// px_profile_start();
 		player_draw_grapple();
-		// px_profile_end();
 		
 		px_spr_end();
 		DEBUG_PROFILE_END();

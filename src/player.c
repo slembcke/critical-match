@@ -279,6 +279,13 @@ void player_draw_grapple(void){
 	// px_spr(player.block_x, player.block_y, 0x00, 'O');
 	// px_spr(player_x, player_y, 0x00, 'O');
 	
+	if(player_y - 32 <= player.block_y){
+		// Blocks are already right above the player.
+		player.grapple_y = 0;
+		grid_pause_semaphore(-1);
+		return;
+	}
+	
 	dy = (u8)(player_y - player.block_y)>>4;
 	if(player.block_x <= player_x){
 		dx = (u8)(player_x - player.block_x)>>1;
@@ -292,33 +299,37 @@ void player_draw_grapple(void){
 	iy = player_y;
 	while(true){
 		iy -= 8;
-		eps += dx; // Divide this
+		eps += dx;
 		while(eps >= dy){
+	px_profile_start();
 			ix += x_inc;
 			eps -= dy;
+	px_profile_end();
 		}
 		
 		if(iy <= player.grapple_y) break;
 		
 		px_spr(ix, iy, 0x01, 0x0E);
 	}
-	
 	// Draw the hook.
 	px_spr(ix, iy, 0x00, 0x0F);
 	
 	// Pull the block towards the player.
+	// TODO Not drawing code. Care?
 	if(player.grapple_y >= player.block_y){
 			player.grapple_y -= 16;
 	} else {
 		player.block_y += 16;
 		if(player_y - 32 <= player.block_y){
+			// Grapple animation has finished.
 			player.grapple_y = 0;
+			grid_pause_semaphore(-1);
 		} else {
 			player.grapple_y += 16;
 		}
 		
-		eps += dx;
-		while(eps >= dy*2){
+		eps += dx/2;
+		while(eps >= dy){
 			player.block_x -= x_inc;
 			eps -= dy;
 		}
@@ -330,6 +341,7 @@ void player_pick_up(void){
 		player.grapple_y = 240;
 		player.block_x = grid_block_x(player.cursor_idx, 5);
 		player.block_y = grid_block_y(player.cursor_idx, 0);
+		grid_pause_semaphore(1);
 	} else {
 		player.grapple_y = 0;
 	}

@@ -76,6 +76,8 @@ typedef struct {
 	u8 flicker_column;
 	u8 state_timer;
 	u8 update_coro[16];
+	
+	u8 pause_semaphore;
 } Grid;
 
 static Grid grid;
@@ -454,6 +456,9 @@ uintptr_t grid_update_coro(void){
 			naco_yield(true);
 		}
 		
+		// Don't tick during some animations and other events.
+		while(grid.pause_semaphore > 0) naco_yield(true);
+		
 		grid_tick();
 		// debug_hex((grid.combo << 4) | (grid.combo_ticks << 0));
 		naco_yield(true);
@@ -567,4 +572,8 @@ bool grid_update(void){
 	}
 	
 	return naco_resume(grid.update_coro, 0);
+}
+
+void grid_pause_semaphore(s8 inc){
+	grid.pause_semaphore += inc;
 }

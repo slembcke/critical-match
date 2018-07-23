@@ -287,6 +287,6 @@ void main(void){
 	rand_seed = 0x0D8E;
 	
 	// debug_chr();
-	game_loop();
+	// game_loop();
 	pixelakes_screen();
 }

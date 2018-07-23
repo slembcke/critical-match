@@ -76,10 +76,13 @@ bool grid_update(void);
 void grid_update_column_height(void);
 void grid_draw_indicators(void);
 void grid_draw_garbage(void);
+void grid_pause_semaphore(s8 inc);
 
 void player_init(void);
 void player_update(u8 joy);
 void player_draw(void);
+void player_draw_blocks(void);
+void player_draw_grapple(void);
 
 void coins_init(void);
 void coins_draw(void);

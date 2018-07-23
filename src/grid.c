@@ -76,6 +76,8 @@ typedef struct {
 	u8 flicker_column;
 	u8 state_timer;
 	u8 update_coro[16];
+	
+	u8 pause_semaphore;
 } Grid;
 
 static Grid grid;
@@ -454,6 +456,9 @@ uintptr_t grid_update_coro(void){
 			naco_yield(true);
 		}
 		
+		// Don't tick during some animations and other events.
+		while(grid.pause_semaphore > 0) naco_yield(true);
+		
 		grid_tick();
 		// debug_hex((grid.combo << 4) | (grid.combo_ticks << 0));
 		naco_yield(true);
@@ -527,7 +532,7 @@ void grid_draw_indicators(void){
 	px_spr(68 + 16*grid.queued_column, 42 + (px_ticks/8 & 0x3), 0x02, 'v');
 	
 	{// Combo meter.
-		static const u8 SPR0[] = {0x00, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C};
+		static const u8 SPR0[] = {0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};
 		
 		idx = grid.combo_ticks;
 		px_spr(183, 27, 0x00, SPR0[idx]);
@@ -567,4 +572,8 @@ bool grid_update(void){
 	}
 	
 	return naco_resume(grid.update_coro, 0);
+}
+
+void grid_pause_semaphore(s8 inc){
+	grid.pause_semaphore += inc;
 }

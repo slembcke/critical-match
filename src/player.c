@@ -27,9 +27,11 @@ typedef struct {
 	// Remaining ticks of jump power.
 	u8 jump_ticks;
 	
-	// Selected block under the cursor.
+	// Selected block under the cursor_y.
 	u8 cursor_idx;
 	
+	u8 block_x, block_y;
+	u8 grapple_y;
 	u8 blocks_held[GRID_H];
 	
 	// Input values
@@ -250,7 +252,98 @@ void player_draw(void){
 	player_sprite(64 + ix, 224 - iy, idx);
 }
 
+void player_draw_blocks(void){
+	// Draw blocks.
+	if(player.grapple_y){
+		ix = player.block_x - 5;
+		iy = player.block_y;
+	} else {
+		ix = ( 64 -  8) + (player.pos_x >> 8);
+		iy = (224 - 32) - (player.pos_y >> 8);
+	}
+	
+	for(idx = 0; player.blocks_held[idx]; ++idx){
+		block_sprite(ix, iy, player.blocks_held[idx] & BLOCK_GFX_MASK);
+		iy -= 16;
+	}
+}
+
+void player_draw_grapple(void){
+	u8 player_x, player_y;
+	register u8 dx, dy, eps = 0, x_inc;
+	
+	if(player.grapple_y == 0) return;
+	player_x = 60 + (player.pos_x >> 8);
+	player_y = 208 - ((player.pos_y >> 8) & ~0x7);
+	
+	// px_spr(player.block_x, player.block_y, 0x00, 'O');
+	// px_spr(player_x, player_y, 0x00, 'O');
+	
+	if(player_y - 32 <= player.block_y){
+		// Blocks are already right above the player.
+		player.grapple_y = 0;
+		grid_pause_semaphore(-1);
+		return;
+	}
+	
+	dy = (u8)(player_y - player.block_y)>>4;
+	if(player.block_x <= player_x){
+		dx = (u8)(player_x - player.block_x)>>1;
+		x_inc = -1;
+	} else {
+		dx = (u8)(player.block_x - player_x)>>1;
+		x_inc = 1;
+	}
+	
+	ix = player_x;
+	iy = player_y;
+	while(true){
+		iy -= 8;
+		eps += dx;
+		while(eps >= dy){
+			ix += x_inc;
+			eps -= dy;
+		}
+		
+		if(iy <= player.grapple_y) break;
+		
+		px_spr(ix, iy, 0x01, 0x0E);
+	}
+	// Draw the hook.
+	px_spr(ix, iy, 0x00, 0x0F);
+	
+	// Pull the block towards the player.
+	// TODO Not drawing code. Care?
+	if(player.grapple_y >= player.block_y){
+			player.grapple_y -= 16;
+	} else {
+		player.block_y += 16;
+		if(player_y - 32 <= player.block_y){
+			// Grapple animation has finished.
+			player.grapple_y = 0;
+			grid_pause_semaphore(-1);
+		} else {
+			player.grapple_y += 16;
+		}
+		
+		eps += dx/2;
+		while(eps >= dy){
+			player.block_x -= x_inc;
+			eps -= dy;
+		}
+	}
+}
+
 void player_pick_up(void){
+	if(JOY_UP(player.joy)){
+		player.grapple_y = 240;
+		player.block_x = grid_block_x(player.cursor_idx, 5);
+		player.block_y = grid_block_y(player.cursor_idx, 0);
+		grid_pause_semaphore(1);
+	} else {
+		player.grapple_y = 0;
+	}
+	
 	for(iy = 0, idx = player.cursor_idx; idx < GRID_BYTES; ++iy, idx += GRID_W){
 		if(
 			// Stop for empty spaces...
@@ -278,7 +371,8 @@ void player_pick_up(void){
 }
 
 void player_drop(void){
-	if(player.cursor_idx){
+	if(player.cursor_idx && player.grapple_y == 0
+	){
 		for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, iy += 1){
 			grid_set_block(idx, player.blocks_held[iy]);
 			player.blocks_held[iy] = 0;
@@ -331,14 +425,6 @@ void player_update(u8 joy){
 		}
 		
 		cursor_sprite(ix, iy, idx);
-	}
-	
-	// Draw blocks.
-	ix = ( 64 -  8) + (player.pos_x >> 8);
-	iy = (224 - 32) - (player.pos_y >> 8);
-	for(idx = 0; player.blocks_held[idx]; ++idx){
-		block_sprite(ix, iy, player.blocks_held[idx] & BLOCK_GFX_MASK);
-		iy -= 16;
 	}
 	
 	player.prev_joy = player.joy;

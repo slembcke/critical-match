@@ -1,6 +1,5 @@
 TODO:
 * Score on game over screen.
-* Grappling hook animation.
 * Drop indicator sprite.
 * Attract mode.
 * Animate splash screen.

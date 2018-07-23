@@ -136,14 +136,12 @@ static GameState game_over(void){
 	}
 	
 	px_ppu_disable(); {
-		static const char *msg = "GAME OVER";
-		
 		px_addr(NT_ADDR(0, 0, 0));
 		px_fill(1024, 0x00);
 		px_spr_clear();
 	
 		px_addr(NT_ADDR(0, 10, 12));
-		px_blit(strlen(msg), msg);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
 		
 		px_wait_nmi();
 	} px_ppu_enable();

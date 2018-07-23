@@ -1,5 +1,4 @@
 TODO:
-* Score on game over screen.
 * Drop indicator sprite.
 * Attract mode.
 * Animate splash screen.

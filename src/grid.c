@@ -17,7 +17,8 @@ u8 COLUMN_HEIGHT[GRID_W];
 #define OVERHEAD_FRAMES (1 + GRID_H - 2)
 
 // Min/Max waiting ticks before triggering the next fall.
-#define MIN_FALL_FRAMES (15 - OVERHEAD_FRAMES)
+// TODO should be 15, but blitting takes too long.
+#define MIN_FALL_FRAMES (16 - OVERHEAD_FRAMES)
 #define MAX_FALL_FRAMES (60 - OVERHEAD_FRAMES)
 
 // How many drops happen before speeding up.
@@ -444,7 +445,7 @@ uintptr_t grid_update_coro(void){
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
 			if(
 				// Check every other frame to animate matching nicely.
-				(grid.state_timer & 0x1) == 0 &&
+				(grid.state_timer & 0x3) == 0 &&
 				grid_match_blocks()
 			){
 				// Prevent the timer from advancing as long as matches are happening.

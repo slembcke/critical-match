@@ -322,8 +322,6 @@ static void grid_blit(void){
 	px_buffer_inc(PX_INC1);
 	px_buffer_data(5, NT_ADDR(0, 11, 4));
 	memset(PX.buffer, 0, 5);
-	
-	// Score
 	ultoa(grid.score, PX.buffer, 10);
 	
 	// Combo
@@ -576,4 +574,8 @@ bool grid_update(void){
 
 void grid_pause_semaphore(s8 inc){
 	grid.pause_semaphore += inc;
+}
+
+u16 grid_get_score(void){
+	return grid.score;
 }

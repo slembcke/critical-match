@@ -77,6 +77,7 @@ void grid_update_column_height(void);
 void grid_draw_indicators(void);
 void grid_draw_garbage(void);
 void grid_pause_semaphore(s8 inc);
+u16 grid_get_score(void);
 
 void player_init(void);
 void player_update(u8 joy);

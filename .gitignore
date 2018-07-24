@@ -11,5 +11,8 @@ link.log
 tools/png2chr
 tools/chr2png
 tools/lz4x
+tools/png2tiles
+tools/nsf2data
+tools/text2data
 
 lib/coro/coro_test

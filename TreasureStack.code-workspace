@@ -18,7 +18,8 @@
 			"lz4.h": "c",
 			"stdlib.h": "c",
 			"type_traits": "c",
-			"shared.h": "c"
+			"shared.h": "c",
+			"stb_image.h": "c"
 		}
 	}
 }

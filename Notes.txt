@@ -1,8 +1,8 @@
 TODO:
 * Drop indicator sprite.
-* Attract mode.
 * Animate splash screen.
 * "Also on Switch" screen?
+* Attract mode. (kinda working, but record later)
 
 Needed:
 * Music.

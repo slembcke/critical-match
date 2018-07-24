@@ -37,7 +37,21 @@ static GameState main_menu(void);
 static void pause(void);
 static GameState game_over(void);
 
+// #define RECORD_ATTRACT
+
 static GameState game_loop(void){
+	register u8 *SAV = (u8 *)0x6000;
+	u8 counter;
+	
+#ifdef RECORD_ATTRACT
+	memset(SAV, 0, 16*1024);
+	memcpy(SAV, &rand_seed, sizeof(rand_seed));
+#else
+	memcpy(&rand_seed, SAV, sizeof(rand_seed));
+#endif
+	SAV += sizeof(rand_seed);
+	counter = SAV[1];
+	
 	player_init();
 	grid_init();
 	coins_init();
@@ -82,6 +96,24 @@ static GameState game_loop(void){
 		joy0 = joy_read(0);
 		joy1 = joy_read(1);
 		if(JOY_START(joy0)) pause();
+		
+#ifdef RECORD_ATTRACT
+		if(joy0 == SAV[0]){
+			++SAV[1];
+		} else {
+			SAV += 2;
+			SAV[0] = joy0;
+			SAV[1] = 1;
+		}
+#else
+		if(counter == 0){
+			SAV += 2;
+			counter = SAV[1];
+		} else {
+			--counter;
+		}
+		joy0 = SAV[0];
+#endif
 		
 		if(!grid_update()) break;
 		player_update(joy0);

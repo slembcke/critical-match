@@ -13,12 +13,11 @@ u8 joy0, joy1;
 #define BG_COLOR 0x1D
 
 static void blit_palette(void){
-	const u8 PALETTE[] = {
+	static const u8 PALETTE[] = {
 		BG_COLOR, 0x1D, 0x28, 0x11, // blue
 		BG_COLOR, 0x1D, 0x28, 0x16, // red
 		BG_COLOR, 0x1D, 0x28, 0x1A, // green
 		BG_COLOR, 0x1D, 0x28, 0x13, // purple
-
 		BG_COLOR, 0x1D, 0x28, 0x11, // blue
 		BG_COLOR, 0x1D, 0x28, 0x16, // red
 		BG_COLOR, 0x1D, 0x28, 0x1A, // green
@@ -161,15 +160,39 @@ static GameState game_over(void){
 static GameState main_menu(void){
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
-		blit_palette();
+		static const u8 PALETTE[] = {
+			0x31, 0x1D, 0x28, 0x11,
+			0x31, 0x1D, 0x28, 0x16,
+			0x31, 0x1D, 0x28, 0x1A,
+			0x31, 0x1D, 0x28, 0x13,
+			0x31, 0x2D, 0x27, 0x20,
+			0x31, 0x2D, 0x2C, 0x20,
+			0x31, 0x1D, 0x28, 0x1A,
+			0x31, 0x1D, 0x28, 0x13,
+		};
+		
+		px_addr(PAL_ADDR);
+		px_blit(sizeof(PALETTE), PALETTE);
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
 		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_main_menu_lz4, 1024);
+		px_spr_table(1);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_logo64_lz4chr, 32*16);
+		
+		px_addr(NT_ADDR(0, 0, 0));
+		px_fill(1024, 0x00);
+		// decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_main_menu_lz4, 1024);
 		
 		px_wait_nmi();
 	} px_ppu_enable();
+	
+	for(iy = 0; iy < 4; ++iy){
+		for(ix = 0; ix < 8; ++ix){
+			idx = 0x80 + 8*iy + ix;
+			px_spr(16 + 8*ix, 240 - 48 + 8*iy, idx < 0x92 ? 0x00 : 0x01, idx);
+		}
+	}
 	
 	wait_noinput();
 	

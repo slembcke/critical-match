@@ -315,6 +315,8 @@ static GameState debug_chr(void){
 }
 
 void main(void){
+	px_bank_select(0);
+	
 	// Install the cc65 static joystick driver.
 	joy_install(joy_static_stddrv);
 	

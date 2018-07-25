@@ -31,4 +31,4 @@
 
 .export _MUSIC
 _MUSIC:
-	.include "famitone2/space_radar_menu.inc"
+	; .include "famitone2/space_radar_menu.inc"

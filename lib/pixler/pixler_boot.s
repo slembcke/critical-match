@@ -109,7 +109,6 @@
 	
 	; Initialize the C runtime and jump to main().
 	jsr copydata
-	jsr initlib
 	
 	CSTACK_TOP = __CSTACK_START__ + __CSTACK_SIZE__
 	lda #<CSTACK_TOP

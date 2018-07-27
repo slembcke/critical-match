@@ -10,18 +10,24 @@
 
 u8 joy0, joy1;
 
-#define BG_COLOR 0x1D
+#define CLR_BG 0x1D
+#define CLR_BLACK 0x1D
+#define CLR_YELLOW 0x28
+#define CLR_1 0x02 // blue
+#define CLR_2 0x07 // red
+#define CLR_3 0x1B // green
+#define CLR_4 0x14 // purple
 
 static void blit_palette(void){
 	static const u8 PALETTE[] = {
-		BG_COLOR, 0x1D, 0x28, 0x11, // blue
-		BG_COLOR, 0x1D, 0x28, 0x16, // red
-		BG_COLOR, 0x1D, 0x28, 0x1A, // green
-		BG_COLOR, 0x1D, 0x28, 0x13, // purple
-		BG_COLOR, 0x1D, 0x28, 0x11, // blue
-		BG_COLOR, 0x1D, 0x28, 0x16, // red
-		BG_COLOR, 0x1D, 0x28, 0x1A, // green
-		BG_COLOR, 0x1D, 0x28, 0x13, // purple
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_1,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_2,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_3,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_4,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_1,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_2,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_3,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_4,
 	};
 	
 	px_addr(PAL_ADDR);
@@ -339,6 +345,7 @@ void main(void){
 	rand_seed = 0x0D8E;
 	
 	// debug_chr();
-	game_loop();
+	// main_menu();
+	// game_loop();
 	pixelakes_screen();
 }

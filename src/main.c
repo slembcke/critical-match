@@ -276,60 +276,30 @@ static GameState debug_chr(void){
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
 		
-		// //Top
-		// px_inc(PX_INC1);
-		// px_addr(NT_ADDR(0, 8, 6));
-		// px_blit(16, _hextab);
+		//Top
+		px_inc(PX_INC1);
+		px_addr(NT_ADDR(0, 8, 6));
+		px_blit(16, _hextab);
 		
-		// // Side
-		// px_inc(PX_INC32);
-		// px_addr(NT_ADDR(0, 6, 8));
-		// px_blit(16, _hextab);
+		// Side
+		px_inc(PX_INC32);
+		px_addr(NT_ADDR(0, 6, 8));
+		px_blit(16, _hextab);
 		
 		
-		// // Grid
-		// px_inc(PX_INC1);
-		// for(iy = 0; iy < 16; ++iy){
-		// 	px_addr(NT_ADDR(0, 8, 8 + iy));
-		// 	for(ix = 0; ix < 16; ++ix){
-		// 		PPU.vram.data = ix | 16*iy;
-		// 	}
-		// }
+		// Grid
+		px_inc(PX_INC1);
+		for(iy = 0; iy < 16; ++iy){
+			px_addr(NT_ADDR(0, 8, 8 + iy));
+			for(ix = 0; ix < 16; ++ix){
+				PPU.vram.data = ix | 16*iy;
+			}
+		}
 		
 		px_spr_clear();
 		px_wait_nmi();
 	} px_ppu_enable();
 	
-	{
-		u8 x1 = 128, x2 = 100;
-		u8 y1 = 16, y2 = 220;
-		u8 dx = x2 - x1;
-		u8 dy = y2/2 - y1/2;
-		u8 eps = 0;
-		u8 inc;;
-		
-		if(x1 <= x2){
-			inc = 1;
-		} else {
-			dx ^= 0xFF;
-			inc = -1;
-		}
-		
-		px_spr(x1, y1, 0x00, 0x0F);
-		px_spr(x2, y2, 0x00, 'O');
-		
-		ix = x1;
-		iy = y1;
-		while(iy <= y2){
-			iy += 8;
-			eps += dx;
-			while(eps >= dy/4) ix += inc, eps -= dy/4;
-			
-			px_spr(ix, iy, 0x01, 0x0E);
-		}
-	}
-	px_spr_end();
-	px_wait_nmi();
 	
 	debug_freeze();
 }

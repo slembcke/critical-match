@@ -525,12 +525,11 @@ void grid_draw_indicators(void){
 	
 	// Column warnings.
 	if(COLUMN_HEIGHT[grid.flicker_column] >= GRID_H - 4){
-		px_spr(68 + 16*grid.flicker_column, 48, 0x00, 0x03);
+		px_spr(68 + 16*grid.flicker_column, 50, 0x00, 0x03);
 	}
 	
 	// Draw drop indicator.
-	// TODO replace temporary sprite.
-	px_spr(68 + 16*grid.queued_column, 42 + (px_ticks/8 & 0x3), 0x02, 'v');
+	px_spr(68 + 16*grid.queued_column, 44 + (px_ticks/8 & 0x3), 0x02, 0x1C);
 	
 	{// Combo meter.
 		static const u8 SPR0[] = {0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};

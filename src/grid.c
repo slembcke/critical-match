@@ -536,7 +536,7 @@ void grid_draw_indicators(void){
 		static const u8 SPR0[] = {0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};
 		
 		idx = grid.combo_ticks;
-		px_spr(183, 27, 0x00, SPR0[idx]);
+		px_spr(183, 27, 0x02, SPR0[idx]);
 	}
 }
 

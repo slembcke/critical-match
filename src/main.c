@@ -10,7 +10,7 @@
 
 u8 joy0, joy1;
 
-#define CLR_BG 0x1D
+#define CLR_BG 0x2D
 #define CLR_BLACK 0x1D
 #define CLR_YELLOW 0x28
 #define CLR_1 0x02 // blue

@@ -1,8 +1,14 @@
 TODO:
+* Redo text colors.
 * Drop indicator sprite.
-* Animate splash screen.
-* "Also on Switch" screen?
+* Menu text.
+* About screen.
+* Permutation table for game-over.
+* Animate slide out for game over.
 * Attract mode. (kinda working, but record later)
+* Animate menu screen.
+* Animate splash screen.
+* Drop indicator sprite.
 
 Needed:
 * Music.

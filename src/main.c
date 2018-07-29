@@ -117,37 +117,16 @@ static void pause(void){
 	wait_noinput();
 }
 
-// TODO This is pretty terrible.
-static GameState game_over(void){
-	u8 boom[16] = {};
-	register u8 y;
-	
-	px_spr_clear();
-	px_wait_nmi();
-	
-	for(ix = 0; ix < 255; ++ix){
-		idx = rand8();
-		if(idx - 8 < GRID_BYTES - 16 && (idx & (sizeof(boom) - 1)) - 1 < 6){
-			boom[ix & (sizeof(boom) - 1)] = idx;
-			grid_set_block(idx, BLOCK_EMPTY);
-		} else {
-			boom[ix & (sizeof(boom) - 1)] = 0;
-		}
+static GameState final_score(void){
+	PX.scroll_y = 0;
 		
-		for(iy = 0; iy < sizeof(boom); ++iy){
-			idx = boom[iy];
-			if(idx) explosion_sprite(grid_block_x(idx, 0), grid_block_y(idx, -6), ((ix + iy)/2) & 7);
-		}
-		
-		px_spr_end();
-		px_wait_frames(2);
-	}
-	
 	px_buffer_inc(PX_INC1);
 	px_ppu_disable(); {
-	
 		px_addr(NT_ADDR(0, 10, 12));
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
+		
+		px_addr(AT_ADDR(0));
+		px_fill(64, 0x55);
 		
 		// Score
 		px_buffer_data(5, NT_ADDR(0, 17, 14));
@@ -164,6 +143,50 @@ static GameState game_over(void){
 	while(!JOY_START(joy_read(0))){}
 	
 	return main_menu();
+}
+
+// TODO This is pretty terrible.
+static GameState game_over(void){
+	u8 BOOM[] = {
+		69, 50, 61, 52, 78, 85, 38, 19, 46, 44, 65, 27,
+		51, 58, 68, 37, 26, 12, 11, 57, 41, 22, 73, 77,
+		84, 82, 59, 36, 34, 29, 18, 21, 45, 83,  9, 13,
+		74, 53, 33, 66, 35, 67, 62, 25, 14, 49, 70, 86,
+		42, 60, 43, 10, 17, 28, 81, 76, 20, 54, 30, 75,
+	};
+	
+	u8 spr_y, boom;
+	
+	px_spr_clear();
+	px_wait_nmi();
+	
+	// px_buffer_inc(PX_INC1);
+	// px_ppu_disable(); {
+	// 	px_addr(NT_ADDR(2, 0, 0));
+	// 	px_fill(32*30, 0x20);
+	// 	px_fill(64, 0x00);
+		
+	// 	px_spr_clear();
+	// 	px_wait_nmi();
+	// } px_ppu_enable();
+	
+	for(boom = 0; boom < sizeof(BOOM); ++boom){
+		idx = BOOM[boom];
+		grid_set_block(idx, BLOCK_EMPTY);
+		
+		for(iy = 0; iy < 4; ++iy){
+			for(ix = 0; ix < 8 && ix < boom; ++ix){
+				idx = BOOM[boom - ix];
+				spr_y = grid_block_y(idx, -6);
+				explosion_sprite(grid_block_x(idx, 0), spr_y, ix);
+			}
+			
+			px_spr_end();
+			px_wait_nmi();
+		}
+	}
+	
+	return final_score();
 }
 
 static GameState main_menu(void){

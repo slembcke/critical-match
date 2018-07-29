@@ -1,6 +1,4 @@
 TODO:
-* Redo text colors.
-* Drop indicator sprite.
 * Menu text.
 * About screen.
 * Permutation table for game-over.
@@ -8,7 +6,7 @@ TODO:
 * Attract mode. (kinda working, but record later)
 * Animate menu screen.
 * Animate splash screen.
-* Drop indicator sprite.
+* Flash to black.
 
 Needed:
 * Music.

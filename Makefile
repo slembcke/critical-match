@@ -60,7 +60,8 @@ GFX = \
 	gfx/characters/ninja.png \
 	gfx/characters/orc.png \
 	gfx/characters/royalguard.png \
-	gfx/characters/rustknight.png
+	gfx/characters/rustknight.png \
+	gfx/characters/cyclops.png
 
 MAPS = \
 	gfx/pixelakes.tmx \

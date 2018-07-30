@@ -30,6 +30,7 @@ inclz4 _gfx_ninja_lz4chr, "characters/ninja.lz4chr"
 inclz4 _gfx_orc_lz4chr, "characters/orc.lz4chr"
 inclz4 _gfx_royalguard_lz4chr, "characters/royalguard.lz4chr"
 inclz4 _gfx_rustknight_lz4chr, "characters/rustknight.lz4chr"
+inclz4 _gfx_cyclops_lz4chr, "characters/cyclops.lz4chr"
 
 inclz4 _gfx_pixelakes_lz4, "pixelakes.lz4"
 inclz4 _gfx_main_menu_lz4, "main_menu.lz4"

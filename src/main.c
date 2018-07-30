@@ -59,9 +59,10 @@ static void blit_palette(u8 bg_color){
 }
 
 static const u8 CHARACTER_PAL[] = {
-	2, 1, 3, 2, 2,
-	2, 1, 1, 0, 0,
-	2, 1, 2, 0, 1,
+	2, 1, 3, 2,
+	2, 2, 1, 1,
+	0, 0, 2, 1,
+	2, 0, 1, 3,
 };
 
 static const void *CHARACTER_GFX[] = {
@@ -69,45 +70,55 @@ static const void *CHARACTER_GFX[] = {
 	gfx_azmodeus_lz4chr,
 	gfx_pinkblob_lz4chr,
 	gfx_blob_lz4chr,
-	gfx_budgie_lz4chr,
 	
+	gfx_budgie_lz4chr,
 	gfx_robinhood_lz4chr,
 	gfx_bonecrusher_lz4chr,
 	gfx_dagon_lz4chr,
+	
 	gfx_dog_lz4chr,
 	gfx_eyeboll_lz4chr,
-	
 	gfx_kermit_lz4chr,
 	gfx_ninja_lz4chr,
+	
 	gfx_orc_lz4chr,
 	gfx_royalguard_lz4chr,
 	gfx_rustknight_lz4chr,
+	gfx_cyclops_lz4chr,
 };
 
 static const char *CHARACTER_BIO[] = {
-	"Cathylu:\n\nGoes by \"Katie Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt generations\nof dreams.",
-	"Azmodeus:",
+	"Cthylu:\n\nGoes by \"Kathy Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt generations\nof dreams.",
+	"Azmodeus:\n\nHails from the second\nlevel of Heck. The\nPrince of Greed isn't\nthe only demon that\ncan stack!",
 	"Pink Blob:\n\nWith a steady career\nin treasure stacking,\nPink Blob hopes to\nprove to Green blob\nthat it's more than\njust a slimy face.",
 	"Green Blob:\n\nGreen Blob is very\nshy. By becoming a\nmaster treasure\nstacker it hopes\nto gain the attention\nof Pink Blob.",
+	
 	"Budgie:\n\nWhen asked how much\nhis stack of treasure\ncost to aquire,\nBudgie simply repiled:\n\"Cheap! Cheap!\"",
-
 	"Robin Hood:\n\nBy stacking the\ntreasure taken from\nthe rich, Robin Hood\nhopes to increase the\ndividends of his\ncharitable donations.",
 	"Bone Crusher:\n\nBONE CRUSHER CARES\nNOT FOR TREASURE! I\nWILL CRUSH YOUR\nBONES! I WILL CRUSH\nTHEM IN A BOAT OR\nWITH A GOAT!",
 	"Dagon:",
-	"Dog:\n\nBark! Bark! Bark!\nArf! Bark! Grrrr!\nWoof! Bark! Bark!\nRuff! Bark! Woof!",
-	"Eyeboll:\n\n",
 	
+	"Dog:\n\nBark! Bark! Bark!\nArf! Bark! Grrrr!\nWoof! Bark! Bark!\nRuff! Bark! Woof!",
+	"Eyeboll:\n\nA keen eye for detail\nhelps achieve the\ngreatest of stacks.\nA fashionable cloak\ndoesn't hurt either.",
 	"Kermit:\n\n",
-	"Ninja:\n\n",
-	"Orc:\n\n",
+	"Ninja:\n\nThis contender is rarely seen or heard off the stacking court.",
+	
+	"Bob:\n\nUsing its immense orc\nstrength this\ncontentder is sure to\nwin the gold. Being a\nCPA doesn't hurt\neither.",
 	"Royal Guard:\n\n",
 	"Rust Knight:\n\n",
+	"Cyclops:\n\n",
 };
 
 static const u8 CHARACTER_COUNT = sizeof(CHARACTER_PAL);
 
-static u8 character = 14;
+static u8 character = 0;
 extern u8 character_pal;
+
+static void character_inc(s8 amount){
+	character += amount;
+	if(character == 255) character = CHARACTER_COUNT - 1;
+	if(character == CHARACTER_COUNT) character = 0;
+}
 
 static void load_character(void){
 	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), CHARACTER_GFX[character], 84*16);
@@ -326,10 +337,13 @@ static GameState character_select(void){
 	wait_noinput();
 	
 	while(true){
-		if(JOY_START(joy_read(0))) return game_loop();
+		joy0 = joy_read(0);
+		if(JOY_START(joy0)) return game_loop();
+		if(JOY_DOWN(joy0)){character_inc(1); return character_select();}
+		if(JOY_UP(joy0)){character_inc(-1); return character_select();}
 		
 		idx = ((px_ticks >> 2) & 0x6) + 17;
-		player_sprite(36, 127, idx);
+		player_sprite(36, 128, idx);
 		
 		px_spr_end();
 		px_wait_nmi();

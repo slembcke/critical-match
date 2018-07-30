@@ -20,6 +20,7 @@ extern u8 gfx_ninja_lz4chr[];
 extern u8 gfx_orc_lz4chr[];
 extern u8 gfx_royalguard_lz4chr[];
 extern u8 gfx_rustknight_lz4chr[];
+extern u8 gfx_cyclops_lz4chr[];
 
 extern u8 gfx_pixelakes_lz4[];
 extern u8 gfx_main_menu_lz4[];

@@ -136,7 +136,7 @@ static GameState final_score(s16 scroll_v){
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
 		
 		px_addr(AT_ADDR(0));
-		// px_fill(64, 0x55);
+		px_fill(64, 0x55);
 		
 		// Score
 		px_buffer_data(5, NT_ADDR(0, 17, 14));

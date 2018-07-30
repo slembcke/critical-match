@@ -60,7 +60,8 @@ static void blit_palette(u8 bg_color){
 
 static const u8 CHARACTER_PAL[] = {
 	2, 1, 3, 2, 2,
-	2, 1, 1, 0,
+	2, 1, 1, 0, 0,
+	2, 1, 2, 0, 1,
 };
 
 static const void *CHARACTER_GFX[] = {
@@ -74,6 +75,13 @@ static const void *CHARACTER_GFX[] = {
 	gfx_bonecrusher_lz4chr,
 	gfx_dagon_lz4chr,
 	gfx_dog_lz4chr,
+	gfx_eyeboll_lz4chr,
+	
+	gfx_kermit_lz4chr,
+	gfx_ninja_lz4chr,
+	gfx_orc_lz4chr,
+	gfx_royalguard_lz4chr,
+	gfx_rustknight_lz4chr,
 };
 
 static const char *CHARACTER_BIO[] = {
@@ -87,11 +95,18 @@ static const char *CHARACTER_BIO[] = {
 	"Bone Crusher:\n\nBONE CRUSHER CARES\nNOT FOR TREASURE! I\nWILL CRUSH YOUR\nBONES! I WILL CRUSH\nTHEM IN A BOAT OR\nWITH A GOAT!",
 	"Dagon:",
 	"Dog:\n\nBark! Bark! Bark!\nArf! Bark! Grrrr!\nWoof! Bark! Bark!\nRuff! Bark! Woof!",
+	"Eyeboll:\n\n",
+	
+	"Kermit:\n\n",
+	"Ninja:\n\n",
+	"Orc:\n\n",
+	"Royal Guard:\n\n",
+	"Rust Knight:\n\n",
 };
 
 static const u8 CHARACTER_COUNT = sizeof(CHARACTER_PAL);
 
-static u8 character = 8;
+static u8 character = 14;
 extern u8 character_pal;
 
 static void load_character(void){
@@ -311,7 +326,7 @@ static GameState character_select(void){
 	wait_noinput();
 	
 	while(true){
-		if(JOY_START(joy_read(0))) break;
+		if(JOY_START(joy_read(0))) return game_loop();
 		
 		idx = ((px_ticks >> 2) & 0x6) + 17;
 		player_sprite(36, 127, idx);
@@ -319,8 +334,6 @@ static GameState character_select(void){
 		px_spr_end();
 		px_wait_nmi();
 	}
-	
-	return game_loop();
 }
 
 static GameState main_menu(void){

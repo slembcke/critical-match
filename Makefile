@@ -54,7 +54,13 @@ GFX = \
 	gfx/characters/robinhood.png \
 	gfx/characters/bonecrusher.png \
 	gfx/characters/dagon.png \
-	gfx/characters/dog.png
+	gfx/characters/dog.png \
+	gfx/characters/eyeboll.png \
+	gfx/characters/kermit.png \
+	gfx/characters/ninja.png \
+	gfx/characters/orc.png \
+	gfx/characters/royalguard.png \
+	gfx/characters/rustknight.png
 
 MAPS = \
 	gfx/pixelakes.tmx \

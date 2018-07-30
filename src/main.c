@@ -232,6 +232,23 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
+static const char *TEXT = "Cathylu:\n\nGoes by \"Katie Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt generations\nof dreams.";
+
+static void blit_text(void){
+	u16 addr = NT_ADDR(0, 7, 11);
+	register const char *cursor = TEXT;
+	
+	px_addr(addr);
+	for(ix = 0; cursor[ix]; ++ix){
+		if(cursor[ix] == '\n'){
+			addr += 32;
+			px_addr(addr);
+		} else {
+			PPU.vram.data = cursor[ix];
+		}
+	}
+}
+
 static GameState character_select(void){
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
@@ -244,6 +261,8 @@ static GameState character_select(void){
 		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
 		
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_character_select_lz4, 1024);
+		
+		blit_text();
 		
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0x55);
@@ -260,7 +279,7 @@ static GameState character_select(void){
 		if(JOY_START(joy_read(0))) break;
 		
 		idx = ((px_ticks >> 2) & 0x6) + 17;
-		player_sprite(64, 64, idx);
+		player_sprite(40, 128, idx);
 		
 		px_spr_end();
 		px_wait_nmi();

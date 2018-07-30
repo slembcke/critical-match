@@ -50,6 +50,7 @@ GFX = \
 
 MAPS = \
 	gfx/pixelakes.tmx \
+	gfx/character_select.tmx \
 	gfx/main_menu.tmx \
 	gfx/board.tmx \
 	gfx/game_over.tmx

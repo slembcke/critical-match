@@ -1,4 +1,5 @@
 TODO:
+* Gray text.
 * Attract mode. (kinda working, but record later)
 * About screen?
 

@@ -14,5 +14,6 @@ tools/lz4x
 tools/png2tiles
 tools/nsf2data
 tools/text2data
+*.exe
 
 lib/coro/coro_test

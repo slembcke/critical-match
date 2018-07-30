@@ -211,7 +211,7 @@ static GameState game_over(void){
 			
 			for(ix = 0; ix < 8 && ix < ticks; ++ix){
 				idx = BOOM[ticks - ix];
-				spr_y = grid_block_y(idx, -6);
+				spr_y = grid_block_y(idx, -6) - 8*ix;
 				if(spr_y + (scroll_y >> 8) < 240) explosion_sprite(grid_block_x(idx, 0), spr_y + (scroll_y >> 8), ix);
 			}
 			

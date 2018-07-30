@@ -42,6 +42,16 @@ static GameState main_menu(void);
 static void pause(void);
 static GameState game_over(void);
 
+static void blank_screen2(){
+	u16 addr = NT_ADDR(2, 0, 0);
+	for(iy = 0; iy < 15; ++iy){
+		px_buffer_data(64, addr);
+		memset(PX.buffer, 0x20, 64);
+		addr += 64;
+		px_wait_nmi();
+	}
+}
+
 static GameState game_loop(void){
 	player_init();
 	grid_init();
@@ -155,36 +165,38 @@ static GameState game_over(void){
 		42, 60, 43, 10, 17, 28, 81, 76, 20, 54, 30, 75,
 	};
 	
-	u8 spr_y, boom;
+	u16 scroll_y = 0, scroll_v = 0;
+	u8 spr_y, ticks = 0;
 	
-	px_spr_clear();
-	px_wait_nmi();
+	blank_screen2();
 	
-	// px_buffer_inc(PX_INC1);
-	// px_ppu_disable(); {
-	// 	px_addr(NT_ADDR(2, 0, 0));
-	// 	px_fill(32*30, 0x20);
-	// 	px_fill(64, 0x00);
+	while(scroll_y < (240 << 8)){
+		scroll_v += 2;
+		scroll_y += scroll_v;
 		
-	// 	px_spr_clear();
-	// 	px_wait_nmi();
-	// } px_ppu_enable();
-	
-	for(boom = 0; boom < sizeof(BOOM); ++boom){
-		idx = BOOM[boom];
+		if(ticks < sizeof(BOOM)){
+			idx = BOOM[ticks];
 		grid_set_block(idx, BLOCK_EMPTY);
 		
-		for(iy = 0; iy < 4; ++iy){
-			for(ix = 0; ix < 8 && ix < boom; ++ix){
-				idx = BOOM[boom - ix];
+			for(ix = 0; ix < 8 && ix < ticks; ++ix){
+				idx = BOOM[ticks - ix];
 				spr_y = grid_block_y(idx, -6);
-				explosion_sprite(grid_block_x(idx, 0), spr_y, ix);
+				if(spr_y + (scroll_y >> 8) < 240) explosion_sprite(grid_block_x(idx, 0), spr_y + (scroll_y >> 8), ix);
 			}
 			
 			px_spr_end();
-			px_wait_nmi();
+		} else {
+			px_spr_clear();
 		}
+		
+		PX.scroll_y = 480 - (scroll_y >> 8);
+			px_wait_nmi();
+		
+		if((px_ticks & 3) == 0) ++ticks;
 	}
+	
+	PX.scroll_y = 240;
+	px_wait_nmi();
 	
 	return final_score();
 }

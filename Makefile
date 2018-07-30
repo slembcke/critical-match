@@ -47,7 +47,8 @@ GFX = \
 	gfx/sheet1.png \
 	gfx/explosion.png \
 	gfx/characters/squidman.png \
-	gfx/characters/azmodeus.png
+	gfx/characters/azmodeus.png \
+	gfx/characters/pinkblob.png
 
 MAPS = \
 	gfx/pixelakes.tmx \

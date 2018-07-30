@@ -59,7 +59,7 @@ static void blit_palette(u8 bg_color){
 }
 
 static void load_character(void){
-	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_azmodeus_lz4chr, 84*16);
+	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_pinkblob_lz4chr, 84*16);
 }
 
 static GameState game_loop(void){

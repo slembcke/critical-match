@@ -12,6 +12,8 @@ extern u8 gfx_blob_lz4chr[];
 extern u8 gfx_budgie_lz4chr[];
 extern u8 gfx_robinhood_lz4chr[];
 extern u8 gfx_bonecrusher_lz4chr[];
+extern u8 gfx_dagon_lz4chr[];
+extern u8 gfx_dog_lz4chr[];
 
 extern u8 gfx_pixelakes_lz4[];
 extern u8 gfx_main_menu_lz4[];

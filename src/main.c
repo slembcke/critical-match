@@ -58,8 +58,45 @@ static void blit_palette(u8 bg_color){
 	PPU.vram.data = bg_color;
 }
 
+static const u8 CHARACTER_PAL[] = {
+	2, 1, 3, 2, 2,
+	2, 1, 1, 0,
+};
+
+static const void *CHARACTER_GFX[] = {
+	gfx_squidman_lz4chr,
+	gfx_azmodeus_lz4chr,
+	gfx_pinkblob_lz4chr,
+	gfx_blob_lz4chr,
+	gfx_budgie_lz4chr,
+	
+	gfx_robinhood_lz4chr,
+	gfx_bonecrusher_lz4chr,
+	gfx_dagon_lz4chr,
+	gfx_dog_lz4chr,
+};
+
+static const char *CHARACTER_BIO[] = {
+	"Cathylu:\n\nGoes by \"Katie Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt generations\nof dreams.",
+	"Azmodeus:",
+	"Pink Blob:\n\nWith a steady career\nin treasure stacking,\nPink Blob hopes to\nprove to Green blob\nthat it's more than\njust a slimy face.",
+	"Green Blob:\n\nGreen Blob is very\nshy. By becoming a\nmaster treasure\nstacker it hopes\nto gain the attention\nof Pink Blob.",
+	"Budgie:\n\nWhen asked how much\nhis stack of treasure\ncost to aquire,\nBudgie simply repiled:\n\"Cheap! Cheap!\"",
+
+	"Robin Hood:\n\nBy stacking the\ntreasure taken from\nthe rich, Robin Hood\nhopes to increase the\ndividends of his\ncharitable donations.",
+	"Bone Crusher:\n\nBONE CRUSHER CARES\nNOT FOR TREASURE! I\nWILL CRUSH YOUR\nBONES! I WILL CRUSH\nTHEM IN A BOAT OR\nWITH A GOAT!",
+	"Dagon:",
+	"Dog:\n\nBark! Bark! Bark!\nArf! Bark! Grrrr!\nWoof! Bark! Bark!\nRuff! Bark! Woof!",
+};
+
+static const u8 CHARACTER_COUNT = sizeof(CHARACTER_PAL);
+
+static u8 character = 8;
+extern u8 character_pal;
+
 static void load_character(void){
-	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_bonecrusher_lz4chr, 84*16);
+	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), CHARACTER_GFX[character], 84*16);
+	character_pal = CHARACTER_PAL[character];
 }
 
 static GameState game_loop(void){
@@ -236,24 +273,10 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
-static const char *TEXT = "Cathylu:\n\nGoes by \"Katie Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt generations\nof dreams.";
-
-static void blit_text(void){
-	u16 addr = NT_ADDR(0, 7, 11);
-	register const char *cursor = TEXT;
-	
-	px_addr(addr);
-	for(ix = 0; cursor[ix]; ++ix){
-		if(cursor[ix] == '\n'){
-			addr += 32;
-			px_addr(addr);
-		} else {
-			PPU.vram.data = cursor[ix];
-		}
-	}
-}
-
 static GameState character_select(void){
+	u16 bio_addr = NT_ADDR(0, 7, 11);
+	register const char *bio_cursor = CHARACTER_BIO[character];
+	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
 		blit_palette(CLR_BLACK);
@@ -266,7 +289,15 @@ static GameState character_select(void){
 		
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_character_select_lz4, 1024);
 		
-		blit_text();
+		px_addr(bio_addr);
+		for(ix = 0; bio_cursor[ix]; ++ix){
+			if(bio_cursor[ix] == '\n'){
+				bio_addr += 32;
+				px_addr(bio_addr);
+			} else {
+				PPU.vram.data = bio_cursor[ix];
+			}
+		}
 		
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0x55);
@@ -283,7 +314,7 @@ static GameState character_select(void){
 		if(JOY_START(joy_read(0))) break;
 		
 		idx = ((px_ticks >> 2) & 0x6) + 17;
-		player_sprite(36, 132, idx);
+		player_sprite(36, 127, idx);
 		
 		px_spr_end();
 		px_wait_nmi();

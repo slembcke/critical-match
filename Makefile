@@ -52,7 +52,9 @@ GFX = \
 	gfx/characters/blob.png \
 	gfx/characters/budgie.png \
 	gfx/characters/robinhood.png \
-	gfx/characters/bonecrusher.png
+	gfx/characters/bonecrusher.png \
+	gfx/characters/dagon.png \
+	gfx/characters/dog.png
 
 MAPS = \
 	gfx/pixelakes.tmx \

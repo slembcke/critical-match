@@ -53,11 +53,10 @@ PLAYER_FRAME_ADDRS:
 		.addr PLAYER_FRAME_DATA + i*OBJ_COUNT
 	.endrepeat
 
-.zeropage
+.data
 
-sprite_x = tmp1
-sprite_y = tmp2
-sprite_pal = tmp3
+.export _character_pal
+_character_pal: .byte 0
 
 .code
 
@@ -72,7 +71,7 @@ sprite_pal = tmp3
 	ror a
 	ror a
 	and #$40
-	ora #$01 ; Set the palette bits.
+	ora _character_pal
 	
 	; Set attributes.
 	sta OAM_ATTR+ 0, x

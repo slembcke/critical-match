@@ -46,7 +46,8 @@ GFX = \
 	gfx/neschar.png \
 	gfx/sheet1.png \
 	gfx/explosion.png \
-	gfx/squidman.png
+	gfx/characters/squidman.png \
+	gfx/characters/azmodeus.png
 
 MAPS = \
 	gfx/pixelakes.tmx \

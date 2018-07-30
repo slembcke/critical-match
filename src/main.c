@@ -58,6 +58,10 @@ static void blit_palette(u8 bg_color){
 	PPU.vram.data = bg_color;
 }
 
+static void load_character(void){
+	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_azmodeus_lz4chr, 84*16);
+}
+
 static GameState game_loop(void){
 	player_init();
 	grid_init();
@@ -85,13 +89,13 @@ static GameState game_loop(void){
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 32*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 128*16);
 		
 		px_spr_table(1);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 128*16);
+		load_character();
 		
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4, 1024);
 		
@@ -258,7 +262,7 @@ static GameState character_select(void){
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
 		
 		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
+		load_character();
 		
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_character_select_lz4, 1024);
 		
@@ -279,7 +283,7 @@ static GameState character_select(void){
 		if(JOY_START(joy_read(0))) break;
 		
 		idx = ((px_ticks >> 2) & 0x6) + 17;
-		player_sprite(40, 128, idx);
+		player_sprite(36, 132, idx);
 		
 		px_spr_end();
 		px_wait_nmi();
@@ -383,7 +387,7 @@ static GameState debug_chr(void){
 		px_spr_table(1);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 32*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 128*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
 		
 		//Top

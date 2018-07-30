@@ -1,17 +1,10 @@
 TODO:
-* Menu text.
-* About screen.
 * Attract mode. (kinda working, but record later)
-* Animate menu screen.
-* Animate splash screen.
-* Flash to black.
+* About screen?
 
 Needed:
 * Music.
 * Sounds.
-* Game screen.
-* Splash screen.
-* Game over screen.
 
 BUGS:
 * Garbage blocks can be added above screen edge.

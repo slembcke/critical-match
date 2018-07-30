@@ -127,8 +127,8 @@ static void pause(void){
 	wait_noinput();
 }
 
-static GameState final_score(void){
-	PX.scroll_y = 0;
+static GameState final_score(s16 scroll_v){
+	u16 scroll_y = 0;
 		
 	px_buffer_inc(PX_INC1);
 	px_ppu_disable(); {
@@ -136,7 +136,7 @@ static GameState final_score(void){
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
 		
 		px_addr(AT_ADDR(0));
-		px_fill(64, 0x55);
+		// px_fill(64, 0x55);
 		
 		// Score
 		px_buffer_data(5, NT_ADDR(0, 17, 14));
@@ -146,6 +146,22 @@ static GameState final_score(void){
 		px_spr_clear();
 		px_wait_nmi();
 	} px_ppu_enable();
+	
+	for(ix = 0; ix < 240; ++ix){
+		scroll_v += 16;
+		scroll_y += scroll_v;
+		
+		if(scroll_y > (240 << 8)){
+			scroll_v = -scroll_v/2;
+			scroll_y = (240 << 8);
+		}
+		
+		PX.scroll_y = 240 - (scroll_y >> 8);
+		px_wait_nmi();
+	}
+	
+	PX.scroll_y = 0;
+	px_wait_nmi();
 	
 	wait_noinput();
 	
@@ -198,7 +214,7 @@ static GameState game_over(void){
 	PX.scroll_y = 240;
 	px_wait_nmi();
 	
-	return final_score();
+	return final_score(scroll_v);
 }
 
 static GameState main_menu(void){

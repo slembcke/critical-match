@@ -23,6 +23,8 @@ void cursor_sprite(u8 x, u8 y, u8 height);
 void block_sprite(u8 x, u8 y, u8 block);
 void explosion_sprite(u8 x, u8 y, u8 frame);
 
+u8 bounce4(void);
+
 // Block color.
 #define BLOCK_COLOR_MASK 0x03
 #define BLOCK_COLOR_BLUE 0x00

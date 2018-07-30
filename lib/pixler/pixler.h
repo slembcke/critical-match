@@ -34,7 +34,6 @@ extern u8 px_ctrl;
 #define PX_MASK_SPRITE_ENABLE 0x10
 #define PX_MASK_RENDER_ENABLE (PX_MASK_SPRITE_ENABLE | PX_MASK_BG_ENABLE)
 
-#define PX_CTRL_BASE_NAMETABLE_ADDR 0x03
 #define PX_CTRL_VRAM_INC 0x04
 #define PX_CTRL_SPR_TABLE_ADDR 0X08
 #define PX_CTRL_BG_TABLE_ADDR 0x10
@@ -54,8 +53,7 @@ extern u8 px_ticks;
 #pragma zpsym("px_ticks");
 
 typedef struct {
-	u16 scroll_x;
-	u16 scroll_y;
+	u16 scroll_x, scroll_y;
 	u8 * const buffer;
 } PX_t;
 

@@ -1,5 +1,3 @@
-.rodata
-
 lz4_header_bytes = 8
 
 .macro inclz4 symbol, file
@@ -8,7 +6,11 @@ lz4_header_bytes = 8
 		.incbin file, lz4_header_bytes
 .endmacro
 
+.segment "PRG0"
+
 inclz4 _gfx_pixelakes_lz4chr, "pixelakes.lz4chr"
+inclz4 _gfx_logo64_lz4chr, "logo64.lz4chr"
+inclz4 _gfx_menu_tiles_lz4chr, "menu_tiles.lz4chr"
 inclz4 _gfx_neschar_lz4chr, "neschar.lz4chr"
 inclz4 _gfx_sheet1_lz4chr, "sheet1.lz4chr"
 inclz4 _gfx_explosion_lz4chr, "explosion.lz4chr"

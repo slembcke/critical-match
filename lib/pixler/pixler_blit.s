@@ -3,13 +3,9 @@
 
 .importzp px_ctrl
 
-.import incsp1
 .import incsp2
 
 .export _px_inc
-.export _px_fill
-.export _px_blit
-
 .proc _px_inc ; u8 direction
 	cmp #0
 	beq @horiz
@@ -27,6 +23,7 @@
 	rts
 .endproc
 
+.export _px_fill
 .proc _px_fill ; u16 len, u8 chr
 	_len = 0
 	; _chr = a
@@ -56,9 +53,10 @@
 		dey
 		bne :-
 	
-	jmp incsp1
+	jmp incsp2
 .endproc
 
+.export _px_blit
 .proc _px_blit ; u16 len, u16 addr
 	_len = 0
 	; _addr = x|a

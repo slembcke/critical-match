@@ -322,7 +322,7 @@ static void grid_blit(void){
 	// Copy score to the screen.
 	px_buffer_inc(PX_INC1);
 	px_buffer_data(5, NT_ADDR(0, 11, 4));
-	memset(PX.buffer, 0, 5);
+	memset(PX.buffer, 0x20, 5);
 	ultoa(grid.score, PX.buffer, 10);
 	
 	// Combo
@@ -517,24 +517,25 @@ void grid_draw_indicators(void){
 		--grid.combo_label_timeout;
 	}
 	
+	// Draw garbage meter timer.
 	// ticks * 2.5
 	iy = grid.garbage_meter_ticks;
 	iy = (u8)(4*iy + iy)/2;
-	px_spr(40, 172 - iy, 0x00, 0x02);
+	px_spr(40, 172 - iy, 0x02, 0x02);
 	
 	// Column warnings.
 	if(COLUMN_HEIGHT[grid.flicker_column] >= GRID_H - 4){
-		px_spr(68 + 16*grid.flicker_column, 48, 0x00, 0x03);
+		px_spr(68 + 16*grid.flicker_column, 50, 0x00, 0x03);
 	}
 	
-	// TODO replace temporary sprite.
-	px_spr(68 + 16*grid.queued_column, 42 + (px_ticks/8 & 0x3), 0x02, 'v');
+	// Draw drop indicator.
+	px_spr(68 + 16*grid.queued_column, 44 + bounce4(), 0x02, 0x1C);
 	
 	{// Combo meter.
 		static const u8 SPR0[] = {0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};
 		
 		idx = grid.combo_ticks;
-		px_spr(183, 27, 0x00, SPR0[idx]);
+		px_spr(183, 27, 0x02, SPR0[idx]);
 	}
 }
 
@@ -544,7 +545,6 @@ void grid_draw_garbage(){
 		iy = COLUMN_HEIGHT[ix];
 		block_sprite(64 + ix*16, 190 - iy*16, BLOCK_GARBAGE);
 	}
-	
 }
 
 static void grid_place_garbage(void){

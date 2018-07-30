@@ -1,6 +1,7 @@
 .include "pixler.inc"
 
 .importzp px_ticks
+.importzp px_ctrl
 .importzp PX_scroll_x
 .importzp PX_scroll_y
 .import _px_buffer_exec
@@ -13,6 +14,38 @@
 px_nmi_ready: .byte 0
 
 .code
+
+; http://forums.nesdev.com/viewtopic.php?f=2&t=16911
+; Returns the quotient in x, remainder in a.
+.macro div240_quick var
+	; Start with q = n/256
+	ldx var+1
+
+	; r += 16*q
+	txa
+	asl
+	asl
+	asl
+	asl
+	; Overflows for > 12 bits!
+	; Assume carry cleared by asl.
+
+	adc var+0
+	; Check for overflow, and adjust q and r again.
+	bcc :+
+		; q += 1
+		inx
+		; r += 16
+		adc #15 ; +1 for carry flag
+	:
+
+	; Check if r > 240 and adjust once more.
+	cmp #240
+	bcc :+
+		inx
+		sbc #240
+	:
+.endmacro
 
 .proc px_nmi
 	; Interrupt enter.
@@ -42,10 +75,20 @@ px_nmi_ready: .byte 0
 	sta PPU_VRAM_ADDR
 	
 	; Set the scroll registers.
-	lda PX_scroll_x + 0
+	lda PX_scroll_x+0
 	sta PPU_SCROLL
-	lda PX_scroll_y + 0
+	div240_quick PX_scroll_y
 	sta PPU_SCROLL
+	; Note: Y-scroll remainder is in x.
+	
+	; Set nametable base address.
+	lda PX_scroll_x+1
+	lsr a
+	txa
+	rol a
+	and #$03
+	ora px_ctrl
+	sta PPU_CTRL
 	
 	@skip_frame:
 	

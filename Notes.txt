@@ -1,15 +1,10 @@
 TODO:
-* Drop indicator sprite.
-* Attract mode.
-* Animate splash screen.
-* "Also on Switch" screen?
+* Attract mode. (kinda working, but record later)
+* About screen?
 
 Needed:
 * Music.
 * Sounds.
-* Game screen.
-* Splash screen.
-* Game over screen.
 
 BUGS:
 * Garbage blocks can be added above screen edge.

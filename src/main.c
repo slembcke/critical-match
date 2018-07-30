@@ -42,6 +42,22 @@ static void blank_screen2(){
 	}
 }
 
+static void blit_palette(u8 bg_color){
+	static const u8 PALETTE[] = {
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_1,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_2,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_3,
+		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_4,
+	};
+	
+	px_addr(PAL_ADDR);
+	px_blit(sizeof(PALETTE), PALETTE);
+	px_blit(sizeof(PALETTE), PALETTE);
+	
+	px_addr(PAL_ADDR);
+	PPU.vram.data = bg_color;
+}
+
 static GameState game_loop(void){
 	player_init();
 	grid_init();
@@ -65,16 +81,7 @@ static GameState game_loop(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
-		static const u8 PALETTE[] = {
-			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_1,
-			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_2,
-			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_3,
-			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_4,
-		};
-		
-		px_addr(PAL_ADDR);
-		px_blit(sizeof(PALETTE), PALETTE);
-		px_blit(sizeof(PALETTE), PALETTE);
+		blit_palette(CLR_BLACK);
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
@@ -225,6 +232,43 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
+static GameState character_select(void){
+	px_inc(PX_INC1);
+	px_ppu_disable(); {
+		blit_palette(CLR_BLACK);
+		
+		px_bg_table(0);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
+		
+		px_spr_table(1);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
+		
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_character_select_lz4, 1024);
+		
+		px_addr(AT_ADDR(0));
+		px_fill(64, 0x55);
+		
+		px_buffer_set_color(0, CLR_BG);
+		
+		px_spr_clear();
+		px_wait_nmi();
+	} px_ppu_enable();
+	
+	wait_noinput();
+	
+	while(true){
+		if(JOY_START(joy_read(0))) break;
+		
+		idx = ((px_ticks >> 2) & 0x6) + 17;
+		player_sprite(64, 64, idx);
+		
+		px_spr_end();
+		px_wait_nmi();
+	}
+	
+	return game_loop();
+}
+
 static GameState main_menu(void){
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
@@ -272,7 +316,7 @@ static GameState main_menu(void){
 	while(true){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
-			if(JOY_START(joy_read(0))) return game_loop();
+			if(JOY_START(joy_read(0))) return character_select();
 		}
 		
 		for(iy = 0; iy < 4; ++iy){
@@ -284,8 +328,6 @@ static GameState main_menu(void){
 		
 		px_wait_nmi();
 	}
-	
-	return game_loop();
 }
 
 static GameState pixelakes_screen(void){
@@ -366,6 +408,7 @@ void main(void){
 	
 	// debug_chr();
 	// main_menu();
+	character_select();
 	// game_loop();
 	pixelakes_screen();
 }

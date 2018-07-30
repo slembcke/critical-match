@@ -48,6 +48,8 @@ GFX = \
 	gfx/explosion.png \
 	gfx/characters/squidman.png \
 	gfx/characters/azmodeus.png \
+	gfx/characters/blob.png \
+	gfx/characters/budgie.png \
 	gfx/characters/pinkblob.png
 
 MAPS = \

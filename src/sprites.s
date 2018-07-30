@@ -72,7 +72,7 @@ sprite_pal = tmp3
 	ror a
 	ror a
 	and #$40
-	ora #$02 ; Set the palette bits.
+	ora #$01 ; Set the palette bits.
 	
 	; Set attributes.
 	sta OAM_ATTR+ 0, x

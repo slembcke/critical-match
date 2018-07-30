@@ -20,6 +20,8 @@ inclz4 _gfx_azmodeus_lz4chr, "characters/azmodeus.lz4chr"
 inclz4 _gfx_pinkblob_lz4chr, "characters/pinkblob.lz4chr"
 inclz4 _gfx_blob_lz4chr, "characters/blob.lz4chr"
 inclz4 _gfx_budgie_lz4chr, "characters/budgie.lz4chr"
+inclz4 _gfx_robinhood_lz4chr, "characters/robinhood.lz4chr"
+inclz4 _gfx_bonecrusher_lz4chr, "characters/bonecrusher.lz4chr"
 
 inclz4 _gfx_pixelakes_lz4, "pixelakes.lz4"
 inclz4 _gfx_main_menu_lz4, "main_menu.lz4"

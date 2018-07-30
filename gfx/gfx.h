@@ -10,6 +10,8 @@ extern u8 gfx_azmodeus_lz4chr[];
 extern u8 gfx_pinkblob_lz4chr[];
 extern u8 gfx_blob_lz4chr[];
 extern u8 gfx_budgie_lz4chr[];
+extern u8 gfx_robinhood_lz4chr[];
+extern u8 gfx_bonecrusher_lz4chr[];
 
 extern u8 gfx_pixelakes_lz4[];
 extern u8 gfx_main_menu_lz4[];

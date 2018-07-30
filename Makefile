@@ -48,9 +48,11 @@ GFX = \
 	gfx/explosion.png \
 	gfx/characters/squidman.png \
 	gfx/characters/azmodeus.png \
+	gfx/characters/pinkblob.png \
 	gfx/characters/blob.png \
 	gfx/characters/budgie.png \
-	gfx/characters/pinkblob.png
+	gfx/characters/robinhood.png \
+	gfx/characters/bonecrusher.png
 
 MAPS = \
 	gfx/pixelakes.tmx \

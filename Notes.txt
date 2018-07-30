@@ -1,8 +1,6 @@
 TODO:
 * Menu text.
 * About screen.
-* Permutation table for game-over.
-* Animate slide out for game over.
 * Attract mode. (kinda working, but record later)
 * Animate menu screen.
 * Animate splash screen.

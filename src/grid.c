@@ -529,7 +529,7 @@ void grid_draw_indicators(void){
 	}
 	
 	// Draw drop indicator.
-	px_spr(68 + 16*grid.queued_column, 44 + (px_ticks/8 & 0x3), 0x02, 0x1C);
+	px_spr(68 + 16*grid.queued_column, 44 + bounce4(), 0x02, 0x1C);
 	
 	{// Combo meter.
 		static const u8 SPR0[] = {0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};

@@ -18,24 +18,14 @@ u8 joy0, joy1;
 #define CLR_3 0x1B // green
 #define CLR_4 0x14 // purple
 
-static void blit_palette(void){
-	static const u8 PALETTE[] = {
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_1,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_2,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_3,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_4,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_1,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_2,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_3,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_4,
-	};
-	
-	px_addr(PAL_ADDR);
-	px_blit(sizeof(PALETTE), PALETTE);
-}
-
 static void wait_noinput(void){
 	while(joy_read(0) || joy_read(1)){}
+}
+
+u8 bounce4(void){
+	u8 y = (px_ticks >> 3);
+	if(y & 4) y = (y ^ 0xFF);
+	return (y & 3);
 }
 
 static GameState main_menu(void);
@@ -68,13 +58,23 @@ static GameState game_loop(void){
 	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
 	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	
-	// for(idx = 8; idx < GRID_BYTES - 16; ++idx){
+	// for(idx = 8; idx < GRID_BYTES - 8; ++idx){
 	// 	GRID[idx] = BLOCK_GARBAGE;
 	// }
+	// GRID[GRID_BYTES - 11] = BLOCK_EMPTY;
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
-		blit_palette();
+		static const u8 PALETTE[] = {
+			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_1,
+			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_2,
+			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_3,
+			CLR_BLACK, CLR_BLACK, CLR_YELLOW, CLR_4,
+		};
+		
+		px_addr(PAL_ADDR);
+		px_blit(sizeof(PALETTE), PALETTE);
+		px_blit(sizeof(PALETTE), PALETTE);
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
@@ -91,6 +91,9 @@ static GameState game_loop(void){
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0x55);
 		
+		px_buffer_set_color(0, CLR_BG);
+		
+		px_spr_clear();
 		px_wait_nmi();
 	} px_ppu_enable();
 	
@@ -129,9 +132,12 @@ static void pause(void){
 
 static GameState final_score(s16 scroll_v){
 	u16 scroll_y = 0;
-		
+	
 	px_buffer_inc(PX_INC1);
 	px_ppu_disable(); {
+		px_addr(PAL_ADDR);
+		PPU.vram.data = CLR_BLACK;
+		
 		px_addr(NT_ADDR(0, 10, 12));
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
 		
@@ -142,6 +148,8 @@ static GameState final_score(s16 scroll_v){
 		px_buffer_data(5, NT_ADDR(0, 17, 14));
 		memset(PX.buffer, 0, 5);
 		ultoa(grid_get_score(), PX.buffer, 10);
+		
+		px_buffer_set_color(0, CLR_BG);
 		
 		px_spr_clear();
 		px_wait_nmi();
@@ -192,8 +200,8 @@ static GameState game_over(void){
 		
 		if(ticks < sizeof(BOOM)){
 			idx = BOOM[ticks];
-		grid_set_block(idx, BLOCK_EMPTY);
-		
+			grid_set_block(idx, BLOCK_EMPTY);
+			
 			for(ix = 0; ix < 8 && ix < ticks; ++ix){
 				idx = BOOM[ticks - ix];
 				spr_y = grid_block_y(idx, -6);
@@ -206,7 +214,7 @@ static GameState game_over(void){
 		}
 		
 		PX.scroll_y = 480 - (scroll_y >> 8);
-			px_wait_nmi();
+		px_wait_nmi();
 		
 		if((px_ticks & 3) == 0) ++ticks;
 	}
@@ -258,20 +266,20 @@ static GameState main_menu(void){
 		px_wait_nmi();
 	} px_ppu_enable();
 	
-	for(iy = 0; iy < 4; ++iy){
-		for(ix = 0; ix < 8; ++ix){
-			idx = 0x80 + 8*iy + ix;
-			px_spr(16 + 8*ix, 240 - 48 + 8*iy, idx < 0x92 ? 0x00 : 0x01, idx);
-		}
-	}
-	
 	wait_noinput();
 	
 	// Randomize the seed based on start time.
 	while(true){
-		for(idx = 0; idx < 255; ++idx){
+		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
 			if(JOY_START(joy_read(0))) return game_loop();
+		}
+		
+		for(iy = 0; iy < 4; ++iy){
+			for(ix = 0; ix < 8; ++ix){
+				idx = 0x80 + 8*iy + ix;
+				px_spr(16 + 8*ix, 240 - 46 + 8*iy + bounce4(), idx < 0x92 ? 0x00 : 0x01, idx);
+			}
 		}
 		
 		px_wait_nmi();
@@ -305,6 +313,7 @@ static GameState pixelakes_screen(void){
 	return main_menu();
 }
 
+#ifdef DEBUG
 static GameState debug_chr(void){
 	px_ppu_disable(); {
 		blit_palette();
@@ -343,6 +352,7 @@ static GameState debug_chr(void){
 	
 	debug_freeze();
 }
+#endif
 
 void main(void){
 	px_bank_select(0);

@@ -320,10 +320,7 @@ static void grid_update_fall_speed(void){
 
 static void grid_blit(void){
 	// Copy score to the screen.
-	px_buffer_inc(PX_INC1);
-	px_buffer_data(5, NT_ADDR(0, 11, 4));
-	memset(PX.buffer, 0x20, 5);
-	ultoa(grid.score, PX.buffer, 10);
+	grid_buffer_score(NT_ADDR(0, 11, 4));
 	
 	// Combo
 	px_buffer_data(1, NT_ADDR(0, 21, 4));
@@ -577,6 +574,10 @@ void grid_pause_semaphore(s8 inc){
 	grid.pause_semaphore += inc;
 }
 
-u16 grid_get_score(void){
-	return grid.score;
+void grid_buffer_score(u16 addr){
+	px_buffer_inc(PX_INC1);
+	px_buffer_data(5, addr);
+	memset(PX.buffer, 0x00, 5);
+	ultoa(grid.score, PX.buffer, 10);
+	for(idx = 4; PX.buffer[idx] == 0; --idx) PX.buffer[idx] = 0x20;
 }

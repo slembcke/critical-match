@@ -209,9 +209,7 @@ static GameState final_score(s16 scroll_v){
 		px_fill(64, 0x55);
 		
 		// Score
-		px_buffer_data(5, NT_ADDR(0, 17, 14));
-		memset(PX.buffer, 0, 5);
-		ultoa(grid_get_score(), PX.buffer, 10);
+		grid_buffer_score(NT_ADDR(0, 17, 14));
 		
 		px_buffer_set_color(0, CLR_BG);
 		

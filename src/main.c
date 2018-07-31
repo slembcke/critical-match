@@ -88,7 +88,7 @@ static const void *CHARACTER_GFX[] = {
 };
 
 static const char *CHARACTER_BIO[] = {
-	"Cthylu:\n\nGoes by \"Kathy Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt generations\nof dreams.",
+	"Cthylu:\n\nGoes by \"Kathy Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt dreams\nfor generations.",
 	"Azmodeus:\n\nHails from the second\nlevel of Heck. The\nPrince of Greed isn't\nthe only demon that\ncan stack!",
 	"Pink Blob:\n\nWith a steady career\nin treasure stacking,\nPink Blob hopes to\nprove to Green blob\nthat it's more than\njust a slimy face.",
 	"Green Blob:\n\nGreen Blob is very\nshy. By becoming a\nmaster treasure\nstacker it hopes\nto gain the attention\nof Pink Blob.",
@@ -96,17 +96,17 @@ static const char *CHARACTER_BIO[] = {
 	"Budgie:\n\nWhen asked how much\nhis stack of treasure\ncost to aquire,\nBudgie simply repiled:\n\"Cheap! Cheap!\"",
 	"Robin Hood:\n\nBy stacking the\ntreasure taken from\nthe rich, Robin Hood\nhopes to increase the\ndividends of his\ncharitable donations.",
 	"Bone Crusher:\n\nBONE CRUSHER CARES\nNOT FOR TREASURE! I\nWILL CRUSH YOUR\nBONES! I WILL CRUSH\nTHEM IN A BOAT OR\nWITH A GOAT!",
-	"Dagon:",
+	"Dagon:\n\nKnown affectionaly as\n\"Wet Willie\" by his\nclosest friends. This\ncontender is as old\nas he is fishy.",
 	
 	"Dog:\n\nBark! Bark! Bark!\nArf! Bark! Grrrr!\nWoof! Bark! Bark!\nRuff! Bark! Woof!",
 	"Eyeboll:\n\nA keen eye for detail\nhelps achieve the\ngreatest of stacks.\nA fashionable cloak\ndoesn't hurt either.",
-	"Kermit:\n\n",
-	"Ninja:\n\nThis contender is rarely seen or heard off the stacking court.",
+	"Kermit:\n\n\"Yeah, well, I've got\na dream too, but it's\nabout treasure and\nstacking and making\nmyself rich.\"",
+	"Ninja:\n\nThis contender is a\nmaster of the shadow,\nand little is known\nabout his past.",
 	
 	"Bob:\n\nUsing its immense orc\nstrength this\ncontentder is sure to\nwin the gold. Being a\nCPA doesn't hurt\neither.",
-	"Royal Guard:\n\n",
-	"Rust Knight:\n\n",
-	"Cyclops:\n\n",
+	"Royal Guard:\n\nRoy always loves a\ngood stacking\nchallenge. He worked\nmany years as a\ntreasury guard before\nhis current post.",
+	"Rust Knight:\n\noil..., *squeak*,\noil..., *squeak*,\nWD40..., *creak*",
+	"Cycil:\n\nLacking depth\nperception is\nactually an advantage\nwhen playing a 2D\ngame. Use this to\nyour advantage.",
 };
 
 static const u8 CHARACTER_COUNT = sizeof(CHARACTER_PAL);
@@ -489,7 +489,7 @@ void main(void){
 	
 	// debug_chr();
 	// main_menu();
-	character_select();
+	// character_select();
 	// game_loop();
 	pixelakes_screen();
 }

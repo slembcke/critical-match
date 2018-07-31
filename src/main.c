@@ -19,7 +19,7 @@ u8 joy0, joy1;
 #define CLR_4 0x14 // purple
 
 static void wait_noinput(void){
-	while(joy_read(0) || joy_read(1)){}
+	while(joy_read(0) || joy_read(1)) px_wait_nmi();
 }
 
 u8 bounce4(void){
@@ -31,16 +31,6 @@ u8 bounce4(void){
 static GameState main_menu(void);
 static void pause(void);
 static GameState game_over(void);
-
-static void blank_screen2(){
-	u16 addr = NT_ADDR(2, 0, 0);
-	for(iy = 0; iy < 15; ++iy){
-		px_buffer_data(64, addr);
-		memset(PX.buffer, 0x20, 64);
-		addr += 64;
-		px_wait_nmi();
-	}
-}
 
 static void blit_palette(u8 bg_color){
 	static const u8 PALETTE[] = {
@@ -266,8 +256,6 @@ static GameState game_over(void){
 	u16 scroll_y = 0, scroll_v = 0;
 	u8 spr_y, ticks = 0;
 	
-	blank_screen2();
-	
 	while(scroll_y < (240 << 8)){
 		scroll_v += 2;
 		scroll_y += scroll_v;
@@ -300,6 +288,8 @@ static GameState game_over(void){
 }
 
 static GameState character_select(void){
+	static const u8 CURVE[] = {1, 7, 15, 26, 38, 53, 68, 84, 99, 114, 129, 141, 152, 160, 166, 168};
+	
 	u16 bio_addr = NT_ADDR(0, 7, 11);
 	register const char *bio_cursor = CHARACTER_BIO[character];
 	
@@ -330,17 +320,24 @@ static GameState character_select(void){
 		
 		px_buffer_set_color(0, CLR_BG);
 		
+		PX.scroll_y = 168;
 		px_spr_clear();
 		px_wait_nmi();
 	} px_ppu_enable();
 	
+	for(idx = 0; idx < sizeof(CURVE)/2; ++idx){
+		PX.scroll_y = 480 + 168 - 2*CURVE[idx];
+		px_wait_nmi();
+	}
+	
+	PX.scroll_y = 0;
 	wait_noinput();
 	
 	while(true){
 		joy0 = joy_read(0);
 		if(JOY_START(joy0)) return game_loop();
-		if(JOY_DOWN(joy0)){character_inc(1); return character_select();}
-		if(JOY_UP(joy0)){character_inc(-1); return character_select();}
+		if(JOY_DOWN(joy0)){character_inc(1); break;}
+		if(JOY_UP(joy0)){character_inc(-1); break;}
 		
 		idx = ((px_ticks >> 2) & 0x6) + 17;
 		player_sprite(36, 128, idx);
@@ -348,6 +345,14 @@ static GameState character_select(void){
 		px_spr_end();
 		px_wait_nmi();
 	}
+	
+	px_spr_clear();
+	for(idx = sizeof(CURVE)/2; idx < sizeof(CURVE); ++idx){
+		PX.scroll_y = 480 + 168 - 2*CURVE[idx];
+		px_wait_nmi();
+	}
+	
+	return character_select();
 }
 
 static GameState main_menu(void){
@@ -486,6 +491,10 @@ void main(void){
 	// Set an initial random seed that's not just zero.
 	// The main menu increments this constantly until the player starts the game.
 	rand_seed = 0x0D8E;
+	
+	// Black out the second screen.
+	px_addr(NT_ADDR(2, 0, 0));
+	px_fill(32*30, 0x20);
 	
 	// debug_chr();
 	// main_menu();

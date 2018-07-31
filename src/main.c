@@ -80,7 +80,7 @@ static const void *CHARACTER_GFX[] = {
 static const char *CHARACTER_BIO[] = {
 	"Cthylu:\n\nGoes by \"Kathy Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt dreams\nfor generations.",
 	"Azmodeus:\n\nHails from the second\nlevel of Heck. The\nPrince of Greed isn't\nthe only demon that\ncan stack!",
-	"Pink Blob:\n\nWith a steady career\nin treasure stacking,\nPink Blob hopes to\nprove to Green blob\nthat it's more than\njust a slimy face.",
+	"Pink Blob:\n\nWith a steady career\nin treasure stacking,\nPink Blob hopes to\nprove to Green Blob\nthat it's more than\njust a slimy face.",
 	"Green Blob:\n\nGreen Blob is very\nshy. By becoming a\nmaster treasure\nstacker it hopes\nto gain the attention\nof Pink Blob.",
 	
 	"Budgie:\n\nWhen asked how much\nhis stack of treasure\ncost to aquire,\nBudgie simply repiled:\n\"Cheap! Cheap!\"",
@@ -90,7 +90,7 @@ static const char *CHARACTER_BIO[] = {
 	
 	"Dog:\n\nBark! Bark! Bark!\nArf! Bark! Grrrr!\nWoof! Bark! Bark!\nRuff! Bark! Woof!",
 	"Eyeboll:\n\nA keen eye for detail\nhelps achieve the\ngreatest of stacks.\nA fashionable cloak\ndoesn't hurt either.",
-	"Kermit:\n\n\"Yeah, well, I've got\na dream too, but it's\nabout treasure and\nstacking and making\nmyself rich.\"",
+	"Mr. Croakes:\n\n\"Yeah, well, I've got\na dream too, but it's\nabout treasure and\nstacking and making\nmyself rich.\"",
 	"Ninja:\n\nThis contender is a\nmaster of the shadow,\nand little is known\nabout his past.",
 	
 	"Bob:\n\nUsing its immense orc\nstrength this\ncontentder is sure to\nwin the gold. Being a\nCPA doesn't hurt\neither.",

@@ -69,6 +69,9 @@ static void player_update_motion(void){
 		}
 	} else if(player.grounded){
 		player.jump_ticks = PLAYER_JUMP_TICKS;
+	} else {
+		// Deplete the jump ticks if in the air and not jumping.
+		player.jump_ticks = 0;
 	}
 }
 

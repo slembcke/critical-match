@@ -46,10 +46,26 @@ GFX = \
 	gfx/neschar.png \
 	gfx/sheet1.png \
 	gfx/explosion.png \
-	gfx/squidman.png
+	gfx/characters/squidman.png \
+	gfx/characters/azmodeus.png \
+	gfx/characters/pinkblob.png \
+	gfx/characters/blob.png \
+	gfx/characters/budgie.png \
+	gfx/characters/robinhood.png \
+	gfx/characters/bonecrusher.png \
+	gfx/characters/dagon.png \
+	gfx/characters/dog.png \
+	gfx/characters/eyeboll.png \
+	gfx/characters/kermit.png \
+	gfx/characters/ninja.png \
+	gfx/characters/orc.png \
+	gfx/characters/royalguard.png \
+	gfx/characters/rustknight.png \
+	gfx/characters/cyclops.png
 
 MAPS = \
 	gfx/pixelakes.tmx \
+	gfx/character_select.tmx \
 	gfx/main_menu.tmx \
 	gfx/board.tmx \
 	gfx/game_over.tmx

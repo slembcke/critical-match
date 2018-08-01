@@ -335,6 +335,9 @@ void player_draw_grapple(void){
 }
 
 void player_pick_up(void){
+	// Flush any pending PPU writes.
+	px_wait_nmi();
+	
 	if(JOY_UP(player.joy)){
 		player.grapple_y = 240;
 		player.block_x = grid_block_x(player.cursor_idx, 5);
@@ -355,6 +358,7 @@ void player_pick_up(void){
 		player.blocks_held[iy] = GRID[idx];
 		if(idx < GRID_BYTES - 8){
 			grid_set_block(idx, BLOCK_EMPTY);
+			grid_set_block(idx, BLOCK_EMPTY);
 		} else {
 			// The top row of the grid is not shown.
 			// Don't change the tile, but do set the value.
@@ -366,13 +370,15 @@ void player_pick_up(void){
 	
 	grid_update_column_height();
 	
-	// Wait for the PPU buffer to flush.
+	// Flush the PPU buffer again.
 	px_wait_nmi();
 }
 
 void player_drop(void){
-	if(player.cursor_idx && player.grapple_y == 0
-	){
+	if(player.cursor_idx && player.grapple_y == 0){
+		// Flush any pending PPU writes.
+		px_wait_nmi();
+		
 		for(idx = player.cursor_idx, iy = 0; player.blocks_held[iy]; idx += GRID_W, iy += 1){
 			grid_set_block(idx, player.blocks_held[iy]);
 			player.blocks_held[iy] = 0;
@@ -384,7 +390,7 @@ void player_drop(void){
 		
 		grid_update_column_height();
 		
-		// Wait for the PPU buffer to flush.
+		// Flush the PPU buffer again.
 		px_wait_nmi();
 	} else {
 		// TODO play "denied" sound?

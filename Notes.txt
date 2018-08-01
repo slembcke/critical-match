@@ -1,5 +1,6 @@
 TODO:
 * Attract mode. (kinda working, but record later)
+* Burn in protection.
 * About screen?
 
 Needed:

@@ -131,7 +131,7 @@ static GameState game_loop(void){
 	// GRID[grid_block_idx(5, 4)] = BLOCK_CHEST | BLOCK_COLOR_GREEN;
 	// GRID[grid_block_idx(6, 4)] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	
-	// for(iy = 1; iy <= 8; ++iy) GRID[grid_block_idx(6, iy)] = BLOCK_GARBAGE;
+	// for(iy = 1; iy <= 10; ++iy) GRID[grid_block_idx(6, iy)] = BLOCK_GARBAGE;
 	// for(idx = 8; idx < GRID_BYTES - 8; ++idx){
 	// 	GRID[idx] = BLOCK_GARBAGE;
 	// }

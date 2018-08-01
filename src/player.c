@@ -358,7 +358,6 @@ void player_pick_up(void){
 		player.blocks_held[iy] = GRID[idx];
 		if(idx < GRID_BYTES - 8){
 			grid_set_block(idx, BLOCK_EMPTY);
-			grid_set_block(idx, BLOCK_EMPTY);
 		} else {
 			// The top row of the grid is not shown.
 			// Don't change the tile, but do set the value.

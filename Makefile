@@ -117,7 +117,7 @@ $(ROM): ld65.cfg $(OBJS)
 	tools/lz4x -f9 $< $@
 
 %.bin: %.hex
-	xxd -r -c 8 $< > $@
+	xxd -r $< > $@
 
 %.bin: %.tmx
 	python tools/tmx2bin.py $< > $@
@@ -127,7 +127,7 @@ $(ROM): ld65.cfg $(OBJS)
 
 gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4)
 
-dat/data.s:
+dat/data.s: dat/attract.bin
 
 # Cancel built in rule for .c files.
 %.o: %.c

@@ -116,13 +116,14 @@ static void load_character(void){
 }
 
 // #define RECORD_ATTRACT
+extern u8 ATTRACT_DATA[];
 
 static GameState game_loop(void){
-	register u8 *SAV = (u8 *)0x6000;
+	register u8 *SAV = ATTRACT_DATA;
 	u8 counter;
 	
 #ifdef RECORD_ATTRACT
-	memset(SAV, 0, 16*1024);
+	memset(SAV, 0, 8*1024);
 	memcpy(SAV, &rand_seed, sizeof(rand_seed));
 #else
 	memcpy(&rand_seed, SAV, sizeof(rand_seed));
@@ -181,7 +182,6 @@ static GameState game_loop(void){
 		
 		joy0 = joy_read(0);
 		joy1 = joy_read(1);
-		if(JOY_START(joy0)) pause();
 		
 #ifdef RECORD_ATTRACT
 		if(joy0 == SAV[0]){
@@ -194,12 +194,16 @@ static GameState game_loop(void){
 #else
 		if(counter == 0){
 			SAV += 2;
-			counter = SAV[1];
+			counter = SAV[1] - 1;
 		} else {
 			--counter;
 		}
 		joy0 = SAV[0];
 #endif
+		
+		debug_hex(SAV - 0x6000);
+		
+		if(JOY_START(joy0)) exit(0);
 		
 		if(!grid_update()) break;
 		player_update(joy0);

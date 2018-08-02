@@ -23,9 +23,9 @@ SRC = \
 ASMSRC = \
 	src/zeropage.s \
 	src/sprites.s \
-	src/audio.s \
 	src/metatiles.s \
 	gfx/gfx.s \
+	audio/audio.s \
 	dat/data.s \
 	lib/naco/naco.s \
 	lib/pixler/rand8.s \
@@ -83,6 +83,7 @@ clean:
 	rm -rf gfx/*.chr
 	rm -rf gfx/*.lz4chr
 	rm -rf gfx/*.lz4
+	rm -rf audio/*.s
 	rm -rf dat/*.lz4
 	rm -rf link.log
 	make -C tools clean
@@ -100,6 +101,9 @@ tools/png2chr:
 
 tools/lz4x:
 	make -C tools lz4x
+
+tools/text2data:
+	make -C tools text2data
 
 $(ROM): ld65.cfg $(OBJS)
 	$(LD) -C ld65.cfg $(OBJS) nes.lib -m link.log -o $@
@@ -126,6 +130,11 @@ $(ROM): ld65.cfg $(OBJS)
 	tools/lz4x -f9 $< $@
 
 gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4)
+
+audio/%.s: audio/%.txt tools/text2data
+	tools/text2data -ca65 $<
+
+audio/audio.o: audio/character-select.s audio/gameplay.s audio/title.s
 
 dat/data.s:
 

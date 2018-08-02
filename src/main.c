@@ -115,7 +115,19 @@ static void load_character(void){
 	character_pal = CHARACTER_PAL[character];
 }
 
+const extern u8 ATTRACT_DATA[];
+static bool attract_mode;
+
 static GameState game_loop(void){
+	register const u8 *attract_cursor = ATTRACT_DATA;
+	u8 attract_counter;
+	
+	if(attract_mode){
+		memcpy(&rand_seed, attract_cursor, sizeof(rand_seed));
+		attract_cursor += sizeof(rand_seed);
+		attract_counter = attract_cursor[1];
+	}
+	
 	music_stop();
 	
 	player_init();
@@ -172,6 +184,19 @@ static GameState game_loop(void){
 		
 		joy0 = joy_read(0);
 		joy1 = joy_read(1);
+		
+		if(attract_mode){
+			if(attract_counter == 0){
+				attract_cursor += 2;
+				attract_counter = attract_cursor[1] - 1;
+			} else {
+				--attract_counter;
+			}
+			joy0 = attract_cursor[0];
+			
+			if(JOY_START(joy0)) exit(0);
+		}
+		
 		if(JOY_START(joy0)) pause();
 		
 		if(!grid_update()) break;
@@ -360,6 +385,8 @@ static GameState character_select(void){
 }
 
 static GameState main_menu(void){
+	u16 timeout;
+	
 	music_stop();
 	
 	px_inc(PX_INC1);
@@ -408,7 +435,7 @@ static GameState main_menu(void){
 	wait_noinput();
 	
 	// Randomize the seed based on start time.
-	while(true){
+	for(timeout = 10*60; timeout > 0; --timeout){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
 			if(JOY_START(joy_read(0))){
@@ -427,6 +454,9 @@ static GameState main_menu(void){
 		
 		px_wait_nmi();
 	}
+	
+	attract_mode = true;
+	return game_loop();
 }
 
 static GameState pixelakes_screen(void){
@@ -435,6 +465,8 @@ static GameState pixelakes_screen(void){
 		0x2D, 0x1D, 0x10, 0x06,
 		0x2D, 0x1D, 0x00, 0x06,
 	};
+	
+	u16 timeout;
 	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
@@ -449,7 +481,10 @@ static GameState pixelakes_screen(void){
 	} px_ppu_enable();
 	
 	wait_noinput();
-	while(!JOY_START(joy_read(0))){}
+	for(timeout = 5*60; timeout > 0; --timeout){
+		if(JOY_START(joy_read(0))) break;
+		px_wait_nmi();
+	}
 	
 	return main_menu();
 }

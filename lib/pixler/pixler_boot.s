@@ -19,9 +19,10 @@
 	.byte "NES", $1a ; iNES Magic number.
 	.byte <NES_PRG_BANKS
 	.byte <NES_CHR_BANKS
-	.byte <((<NES_MAPPER<<4) | NES_MIRRORING)
+	.byte <((<NES_MAPPER<<4) | NES_MIRRORING | $02)
 	.byte <(NES_MAPPER & $F0)
-	.res 8, 0 ; Remainder of header is unused space.
+	.byte 1
+	.res 7, 0 ; Remainder of header is unused space.
 
 .segment "STARTUP"
 

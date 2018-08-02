@@ -70,6 +70,11 @@ MAPS = \
 	gfx/board.tmx \
 	gfx/game_over.tmx
 
+SONGS = \
+	audio/character-select.txt \
+	audio/gameplay2.txt \
+	audio/title2.txt
+
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
 .PHONY: default clean rom run-mac run-linux
@@ -83,7 +88,7 @@ clean:
 	rm -rf gfx/*.chr
 	rm -rf gfx/*.lz4chr
 	rm -rf gfx/*.lz4
-	rm -rf audio/*.s
+	rm -rf $(SONGS:.txt=.s)
 	rm -rf dat/*.lz4
 	rm -rf link.log
 	make -C tools clean
@@ -134,7 +139,7 @@ gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4)
 audio/%.s: audio/%.txt tools/text2data
 	tools/text2data -ca65 $<
 
-audio/audio.o: audio/character-select.s audio/gameplay2.s audio/title2.s
+audio/audio.o: $(SONGS:.txt=.s)
 
 dat/data.o: dat/attract.bin
 

@@ -134,7 +134,7 @@ gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4)
 audio/%.s: audio/%.txt tools/text2data
 	tools/text2data -ca65 $<
 
-audio/audio.o: audio/character-select.s audio/gameplay.s audio/title.s
+audio/audio.o: audio/character-select.s audio/gameplay2.s audio/title2.s
 
 dat/data.s:
 

@@ -136,7 +136,7 @@ audio/%.s: audio/%.txt tools/text2data
 
 audio/audio.o: audio/character-select.s audio/gameplay2.s audio/title2.s
 
-dat/data.s: dat/attract.bin
+dat/data.o: dat/attract.bin
 
 # Cancel built in rule for .c files.
 %.o: %.c

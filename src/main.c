@@ -186,6 +186,8 @@ static GameState game_loop(void){
 		joy1 = joy_read(1);
 		
 		if(attract_mode){
+			if(JOY_START(joy0)) exit(0);
+			
 			if(attract_counter == 0){
 				attract_cursor += 2;
 				attract_counter = attract_cursor[1] - 1;
@@ -194,6 +196,7 @@ static GameState game_loop(void){
 			}
 			joy0 = attract_cursor[0];
 			
+			// debug_hex(attract_cursor - ATTRACT_DATA);
 			if(JOY_START(joy0)) exit(0);
 		}
 		
@@ -226,6 +229,7 @@ static void pause(void){
 }
 
 static GameState final_score(s16 scroll_v){
+	u16 timeout;
 	u16 scroll_y = 0;
 	
 	px_buffer_inc(PX_INC1);
@@ -266,10 +270,13 @@ static GameState final_score(s16 scroll_v){
 	
 	wait_noinput();
 	
-	// Wait until start is pressed.
-	while(!JOY_START(joy_read(0))){}
+	// Wait a while or until start is pressed.
+	for(timeout = 30*60; timeout > 0; --timeout){
+		if(JOY_START(joy_read(0))) break;
+		px_wait_nmi();
+	}
 	
-	return main_menu();
+	exit(0);
 }
 
 // TODO This is pretty terrible.
@@ -318,6 +325,7 @@ static GameState game_over(void){
 
 static GameState character_select(void){
 	static const u8 CURVE[] = {1, 7, 15, 26, 38, 53, 68, 84, 99, 114, 129, 141, 152, 160, 166, 168};
+	u16 timeout = 30*60;
 	
 	u16 bio_addr = NT_ADDR(0, 7, 11);
 	register const char *bio_cursor = CHARACTER_BIO[character];
@@ -363,6 +371,8 @@ static GameState character_select(void){
 	wait_noinput();
 	
 	while(true){
+		if(--timeout == 0) exit(0);
+		
 		joy0 = joy_read(0);
 		if(JOY_START(joy0)) return game_loop();
 		if(JOY_DOWN(joy0)){character_inc(1); break;}
@@ -435,7 +445,7 @@ static GameState main_menu(void){
 	wait_noinput();
 	
 	// Randomize the seed based on start time.
-	for(timeout = 10*60; timeout > 0; --timeout){
+	for(timeout = 30*60; timeout > 0; --timeout){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
 			if(JOY_START(joy_read(0))){

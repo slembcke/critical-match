@@ -116,6 +116,8 @@ static void load_character(void){
 }
 
 static GameState game_loop(void){
+	music_stop();
+	
 	player_init();
 	grid_init();
 	coins_init();
@@ -161,6 +163,9 @@ static GameState game_loop(void){
 		px_spr_clear();
 		px_wait_nmi();
 	} px_ppu_enable();
+	
+	music_init(GAMEPLAY_MUSIC);
+	music_play(0);
 	
 	while(true){
 		DEBUG_PROFILE_START();
@@ -355,6 +360,8 @@ static GameState character_select(void){
 }
 
 static GameState main_menu(void){
+	music_stop();
+	
 	px_inc(PX_INC1);
 	px_ppu_disable(); {
 		static const u8 PALETTE[] = {
@@ -395,13 +402,20 @@ static GameState main_menu(void){
 		px_wait_nmi();
 	} px_ppu_enable();
 	
+	music_init(TITLE_MUSIC);
+	music_play(0);
+
 	wait_noinput();
 	
 	// Randomize the seed based on start time.
 	while(true){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
-			if(JOY_START(joy_read(0))) return character_select();
+			if(JOY_START(joy_read(0))){
+				music_init(CHARACTER_SELECT_MUSIC);
+				music_play(0);
+				return character_select();
+			}
 		}
 		
 		for(iy = 0; iy < 4; ++iy){

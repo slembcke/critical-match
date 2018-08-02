@@ -11,7 +11,9 @@ extern u8 ix, iy, idx;
 extern u8 joy0, joy1;
 
 typedef struct {} Music;
-extern const Music MUSIC[];
+extern const Music TITLE_MUSIC[];
+extern const Music CHARACTER_SELECT_MUSIC[];
+extern const Music GAMEPLAY_MUSIC[];
 
 void music_init(const Music *music);
 void music_play(u8 song);

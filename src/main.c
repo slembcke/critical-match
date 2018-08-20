@@ -29,16 +29,17 @@ u8 bounce4(void){
 }
 
 static void px_ppu_sync_off(){
-	// waitvsync();
+	waitvsync();
 	px_ppu_disable();
-	// px_buffer_exec();
+	px_buffer_exec();
 }
 
 static void px_ppu_sync_on(){
+	// Exec buffer, set scrolling, etc.
 	px_wait_nmi();
-	// waitvsync();
-	// px_buffer_exec();
-	// waitvsync();
+	
+	// Wait for the next frame to re-enable.
+	waitvsync();
 	px_ppu_enable();
 }
 
@@ -166,7 +167,7 @@ static GameState game_loop(void){
 	// GRID[GRID_BYTES - 11] = BLOCK_EMPTY;
 	
 	px_inc(PX_INC1);
-	px_ppu_disable(); {
+	px_ppu_sync_off(); {
 		blit_palette(CLR_BLACK);
 		
 		px_bg_table(0);
@@ -187,8 +188,7 @@ static GameState game_loop(void){
 		px_buffer_set_color(0, CLR_BG);
 		
 		px_spr_clear();
-		px_wait_nmi();
-	} px_ppu_enable();
+	} px_ppu_sync_on();
 	
 	music_init(GAMEPLAY_MUSIC);
 	music_play(0);
@@ -246,8 +246,10 @@ static GameState final_score(s16 scroll_v){
 	u16 timeout;
 	u16 scroll_y = 0;
 	
+	px_buffer_set_color(0, CLR_BG);
+	
 	px_buffer_inc(PX_INC1);
-	px_ppu_disable(); {
+	px_ppu_sync_off(); {
 		px_addr(PAL_ADDR);
 		PPU.vram.data = CLR_BLACK;
 		
@@ -260,11 +262,9 @@ static GameState final_score(s16 scroll_v){
 		// Score
 		grid_buffer_score(NT_ADDR(0, 17, 14));
 		
-		px_buffer_set_color(0, CLR_BG);
-		
 		px_spr_clear();
 		px_wait_nmi();
-	} px_ppu_enable();
+	} px_ppu_sync_on();
 	
 	for(ix = 0; ix < 240; ++ix){
 		scroll_v += 16;
@@ -346,7 +346,7 @@ static GameState character_select(void){
 	register const char *bio_cursor = CHARACTER_BIO[character];
 	
 	px_inc(PX_INC1);
-	px_ppu_disable(); {
+	px_ppu_sync_off(); {
 		blit_palette(CLR_BLACK);
 		
 		px_bg_table(0);
@@ -374,8 +374,7 @@ static GameState character_select(void){
 		
 		PX.scroll_y = 168;
 		px_spr_clear();
-		px_wait_nmi();
-	} px_ppu_enable();
+	} px_ppu_sync_on();
 	
 	for(idx = 0; idx < sizeof(CURVE)/2; ++idx){
 		PX.scroll_y = 480 + 168 - 2*CURVE[idx];
@@ -418,7 +417,7 @@ static GameState main_menu(void){
 	music_stop();
 	
 	px_inc(PX_INC1);
-	px_ppu_disable(); {
+	px_ppu_sync_off(); {
 		static const u8 PALETTE[] = {
 			0x1D, 0x2D, 0x3D, 0x11,
 			0x1D, 0x18, 0x28, 0x38,
@@ -455,7 +454,7 @@ static GameState main_menu(void){
 		px_blit(sizeof(ATTR), ATTR);
 		
 		px_wait_nmi();
-	} px_ppu_enable();
+	} px_ppu_sync_on();
 	
 	music_init(TITLE_MUSIC);
 	music_play(0);
@@ -497,16 +496,14 @@ static GameState pixelakes_screen(void){
 	u16 timeout;
 	
 	px_inc(PX_INC1);
-	px_ppu_disable(); {
+	px_ppu_sync_off(); {
 		px_addr(PAL_ADDR);
 		px_blit(4, PALETTE + 0);
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_pixelakes_lz4chr, 128*16);
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_pixelakes_lz4, 1024);
-		
-		px_wait_nmi();
-	} px_ppu_enable();
+	} px_ppu_sync_on();
 	
 	wait_noinput();
 	for(timeout = 5*60; timeout > 0; --timeout){
@@ -519,7 +516,7 @@ static GameState pixelakes_screen(void){
 
 #ifdef DEBUG
 static GameState debug_chr(void){
-	px_ppu_disable(); {
+	px_ppu_sync_off(); {
 		blit_palette();
 		
 		px_bg_table(1);
@@ -551,7 +548,7 @@ static GameState debug_chr(void){
 		
 		px_spr_clear();
 		px_wait_nmi();
-	} px_ppu_enable();
+	} px_ppu_sync_on();
 	
 	
 	debug_freeze();

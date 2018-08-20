@@ -28,6 +28,20 @@ u8 bounce4(void){
 	return (y & 3);
 }
 
+static void px_ppu_sync_off(){
+	// waitvsync();
+	px_ppu_disable();
+	// px_buffer_exec();
+}
+
+static void px_ppu_sync_on(){
+	px_wait_nmi();
+	// waitvsync();
+	// px_buffer_exec();
+	// waitvsync();
+	px_ppu_enable();
+}
+
 static GameState main_menu(void);
 static void pause(void);
 static GameState game_over(void);
@@ -324,6 +338,7 @@ static GameState game_over(void){
 }
 
 static GameState character_select(void){
+	static const char msg[] = "Press UP / DOWN";
 	static const u8 CURVE[] = {1, 7, 15, 26, 38, 53, 68, 84, 99, 114, 129, 141, 152, 160, 166, 168};
 	u16 timeout = 30*60;
 	
@@ -381,6 +396,9 @@ static GameState character_select(void){
 		idx = ((px_ticks >> 2) & 0x6) + 17;
 		player_sprite(36, 128, idx);
 		
+		px_buffer_data(sizeof(msg) - 1, NT_ADDR(0, 8, 7));
+		memcpy(PX.buffer, msg, sizeof(msg) - 1);
+	
 		px_spr_end();
 		px_wait_nmi();
 	}

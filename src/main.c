@@ -165,6 +165,8 @@ static GameState game_loop(void){
 	// }
 	// GRID[GRID_BYTES - 11] = BLOCK_EMPTY;
 	
+	px_buffer_set_color(0, CLR_BLACK);
+	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
 		blit_palette(CLR_BLACK);

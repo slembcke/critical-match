@@ -92,13 +92,12 @@ px_nmi_ready: .byte 0
 	ora px_ctrl
 	sta PPU_CTRL
 	
-	@skip_frame:
-	
-	jsr FamiToneUpdate
-	
 	; Reset ready flag.
 	lda #0
 	sta px_nmi_ready
+	
+	@skip_frame:
+	jsr FamiToneUpdate
 	
 	; Interrupt exit.
 	pla

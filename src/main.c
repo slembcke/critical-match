@@ -337,7 +337,33 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
-static GameState character_select(void){
+static const u8 CURVE[] = {0, 5, 19, 40, 67, 98, 132, 168};
+
+static void scroll_on(bool up){
+	for(idx = sizeof(CURVE) - 1; idx > 0; --idx){
+		iy = CURVE[idx];
+		if(up){
+			PX.scroll_y = 480 - iy;
+		} else {
+			PX.scroll_y = 480 + iy;
+		}
+		px_wait_nmi();
+	}
+}
+
+static void scroll_off(bool up){
+	for(idx = 0; idx < sizeof(CURVE); ++idx){
+		iy = CURVE[idx];
+		if(up){
+			PX.scroll_y = 480 + iy;
+		} else {
+			PX.scroll_y = 480 - iy;
+		}
+		px_wait_nmi();
+	}
+}
+
+static GameState character_select(bool scroll_up){
 	static const char msg[] = "Press UP / DOWN";
 	static const u8 CURVE[] = {1, 7, 15, 26, 38, 53, 68, 84, 99, 114, 129, 141, 152, 160, 166, 168};
 	u16 timeout = 30*60;
@@ -376,12 +402,9 @@ static GameState character_select(void){
 		px_spr_clear();
 	} px_ppu_sync_on();
 	
-	for(idx = 0; idx < sizeof(CURVE)/2; ++idx){
-		PX.scroll_y = 480 + 168 - 2*CURVE[idx];
-		px_wait_nmi();
-	}
+	scroll_on(scroll_up);
 	
-	PX.scroll_y = 0;
+	PX.scroll_y = 480;
 	wait_noinput();
 	
 	while(true){
@@ -389,8 +412,8 @@ static GameState character_select(void){
 		
 		joy0 = joy_read(0);
 		if(JOY_START(joy0)) return game_loop();
-		if(JOY_DOWN(joy0)){character_inc(1); break;}
-		if(JOY_UP(joy0)){character_inc(-1); break;}
+		if(JOY_DOWN(joy0)){scroll_up = false; character_inc(1); break;}
+		if(JOY_UP(joy0)){scroll_up = true; character_inc(-1); break;}
 		
 		idx = ((px_ticks >> 2) & 0x6) + 17;
 		player_sprite(36, 128, idx);
@@ -403,12 +426,9 @@ static GameState character_select(void){
 	}
 	
 	px_spr_clear();
-	for(idx = sizeof(CURVE)/2; idx < sizeof(CURVE); ++idx){
-		PX.scroll_y = 480 + 168 - 2*CURVE[idx];
-		px_wait_nmi();
-	}
+	scroll_off(scroll_up);
 	
-	return character_select();
+	return character_select(scroll_up);
 }
 
 static GameState main_menu(void){
@@ -468,7 +488,7 @@ static GameState main_menu(void){
 			if(JOY_START(joy_read(0))){
 				music_init(CHARACTER_SELECT_MUSIC);
 				music_play(0);
-				return character_select();
+				return character_select(false);
 			}
 		}
 		
@@ -571,7 +591,7 @@ void main(void){
 	
 	// debug_chr();
 	// main_menu();
-	// character_select();
+	// character_select(false);
 	// game_loop();
 	pixelakes_screen();
 }

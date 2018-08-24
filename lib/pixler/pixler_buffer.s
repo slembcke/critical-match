@@ -19,19 +19,19 @@ px_nmi_tmp: .res 4
 
 .code
 
-.proc exec_inc_h
-	lda px_ctrl
-	and #(~$04 & $FF)
-	sta px_ctrl
-	sta PPU_CTRL
+; Restores the stack and jumps to the caller of px_buffer_exec
+.proc exec_terminator
+	pla
+	tax
+	txs
 	rts
 .endproc
 
-.proc exec_inc_v
-	lda px_ctrl
-	ora #$04
-	sta px_ctrl
-	sta PPU_CTRL
+.export _px_buffer_clear
+.proc _px_buffer_clear
+	ldx #0
+	stx px_buffer_cursor
+	
 	rts
 .endproc
 
@@ -47,34 +47,6 @@ px_nmi_tmp: .res 4
 		sta PPU_VRAM_IO
 		dex
 		bne :-
-	
-	rts
-.endproc
-
-.proc exec_set_color
-	lda #>PPU_PAL0
-	sta PPU_VRAM_ADDR
-	pla
-	sta PPU_VRAM_ADDR
-	
-	pla
-	sta PPU_VRAM_IO
-	
-	rts
-.endproc
-
-; Restores the stack and jumps to the caller of px_buffer_exec
-.proc exec_terminator
-	pla
-	tax
-	txs
-	rts
-.endproc
-
-.export _px_buffer_clear
-.proc _px_buffer_clear
-	ldx #0
-	stx px_buffer_cursor
 	
 	rts
 .endproc
@@ -96,6 +68,22 @@ px_nmi_tmp: .res 4
 	; This is the first display list buffer func.
 	ldx #$FF
 	txs
+	rts
+.endproc
+
+.proc exec_inc_h
+	lda px_ctrl
+	and #(~$04 & $FF)
+	sta px_ctrl
+	sta PPU_CTRL
+	rts
+.endproc
+
+.proc exec_inc_v
+	lda px_ctrl
+	ora #$04
+	sta px_ctrl
+	sta PPU_CTRL
 	rts
 .endproc
 
@@ -149,6 +137,18 @@ px_nmi_tmp: .res 4
 	sta PX_buffer + 1
 	
 	jmp incsp1
+.endproc
+
+.proc exec_set_color
+	lda #>PPU_PAL0
+	sta PPU_VRAM_ADDR
+	pla
+	sta PPU_VRAM_ADDR
+	
+	pla
+	sta PPU_VRAM_IO
+	
+	rts
 .endproc
 
 .export _px_buffer_set_color

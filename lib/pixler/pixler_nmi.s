@@ -1,7 +1,7 @@
 .include "pixler.inc"
 
 .importzp px_ticks
-.importzp px_ctrl
+.importzp px_mask, px_ctrl
 .importzp PX_scroll_x
 .importzp PX_scroll_y
 .import _px_buffer_exec
@@ -58,9 +58,11 @@ px_nmi_ready: .byte 0
 	lda px_nmi_ready
 	beq @skip_frame
 	
-	; Reset ready flag.
-	lda #0
-	sta px_nmi_ready
+	lda px_mask
+	sta PPU_MASK
+	
+	lda px_ctrl
+	sta PPU_CTRL
 	
 	; Invoke OAM DMA copy.
 	lda #>OAM
@@ -93,6 +95,10 @@ px_nmi_ready: .byte 0
 	@skip_frame:
 	
 	jsr FamiToneUpdate
+	
+	; Reset ready flag.
+	lda #0
+	sta px_nmi_ready
 	
 	; Interrupt exit.
 	pla

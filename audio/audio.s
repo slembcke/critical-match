@@ -17,9 +17,6 @@
 	lda #1 ; TODO Hardcoded NTSC
 	jsr FamiToneInit
 	
-	lda #0
-	jsr FamiToneMusicPlay
-	
 	rts
 .endproc
 

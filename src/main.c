@@ -29,18 +29,13 @@ u8 bounce4(void){
 }
 
 static void px_ppu_sync_off(){
-	waitvsync();
-	px_ppu_disable();
-	px_buffer_exec();
+	px_mask &= ~PX_MASK_RENDER_ENABLE;
+	px_wait_nmi();
 }
 
 static void px_ppu_sync_on(){
-	// Exec buffer, set scrolling, etc.
+	px_mask |= PX_MASK_RENDER_ENABLE;
 	px_wait_nmi();
-	
-	// Wait for the next frame to re-enable.
-	waitvsync();
-	px_ppu_enable();
 }
 
 static GameState main_menu(void);
@@ -337,7 +332,7 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
-static const u8 CURVE[] = {0, 5, 19, 40, 67, 98, 132, 168};
+static const u8 CURVE[] = {0, 1, 6, 12, 20, 29, 39, 50};
 
 static void scroll_on(bool up){
 	for(idx = sizeof(CURVE) - 1; idx > 0; --idx){
@@ -348,6 +343,7 @@ static void scroll_on(bool up){
 			PX.scroll_y = 480 + iy;
 		}
 		px_wait_nmi();
+		// px_wait_frames(10);
 	}
 }
 
@@ -360,12 +356,12 @@ static void scroll_off(bool up){
 			PX.scroll_y = 480 - iy;
 		}
 		px_wait_nmi();
+		// px_wait_frames(10);
 	}
 }
 
 static GameState character_select(bool scroll_up){
 	static const char msg[] = "Press UP / DOWN";
-	static const u8 CURVE[] = {1, 7, 15, 26, 38, 53, 68, 84, 99, 114, 129, 141, 152, 160, 166, 168};
 	u16 timeout = 30*60;
 	
 	u16 bio_addr = NT_ADDR(0, 7, 11);
@@ -426,6 +422,8 @@ static GameState character_select(bool scroll_up){
 	}
 	
 	px_spr_clear();
+	px_buffer_data(sizeof(msg) - 1, NT_ADDR(0, 8, 7));
+	memset(PX.buffer, ' ', sizeof(msg) - 1);
 	scroll_off(scroll_up);
 	
 	return character_select(scroll_up);

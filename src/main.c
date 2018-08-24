@@ -31,11 +31,15 @@ u8 bounce4(void){
 static void px_ppu_sync_off(){
 	px_mask &= ~PX_MASK_RENDER_ENABLE;
 	px_wait_nmi();
+	waitvsync();
+	waitvsync();
 }
 
 static void px_ppu_sync_on(){
 	px_mask |= PX_MASK_RENDER_ENABLE;
 	px_wait_nmi();
+	waitvsync();
+	waitvsync();
 }
 
 static GameState main_menu(void);
@@ -241,13 +245,10 @@ static GameState final_score(s16 scroll_v){
 	u16 timeout;
 	u16 scroll_y = 0;
 	
-	px_buffer_set_color(0, CLR_BG);
+	px_buffer_set_color(0, CLR_BLACK);
 	
 	px_buffer_inc(PX_INC1);
 	px_ppu_sync_off(); {
-		px_addr(PAL_ADDR);
-		PPU.vram.data = CLR_BLACK;
-		
 		px_addr(NT_ADDR(0, 10, 12));
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
 		
@@ -366,6 +367,8 @@ static GameState character_select(bool scroll_up){
 	
 	u16 bio_addr = NT_ADDR(0, 7, 11);
 	register const char *bio_cursor = CHARACTER_BIO[character];
+	
+	px_buffer_set_color(0, CLR_BLACK);
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {

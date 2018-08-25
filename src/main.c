@@ -31,15 +31,11 @@ u8 bounce4(void){
 static void px_ppu_sync_off(){
 	px_mask &= ~PX_MASK_RENDER_ENABLE;
 	px_wait_nmi();
-	waitvsync();
-	waitvsync();
 }
 
 static void px_ppu_sync_on(){
 	px_mask |= PX_MASK_RENDER_ENABLE;
 	px_wait_nmi();
-	waitvsync();
-	waitvsync();
 }
 
 static GameState main_menu(void);
@@ -54,12 +50,11 @@ static void blit_palette(u8 bg_color){
 		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_4,
 	};
 	
-	px_addr(PAL_ADDR);
-	px_blit(sizeof(PALETTE), PALETTE);
-	px_blit(sizeof(PALETTE), PALETTE);
+	px_buffer_data(32, PAL_ADDR);
+	memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
+	memcpy(PX.buffer + 16, PALETTE, sizeof(PALETTE));
 	
-	px_addr(PAL_ADDR);
-	PPU.vram.data = bg_color;
+	px_buffer_set_color(0, bg_color);
 }
 
 static const u8 CHARACTER_PAL[] = {
@@ -463,8 +458,8 @@ static GameState main_menu(void){
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		};
 		
-		px_addr(PAL_ADDR);
-		px_blit(sizeof(PALETTE), PALETTE);
+		px_buffer_data(sizeof(PALETTE), PAL_ADDR);
+		memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_menu_tiles_lz4chr, 128*16);
@@ -520,8 +515,8 @@ static GameState pixelakes_screen(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
-		px_addr(PAL_ADDR);
-		px_blit(4, PALETTE + 0);
+		px_buffer_data(sizeof(PALETTE), PAL_ADDR);
+		memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_pixelakes_lz4chr, 128*16);

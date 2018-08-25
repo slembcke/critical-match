@@ -127,6 +127,12 @@ static void load_character(void){
 const extern u8 ATTRACT_DATA[];
 static bool attract_mode;
 
+static void attract_reset(void){
+	px_buffer_set_color(0, 0x2D);
+	px_wait_nmi();
+	exit(0);
+}
+
 static GameState game_loop(void){
 	register const u8 *attract_cursor = ATTRACT_DATA;
 	u8 attract_counter;
@@ -196,7 +202,7 @@ static GameState game_loop(void){
 		joy1 = joy_read(1);
 		
 		if(attract_mode){
-			if(JOY_START(joy0)) exit(0);
+			if(JOY_START(joy0)) attract_reset();
 			
 			if(attract_counter == 0){
 				attract_cursor += 2;
@@ -207,7 +213,7 @@ static GameState game_loop(void){
 			joy0 = attract_cursor[0];
 			
 			// debug_hex(attract_cursor - ATTRACT_DATA);
-			if(JOY_START(joy0)) exit(0);
+			if(JOY_START(joy0)) attract_reset();
 		}
 		
 		if(JOY_START(joy0)) pause();

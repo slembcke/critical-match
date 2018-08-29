@@ -6,7 +6,8 @@ lz4_header_bytes = 8
 		.incbin file, lz4_header_bytes
 .endmacro
 
-.segment "PRG0"
+; .segment "PRG0"
+.rodata
 
 inclz4 _gfx_neschar_lz4chr, "neschar.lz4chr"
 inclz4 _gfx_sheet1_lz4chr, "sheet1.lz4chr"

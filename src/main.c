@@ -57,73 +57,6 @@ static void blit_palette(u8 bg_color){
 	px_buffer_set_color(0, bg_color);
 }
 
-static const u8 CHARACTER_PAL[] = {
-	2, 1, 3, 2,
-	2, 2, 1, 1,
-	0, 0, 2, 1,
-	2, 0, 1, 3,
-};
-
-static const void *CHARACTER_GFX[] = {
-	gfx_squidman_lz4chr,
-	gfx_azmodeus_lz4chr,
-	gfx_pinkblob_lz4chr,
-	gfx_blob_lz4chr,
-	
-	gfx_budgie_lz4chr,
-	gfx_robinhood_lz4chr,
-	gfx_bonecrusher_lz4chr,
-	gfx_dagon_lz4chr,
-	
-	gfx_dog_lz4chr,
-	gfx_eyeboll_lz4chr,
-	gfx_kermit_lz4chr,
-	gfx_ninja_lz4chr,
-	
-	gfx_orc_lz4chr,
-	gfx_royalguard_lz4chr,
-	gfx_rustknight_lz4chr,
-	gfx_cyclops_lz4chr,
-};
-
-static const char *CHARACTER_BIO[] = {
-	"Cthylu:\n\nGoes by \"Kathy Lu\".\nRaising capital to\nstart a childrens\nhorror series to\nhaunt dreams\nfor generations.",
-	"Azmodeus:\n\nHails from the second\nlevel of Heck. The\nPrince of Greed isn't\nthe only demon that\ncan stack!",
-	"Pink Blob:\n\nWith a steady career\nin treasure stacking,\nPink Blob hopes to\nprove to Green Blob\nthat it's more than\njust a slimy face.",
-	"Green Blob:\n\nGreen Blob is very\nshy. By becoming a\nmaster treasure\nstacker it hopes\nto gain the attention\nof Pink Blob.",
-	
-	"Budgie:\n\nWhen asked how much\nhis stack of treasure\ncost to aquire,\nBudgie simply repiled:\n\"Cheap! Cheap!\"",
-	"Robin Hood:\n\nBy stacking the\ntreasure taken from\nthe rich, Robin Hood\nhopes to increase the\ndividends of his\ncharitable donations.",
-	"Bone Crusher:\n\nBONE CRUSHER CARES\nNOT FOR TREASURE! I\nWILL CRUSH YOUR\nBONES! I WILL CRUSH\nTHEM IN A BOAT OR\nWITH A GOAT!",
-	"Dagon:\n\nKnown affectionaly as\n\"Wet Willie\" by his\nclosest friends. This\ncontender is as old\nas he is fishy.",
-	
-	"Dog:\n\nBark! Bark! Bark!\nArf! Bark! Grrrr!\nWoof! Bark! Bark!\nRuff! Bark! Woof!",
-	"Eyeboll:\n\nA keen eye for detail\nhelps achieve the\ngreatest of stacks.\nA fashionable cloak\ndoesn't hurt either.",
-	"Mr. Croakes:\n\n\"Yeah, well, I've got\na dream too, but it's\nabout treasure and\nstacking and making\nmyself rich.\"",
-	"Ninja:\n\nThis contender is a\nmaster of the shadow,\nand little is known\nabout his past.",
-	
-	"Bob:\n\nUsing its immense orc\nstrength this\ncontentder is sure to\nwin the gold. Being a\nCPA doesn't hurt\neither.",
-	"Royal Guard:\n\nRoy always loves a\ngood stacking\nchallenge. He worked\nmany years as a\ntreasury guard before\nhis current post.",
-	"Rust Knight:\n\noil..., *squeak*,\noil..., *squeak*,\nWD40..., *creak*",
-	"Cycil:\n\nLacking depth\nperception is\nactually an advantage\nwhen playing a 2D\ngame. Use this to\nyour advantage.",
-};
-
-static const u8 CHARACTER_COUNT = sizeof(CHARACTER_PAL);
-
-static u8 character = 0;
-extern u8 character_pal;
-
-static void character_inc(s8 amount){
-	character += amount;
-	if(character == 255) character = CHARACTER_COUNT - 1;
-	if(character == CHARACTER_COUNT) character = 0;
-}
-
-static void load_character(void){
-	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), CHARACTER_GFX[character], 84*16);
-	character_pal = CHARACTER_PAL[character];
-}
-
 const extern u8 ATTRACT_DATA[];
 static bool attract_mode;
 
@@ -193,7 +126,7 @@ static GameState game_loop(void){
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
 		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 128*16);
-		load_character();
+		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr, 84*16);
 		
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4, 1024);
 		
@@ -375,77 +308,6 @@ static void scroll_off(bool up){
 	}
 }
 
-static GameState character_select(bool scroll_up){
-	static const char msg[] = "Press UP / DOWN";
-	u16 timeout = 30*60;
-	
-	u16 bio_addr = NT_ADDR(0, 7, 11);
-	register const char *bio_cursor = CHARACTER_BIO[character];
-	
-	px_buffer_set_color(0, CLR_BLACK);
-	
-	px_inc(PX_INC1);
-	px_ppu_sync_off(); {
-		blit_palette(CLR_BLACK);
-		
-		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
-		
-		px_spr_table(1);
-		load_character();
-		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_character_select_lz4, 1024);
-		
-		px_addr(bio_addr);
-		for(ix = 0; bio_cursor[ix]; ++ix){
-			if(bio_cursor[ix] == '\n'){
-				bio_addr += 32;
-				px_addr(bio_addr);
-			} else {
-				PPU.vram.data = bio_cursor[ix];
-			}
-		}
-		
-		px_addr(AT_ADDR(0));
-		px_fill(64, 0x55);
-		
-		px_buffer_set_color(0, CLR_BG);
-		
-		PX.scroll_y = 168;
-		px_spr_clear();
-	} px_ppu_sync_on();
-	
-	scroll_on(scroll_up);
-	
-	PX.scroll_y = 480;
-	wait_noinput();
-	
-	while(true){
-		if(--timeout == 0) exit(0);
-		
-		joy0 = joy_read(0);
-		if(JOY_START(joy0)) return game_loop();
-		if(JOY_DOWN(joy0)){scroll_up = false; character_inc(1); break;}
-		if(JOY_UP(joy0)){scroll_up = true; character_inc(-1); break;}
-		
-		idx = ((px_ticks >> 2) & 0x6) + 17;
-		player_sprite(36, 128, idx);
-		
-		px_buffer_data(sizeof(msg) - 1, NT_ADDR(0, 8, 7));
-		memcpy(PX.buffer, msg, sizeof(msg) - 1);
-	
-		px_spr_end();
-		px_wait_nmi();
-	}
-	
-	px_spr_clear();
-	px_buffer_data(sizeof(msg) - 1, NT_ADDR(0, 8, 7));
-	memset(PX.buffer, ' ', sizeof(msg) - 1);
-	scroll_off(scroll_up);
-	
-	return character_select(scroll_up);
-}
-
 static GameState main_menu(void){
 	u16 timeout;
 	
@@ -503,7 +365,7 @@ static GameState main_menu(void){
 			if(JOY_START(joy_read(0))){
 				music_init(CHARACTER_SELECT_MUSIC);
 				music_play(0);
-				return character_select(false);
+				return game_loop();
 			}
 		}
 		

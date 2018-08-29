@@ -120,7 +120,7 @@ audio/%.s: audio/%.txt tools/text2data
 
 audio/audio.o: $(SONGS:.txt=.s)
 
-dat/data.o: dat/attract.bin
+dat/data.o:
 
 # Cancel built in rule for .c files.
 %.o: %.c

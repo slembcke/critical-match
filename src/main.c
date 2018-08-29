@@ -57,25 +57,7 @@ static void blit_palette(u8 bg_color){
 	px_buffer_set_color(0, bg_color);
 }
 
-const extern u8 ATTRACT_DATA[];
-static bool attract_mode;
-
-static void attract_reset(void){
-	px_buffer_set_color(0, 0x2D);
-	px_wait_nmi();
-	exit(0);
-}
-
 static GameState game_loop(void){
-	register const u8 *attract_cursor = ATTRACT_DATA;
-	u8 attract_counter;
-	
-	if(attract_mode){
-		memcpy(&rand_seed, attract_cursor, sizeof(rand_seed));
-		attract_cursor += sizeof(rand_seed);
-		attract_counter = attract_cursor[1];
-	}
-	
 	music_stop();
 	
 	player_init();
@@ -144,21 +126,6 @@ static GameState game_loop(void){
 		
 		joy0 = joy_read(0);
 		joy1 = joy_read(1);
-		
-		if(attract_mode){
-			if(JOY_START(joy0)) attract_reset();
-			
-			if(attract_counter == 0){
-				attract_cursor += 2;
-				attract_counter = attract_cursor[1] - 1;
-			} else {
-				--attract_counter;
-			}
-			joy0 = attract_cursor[0];
-			
-			// debug_hex(attract_cursor - ATTRACT_DATA);
-			if(JOY_START(joy0)) attract_reset();
-		}
 		
 		if(JOY_START(joy0)) pause();
 		
@@ -343,7 +310,6 @@ static GameState main_menu(void){
 		px_wait_nmi();
 	}
 	
-	attract_mode = true;
 	return game_loop();
 }
 

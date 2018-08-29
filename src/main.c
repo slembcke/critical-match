@@ -149,11 +149,11 @@ static GameState game_loop(void){
 	grid_init();
 	coins_init();
 	
-	// GRID[grid_block_idx(1, 1)] = BLOCK_GARBAGE;
-	// GRID[grid_block_idx(3, 1)] = BLOCK_KEY | BLOCK_COLOR_BLUE;
-	// GRID[grid_block_idx(4, 1)] = BLOCK_KEY | BLOCK_COLOR_RED;
-	// GRID[grid_block_idx(5, 1)] = BLOCK_KEY | BLOCK_COLOR_GREEN;
-	// GRID[grid_block_idx(6, 1)] = BLOCK_KEY | BLOCK_COLOR_PURPLE;
+	GRID[grid_block_idx(1, 1)] = BLOCK_GARBAGE;
+	GRID[grid_block_idx(3, 1)] = BLOCK_KEY | BLOCK_COLOR_BLUE;
+	GRID[grid_block_idx(4, 1)] = BLOCK_KEY | BLOCK_COLOR_RED;
+	GRID[grid_block_idx(5, 1)] = BLOCK_KEY | BLOCK_COLOR_GREEN;
+	GRID[grid_block_idx(6, 1)] = BLOCK_KEY | BLOCK_COLOR_PURPLE;
 	
 	// GRID[grid_block_idx(3, 4)] = BLOCK_CHEST | BLOCK_COLOR_BLUE;
 	// GRID[grid_block_idx(4, 4)] = BLOCK_CHEST | BLOCK_COLOR_RED;
@@ -166,11 +166,24 @@ static GameState game_loop(void){
 	// }
 	// GRID[GRID_BYTES - 11] = BLOCK_EMPTY;
 	
-	px_buffer_set_color(0, CLR_BLACK);
-	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
-		blit_palette(CLR_BLACK);
+		static const u8 PALETTE[] = {
+			0x21, 0x07, 0x1A, 0x04,
+			0x21, 0x17, 0x28, 0x20,
+			0x21, 0x1A, 0x04, 0x07,
+			0x21, 0x71, 0x82, 0x20,
+			0x21, 0x1A, 0x04, 0x07,
+			0x21, 0x71, 0x82, 0x20,
+			0x21, 0x1A, 0x04, 0x07,
+			0x21, 0x71, 0x82, 0x20,
+		};
+		
+		px_buffer_data(32, PAL_ADDR);
+		memcpy(PX.buffer, PALETTE, 8);
+		memset(PX.buffer + 8, 0x10, 24);
+		
+		px_buffer_set_color(0, 0x21);
 		
 		px_bg_table(0);
 		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
@@ -186,8 +199,6 @@ static GameState game_loop(void){
 		
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0x55);
-		
-		px_buffer_set_color(0, CLR_BG);
 		
 		px_spr_clear();
 	} px_ppu_sync_on();
@@ -596,6 +607,6 @@ void main(void){
 	// debug_chr();
 	// main_menu();
 	// character_select(false);
-	// game_loop();
+	game_loop();
 	pixelakes_screen();
 }

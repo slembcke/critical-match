@@ -424,12 +424,15 @@ void player_update(u8 joy){
 		ix = grid_block_x(idx,  0);
 		iy = grid_block_y(idx, -5);
 		
+		// TODO rewrite in inline asm.
 		// Calculate cursor height into idx.
-		if(player.blocks_held[0]){
-			for(idx = 1; player.blocks_held[idx] != BLOCK_EMPTY && idx < GRID_H; ++idx);
-		} else {
+		if(player.blocks_held[0] == BLOCK_EMPTY){
+			// Calculate cursor height from blocks on grid.
 			for(idx = player.cursor_idx; GRID[idx] != BLOCK_EMPTY && idx < GRID_BYTES; idx += GRID_W);
 			idx = (idx - player.cursor_idx)/8;
+		} else {
+			// Calculate cursor height from held blocks.
+			for(idx = 1; player.blocks_held[idx] != BLOCK_EMPTY && idx < GRID_H; ++idx);
 		}
 		
 		cursor_sprite(ix, iy, idx);

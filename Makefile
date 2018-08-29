@@ -40,17 +40,12 @@ ASMSRC = \
 	lib/famitone2/famitone2.s
 
 GFX = \
-	gfx/pixelakes.png \
-	gfx/menu_tiles.png \
-	gfx/logo64.png \
 	gfx/neschar.png \
 	gfx/sheet1.png \
 	gfx/explosion.png \
 	gfx/character.png \
 
 MAPS = \
-	gfx/pixelakes.tmx \
-	gfx/main_menu.tmx \
 	gfx/board.tmx \
 	gfx/game_over.tmx
 

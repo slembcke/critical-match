@@ -315,42 +315,6 @@ static GameState main_menu(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
-		static const u8 PALETTE[] = {
-			0x1D, 0x2D, 0x3D, 0x11,
-			0x1D, 0x18, 0x28, 0x38,
-			0x1D, 0x09, 0x09, 0x09,
-			0x1D, 0x01, 0x01, 0x01,
-			0x1D, 0x2D, 0x27, 0x20,
-			0x1D, 0x2D, 0x2C, 0x20,
-			0x1D, 0x1D, 0x28, 0x1A,
-			0x1D, 0x1D, 0x28, 0x13,
-		};
-		
-		static const u8 ATTR[] = {
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x00,
-			0x00, 0x55, 0x55, 0x55, 0x00, 0x55, 0x55, 0x55,
-			0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		};
-		
-		px_buffer_data(sizeof(PALETTE), PAL_ADDR);
-		memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
-		
-		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_menu_tiles_lz4chr, 128*16);
-		
-		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_logo64_lz4chr, 32*16);
-		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_main_menu_lz4, 32*30);
-		px_addr(AT_ADDR(0));
-		px_blit(sizeof(ATTR), ATTR);
-		
-		px_wait_nmi();
 	} px_ppu_sync_on();
 	
 	music_init(TITLE_MUSIC);
@@ -381,34 +345,6 @@ static GameState main_menu(void){
 	
 	attract_mode = true;
 	return game_loop();
-}
-
-static GameState pixelakes_screen(void){
-	static const u8 PALETTE[] = {
-		0x2D, 0x1D, 0x20, 0x06,
-		0x2D, 0x1D, 0x10, 0x06,
-		0x2D, 0x1D, 0x00, 0x06,
-	};
-	
-	u16 timeout;
-	
-	px_inc(PX_INC1);
-	px_ppu_sync_off(); {
-		px_buffer_data(sizeof(PALETTE), PAL_ADDR);
-		memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
-		
-		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_pixelakes_lz4chr, 128*16);
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_pixelakes_lz4, 1024);
-	} px_ppu_sync_on();
-	
-	wait_noinput();
-	for(timeout = 5*60; timeout > 0; --timeout){
-		if(JOY_START(joy_read(0))) break;
-		px_wait_nmi();
-	}
-	
-	return main_menu();
 }
 
 #ifdef DEBUG
@@ -467,8 +403,5 @@ void main(void){
 	px_fill(32*30, 0x20);
 	
 	// debug_chr();
-	// main_menu();
-	// character_select(false);
 	game_loop();
-	pixelakes_screen();
 }

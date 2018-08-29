@@ -92,7 +92,7 @@ tools/text2data:
 $(ROM): ld65.cfg $(OBJS)
 	$(LD) -C ld65.cfg $(OBJS) nes.lib -m link.log -o $@
 
-%.s: %.c
+%.s: %.c src/shared.h
 	$(CC) $(CFLAGS) $< --add-source $(INCLUDE) -o $@
 
 %.o: %.s

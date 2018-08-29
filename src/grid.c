@@ -140,7 +140,7 @@ static bool grid_match_blocks(void){
 	register u8 block;
 	register u8 mask, expect;
 	
-	for(ix = 1; ix < GRID_W - 1; ++ix){
+	for(ix = GRID_W - 2; ix > 0; --ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
 			idx = grid_block_idx(ix, iy);
 			
@@ -207,7 +207,7 @@ static bool grid_match_blocks(void){
 }
 
 void grid_update_column_height(void){
-	for(ix = 1; ix < GRID_W - 1; ++ix){
+	for(ix = GRID_W - 2; ix > 0; --ix){
 		for(iy = 1; iy < GRID_H - 1; ++iy){
 			idx = grid_block_idx(ix, iy);
 			if(GRID[idx] == BLOCK_EMPTY) break;
@@ -441,7 +441,7 @@ uintptr_t grid_update_coro(void){
 		// Look for matches while waiting for the next tick.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
 			if(
-				// Check every other frame to animate matching nicely.
+				// Check every few frames to animate matching nicely.
 				(grid.state_timer & 0x3) == 0 &&
 				grid_match_blocks()
 			){
@@ -460,10 +460,10 @@ uintptr_t grid_update_coro(void){
 		naco_yield(true);
 		
 		// Blit the blocks to the screen over several frames.
-		for(grid.state_timer = 1; grid.state_timer < GRID_H - 1; ++grid.state_timer){
+		for(grid.state_timer = GRID_H - 2; grid.state_timer > 0; --grid.state_timer){
 			px_buffer_inc(PX_INC1);
 			
-			for(ix = 1; ix < GRID_W - 1; ++ix){
+			for(ix = GRID_W - 2; ix > 0; --ix){
 				idx = grid_block_idx(ix, grid.state_timer);
 				grid_set_block(idx, GRID[idx]);
 			}
@@ -482,10 +482,8 @@ void grid_init(void){
 	memcpy(GRID + 0x58, ROW, sizeof(ROW));
 	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
 	memset(GRID, BLOCK_BORDER, 8);
-	
-	bzero(COLUMN_HEIGHT, sizeof(COLUMN_HEIGHT));
-	
-	bzero(&grid, sizeof(grid));
+	memset(COLUMN_HEIGHT, 0x0, sizeof(COLUMN_HEIGHT));
+	memset(&grid, 0x0, sizeof(grid));
 	for(idx = 255; idx > 0; --idx){
 		get_shuffled_block();
 		get_shuffled_block();
@@ -497,7 +495,7 @@ void grid_init(void){
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
 	
 	grid.garbage_block_ticks = GARBAGE_BLOCK_TICKS;
-	grid.flicker_column = 1;
+	grid.flicker_column = GRID_W - 2;
 	
 	grid.combo = 1;
 	
@@ -559,7 +557,7 @@ static void grid_place_garbage(void){
 }
 
 bool grid_update(void){
-	if(++grid.flicker_column == GRID_W - 1) grid.flicker_column = 1;
+	if(--grid.flicker_column == 0) grid.flicker_column = GRID_W - 2;
 	
 	if(grid.garbage_preview_timeout > 0){
 		if(--grid.garbage_preview_timeout == 0){
@@ -574,6 +572,7 @@ void grid_pause_semaphore(s8 inc){
 	grid.pause_semaphore += inc;
 }
 
+// Rewrite?
 void grid_buffer_score(u16 addr){
 	px_buffer_inc(PX_INC1);
 	px_buffer_data(5, addr);

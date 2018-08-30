@@ -86,13 +86,13 @@ static GameState game_loop(void){
 		static const u8 PALETTE[] = {
 			0x21, 0x07, 0x1A, 0x04,
 			0x21, 0x17, 0x28, 0x20,
-			0x21, 0x1A, 0x04, 0x07,
-			0x21, 0x71, 0x82, 0x20,
+			0x21, 0x11, 0x1D, 0x1D,
+			0x21, 0x1D, 0x1D, 0x1D,
 			
 			0x21, 0x07, 0x1A, 0x04,
 			0x21, 0x17, 0x28, 0x20,
-			0x21, 0x1A, 0x04, 0x07,
-			0x21, 0x71, 0x82, 0x20,
+			0x21, 0x1D, 0x1D, 0x1D,
+			0x21, 0x1D, 0x1D, 0x1D,
 		};
 		
 		px_buffer_data(32, PAL_ADDR);
@@ -111,7 +111,7 @@ static GameState game_loop(void){
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4, 1024);
 		
 		px_addr(AT_ADDR(0));
-		px_fill(64, 0x55);
+		px_fill(64, 0xAA);
 		
 		px_spr_clear();
 	} px_ppu_sync_on();
@@ -203,7 +203,7 @@ static GameState final_score(s16 scroll_v){
 
 // TODO This is pretty terrible.
 static GameState game_over(void){
-	u8 BOOM[] = {
+	static const u8 BOOM[] = {
 		69, 50, 61, 52, 78, 85, 38, 19, 46, 44, 65, 27,
 		51, 58, 68, 37, 26, 12, 11, 57, 41, 22, 73, 77,
 		84, 82, 59, 36, 34, 29, 18, 21, 45, 83,  9, 13,

@@ -24,10 +24,13 @@ void coins_init(void){
 	}
 }
 
+static const u8 PAL[] = {0, 0, 1, 1};
+static const u8 SPR[] = {0x8C, 0x8D, 0x8C, 0x9C};
+
 void coins_draw(void){
 	register u8 i, t;
 	
-	for(i = 0; i < COIN_COUNT; ++i){
+	for(i = COIN_COUNT - 1; i > 0 ; --i){
 		t = COIN_TIMEOUT[i];
 		
 		if(t < COIN_COUNT){
@@ -39,9 +42,15 @@ void coins_draw(void){
 			idx = COIN_BLOCK_IDX[i];
 			ix += (u8)grid_block_x(idx, 4);
 			iy += (u8)grid_block_y(idx, 0);
-			px_spr(ix, iy, 0x00, 0x8C);
 			
-			++COIN_TIMEOUT[i];
+			idx = COIN_BLOCK_IDX[i];
+			idx = GRID[idx] & BLOCK_COLOR_MASK;
+			px_spr(ix, iy, PAL[idx], SPR[idx]);
+			
+			// ++COIN_TIMEOUT[i];
+			asm("lda %v", i); \
+			asm("tax"); \
+			asm("inc %v, x", COIN_TIMEOUT);
 		}
 	}
 }

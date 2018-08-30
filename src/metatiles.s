@@ -12,10 +12,10 @@
 
 ; Empty, Chest, Open, Key
 .export METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
-METATILE0: .byte  $8C,  $00,  $8E,  $00,  $80,  $82,  $80,  $84,  $86,  $88,  $86,  $8A,  $86,  $88,  $86,  $8A
-METATILE1: .byte  $8D,  $00,  $8F,  $00,  $81,  $83,  $81,  $85,  $87,  $89,  $87,  $8B,  $87,  $89,  $87,  $8B
-METATILE2: .byte  $8D,  $00,  $9E,  $00,  $90,  $92,  $90,  $94,  $96,  $98,  $96,  $9A,  $96,  $98,  $96,  $9A
-METATILE3: .byte  $8C,  $00,  $9F,  $00,  $91,  $93,  $91,  $95,  $97,  $99,  $97,  $9B,  $97,  $99,  $97,  $9B
+METATILE0: .byte  $00,  $00,  $8E,  $00,  $80,  $82,  $80,  $84,  $86,  $88,  $86,  $8A,  $86,  $88,  $86,  $8A
+METATILE1: .byte  $00,  $00,  $8F,  $00,  $81,  $83,  $81,  $85,  $87,  $89,  $87,  $8B,  $87,  $89,  $87,  $8B
+METATILE2: .byte  $00,  $00,  $9E,  $00,  $90,  $92,  $90,  $94,  $96,  $98,  $96,  $9A,  $96,  $98,  $96,  $9A
+METATILE3: .byte  $00,  $00,  $9F,  $00,  $91,  $93,  $91,  $95,  $97,  $99,  $97,  $9B,  $97,  $99,  $97,  $9B
 METATILE4: .byte PAL0, PAL0, PAL1, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL1, PAL1
 
 .code

@@ -6,12 +6,14 @@
 #include "pixler/pixler.h"
 #include "shared.h"
 
-#define PLAYER_MAX_SPEED 0x0180
+// 0x100, 0x180, 0x1C0
+#define PLAYER_MAX_SPEED 0x01C0
 #define PLAYER_ACCEL 0x0060
 #define PLAYER_GRAVITY 0x00A0
 #define PLAYER_MAX_FALL (6*PLAYER_MAX_SPEED/2)
 #define PLAYER_JUMP 0x03C0
-#define PLAYER_JUMP_TICKS 5
+// 5, 8
+#define PLAYER_JUMP_TICKS 8
 #define MAX_Y ((16 << 8)*(GRID_H - 2))
 
 typedef struct {
@@ -24,6 +26,8 @@ typedef struct {
 	bool facingRight;
 	bool grounded;
 	
+	// Is double jump ready?
+	bool double_jump;
 	// Remaining ticks of jump power.
 	u8 jump_ticks;
 	
@@ -67,7 +71,12 @@ static void player_update_motion(void){
 			player.vel_y = PLAYER_JUMP;
 			--player.jump_ticks;
 		}
-	} else if(player.grounded){
+		
+		if(!JOY_BTN_1(player.prev_joy)){
+			// If you are grounded when you first jump, enable double jump.
+			player.double_jump = player.grounded;
+		}
+	} else if(player.grounded || player.double_jump){
 		player.jump_ticks = PLAYER_JUMP_TICKS;
 	} else {
 		// Deplete the jump ticks if in the air and not jumping.

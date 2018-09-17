@@ -7,14 +7,17 @@
 #include "shared.h"
 
 // 0x100, 0x180, 0x1C0
-#define PLAYER_MAX_SPEED 0x01C0
+#define PLAYER_MAX_SPEED 0x0180
 #define PLAYER_ACCEL 0x0060
 #define PLAYER_GRAVITY 0x00A0
 #define PLAYER_MAX_FALL (6*PLAYER_MAX_SPEED/2)
 #define PLAYER_JUMP 0x03C0
 // 5, 8
-#define PLAYER_JUMP_TICKS 8
+#define PLAYER_JUMP_TICKS 5
 #define MAX_Y ((16 << 8)*(GRID_H - 2))
+
+#define ENABLE_DOUBLE_JUMP 0
+#define ENABLE_GRAPPLE 1
 
 typedef struct {
 	u16 pos_x, pos_y;
@@ -72,7 +75,7 @@ static void player_update_motion(void){
 			--player.jump_ticks;
 		}
 		
-		if(!JOY_BTN_1(player.prev_joy)){
+		if(ENABLE_DOUBLE_JUMP && !JOY_BTN_1(player.prev_joy)){
 			// If you are grounded when you first jump, enable double jump.
 			player.double_jump = player.grounded;
 		}
@@ -166,7 +169,7 @@ static void player_cursor_update(void){
 			}
 		}
 	} else {
-		if(JOY_UP(player.joy)){
+		if(ENABLE_GRAPPLE && JOY_UP(player.joy)){
 			// Search upwards for a block to grapple.
 			while(GRID[idx] == BLOCK_EMPTY){
 				idx += GRID_W;

@@ -1,11 +1,9 @@
-TODO:
-* Attract mode. (kinda working, but record later)
-* Burn in protection.
-* About screen?
-
-Needed:
-* Music.
-* Sounds.
-
 BUGS:
 * Garbage blocks can be added above screen edge.
+
+UPGRADES:
+* High jump.
+* Double jump.
+* Grapple.
+* Speed.
+* Strength.

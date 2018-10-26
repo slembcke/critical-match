@@ -168,39 +168,7 @@ memcpy_dst_to_dst: jmp $FFFC
 	; if (offset == 15) {
 	lda offset+0
 	cmp #15
-	@more_literals:
-	bne @skip_more_literals
-	
-	; tmp = *src++;
-	ldy #0
-	lda (src), y
-	sta tmp
-	
-	inc src+0
-	bne :+
-		inc src+1
-	:
-	
-	; offset += tmp;
-	clc
-	adc offset+0
-	sta offset+0
-	lda #0
-	adc offset+1
-	sta offset+1
-	
-	; if (tmp == 255)
-	lda tmp
-	cmp #255
-	
-	; goto @more_literals;
-	jmp @more_literals
-	
-	@skip_more_literals:
-	; if (offset) {
-	lda offset+0
-	ora offset+1
-	beq @ski_copy_literals ; TODO remove
+	jsr consume_length_bytes
 	
 	; memcpy(dst, src, offset);
 	lda dst+0
@@ -224,14 +192,13 @@ memcpy_dst_to_dst: jmp $FFFC
 	sta dst+1
 	
 ; src += offset;
-	lda offset+0
 	clc
+	lda offset+0
 	adc src+0
 	sta src+0
 	lda offset+1
 	adc src+1
 	sta src+1
-	@ski_copy_literals:
 	
 	; memcpy(&offset, src, 2);
 	ldy #0
@@ -275,8 +242,32 @@ memcpy_dst_to_dst: jmp $FFFC
 	
 	; if (token == 19) {
 	cmp #19
-	@more_matches:
-	bne @skip_more_matches
+	jsr consume_length_bytes
+	
+	; memcpy(dst, copysrc, offset);
+	lda dst+0
+	ldx dst+1
+	sta ptr2+0
+	stx ptr2+1
+	jsr pushax
+	; ldy #$00 - not needed as pushax zeroes Y
+	jsr memcpy_dst_to_dst
+	
+	; dst += offset;
+	clc
+	adc offset+0
+	sta dst+0
+	txa
+	adc offset+1
+	sta dst+1
+	
+	jmp @loop
+.endproc
+
+.proc consume_length_bytes
+	beq :+
+		rts
+	:
 	
 	; tmp = *src++;
 	ldy #0
@@ -301,25 +292,5 @@ memcpy_dst_to_dst: jmp $FFFC
 	cmp #255
 	
 	; goto @more_matches;
-	jmp @more_matches
-	
-	@skip_more_matches:
-	; memcpy(dst, copysrc, offset);
-	lda dst+0
-	ldx dst+1
-	sta ptr2+0
-	stx ptr2+1
-	jsr pushax
-	; ldy #$00 - not needed as pushax zeroes Y
-	jsr memcpy_dst_to_dst
-	
-	; dst += offset;
-	clc
-	adc offset+0
-	sta dst+0
-	txa
-	adc offset+1
-	sta dst+1
-	
-	jmp @loop
+	jmp consume_length_bytes
 .endproc

@@ -16,7 +16,6 @@
 
 dst = regsave
 src = sreg
-tmp = tmp1
 token = tmp2
 offset = ptr3
 
@@ -272,7 +271,7 @@ memcpy_dst_to_dst: jmp $FFFC
 	; tmp = *src++;
 	ldy #0
 	lda (src), y
-	sta tmp
+	tax
 	
 	inc src+0
 	bne :+
@@ -288,7 +287,7 @@ memcpy_dst_to_dst: jmp $FFFC
 	sta offset+1
 	
 	; if (tmp == 255)
-	lda tmp
+	txa
 	cmp #255
 	
 	; goto @more_matches;

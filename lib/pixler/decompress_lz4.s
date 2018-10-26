@@ -137,7 +137,7 @@ memcpy_dst_to_dst: jmp $FFFC
 	sta	dst+0
 	stx	dst+1
 	
-	loop:
+	@loop:
 	; token = *src++;
 	ldy #0
 	lda (src), y
@@ -168,8 +168,8 @@ memcpy_dst_to_dst: jmp $FFFC
 	; if (offset == 15) {
 	lda offset+0
 	cmp #15
-	moreliterals:
-	bne L001A
+	@more_literals:
+	bne @skip_more_literals
 	
 	; tmp = *src++;
 	ldy #0
@@ -193,14 +193,14 @@ memcpy_dst_to_dst: jmp $FFFC
 	lda tmp
 	cmp #255
 	
-	; goto moreliterals;
-	jmp moreliterals
+	; goto @more_literals;
+	jmp @more_literals
 	
-	L001A:
+	@skip_more_literals:
 	; if (offset) {
 	lda offset+0
 	ora offset+1
-	beq L001C
+	beq @ski_copy_literals ; TODO remove
 	
 	; memcpy(dst, src, offset);
 	lda dst+0
@@ -231,7 +231,7 @@ memcpy_dst_to_dst: jmp $FFFC
 	lda offset+1
 	adc src+1
 	sta src+1
-	L001C:
+	@ski_copy_literals:
 	
 	; memcpy(&offset, src, 2);
 	ldy #0
@@ -275,8 +275,8 @@ memcpy_dst_to_dst: jmp $FFFC
 	
 	; if (token == 19) {
 	cmp #19
-	morematches:
-	bne L003C
+	@more_matches:
+	bne @skip_more_matches
 	
 	; tmp = *src++;
 	ldy #0
@@ -300,10 +300,10 @@ memcpy_dst_to_dst: jmp $FFFC
 	lda tmp
 	cmp #255
 	
-	; goto morematches;
-	jmp morematches
+	; goto @more_matches;
+	jmp @more_matches
 	
-	L003C:
+	@skip_more_matches:
 	; memcpy(dst, copysrc, offset);
 	lda dst+0
 	ldx dst+1
@@ -321,5 +321,5 @@ memcpy_dst_to_dst: jmp $FFFC
 	adc offset+1
 	sta dst+1
 	
-	jmp loop
+	jmp @loop
 .endproc

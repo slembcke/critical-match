@@ -20,7 +20,6 @@ tmp = tmp1
 token = tmp2
 offset = ptr3
 in = sreg
-outlen = ptr4
 
 .data
 
@@ -131,10 +130,6 @@ memcpy_dst_to_dst: jmp $FFFC
 .endproc
 
 .proc	decompress_lz4
-	jsr popax
-	sta	outlen+0
-	stx	outlen+1
-	
 	jsr	popax
 	sta	in+0
 	stx	in+1
@@ -146,11 +141,9 @@ memcpy_dst_to_dst: jmp $FFFC
 	; written = 0;
 	lda #0
 	sta written+0
+	sta written+1
 	
-	; while (written < outlen) {
-	jmp L0046
-	
-	L0004:
+	loop:
 	; token = *in++;
 	ldy #0
 	lda (in), y
@@ -252,15 +245,6 @@ memcpy_dst_to_dst: jmp $FFFC
 	sta in+1
 	L001C:
 	
-	; if (written >= outlen) return;
-	lda written+0
-	cmp outlen+0
-	lda written+1
-	sbc outlen+1
-	bcc :+
-		rts
-	:
-	
 	; memcpy(&offset, in, 2);
 	ldy #0
 	lda (in), y
@@ -268,6 +252,14 @@ memcpy_dst_to_dst: jmp $FFFC
 	iny
 	lda (in), y
 	sta offset+1
+	
+	; Terminate if offset is 0.
+	lda offset+0
+	bne :+
+		lda offset+1
+		bne :+
+		rts
+	:
 	
 	; in += 2;
 	lda #2
@@ -352,15 +344,7 @@ memcpy_dst_to_dst: jmp $FFFC
 	sta written+0
 	lda offset+1
 	adc written+1
-	L0046:
 	sta written+1
 	
-	; while (written < outlen) {
-	lda written+0
-	cmp outlen+0
-	lda written+1
-	sbc outlen+1
-	jcc L0004
-	
-	rts
+	jmp loop
 .endproc

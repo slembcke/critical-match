@@ -4,6 +4,7 @@ lz4_header_bytes = 8
 	.export symbol
 	symbol:
 		.incbin file, lz4_header_bytes
+		.word 0 ; terminator
 .endmacro
 
 .segment "PRG0"

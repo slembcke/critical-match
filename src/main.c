@@ -120,7 +120,7 @@ static void character_inc(s8 amount){
 }
 
 static void load_character(void){
-	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), CHARACTER_GFX[character], 84*16);
+	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), CHARACTER_GFX[character]);
 	character_pal = CHARACTER_PAL[character];
 }
 
@@ -173,16 +173,16 @@ static GameState game_loop(void){
 		blit_palette(CLR_BLACK);
 		
 		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr);
 		
 		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
 		load_character();
 		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4, 1024);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0x55);
@@ -253,7 +253,7 @@ static GameState final_score(s16 scroll_v){
 	px_buffer_inc(PX_INC1);
 	px_ppu_sync_off(); {
 		px_addr(NT_ADDR(0, 10, 12));
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4);
 		
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0x55);
@@ -378,12 +378,12 @@ static GameState character_select(bool scroll_up){
 		blit_palette(CLR_BLACK);
 		
 		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr);
 		
 		px_spr_table(1);
 		load_character();
 		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_character_select_lz4, 1024);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_character_select_lz4);
 		
 		px_addr(bio_addr);
 		for(ix = 0; bio_cursor[ix]; ++ix){
@@ -468,12 +468,12 @@ static GameState main_menu(void){
 		memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
 		
 		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_menu_tiles_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_menu_tiles_lz4chr);
 		
 		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_logo64_lz4chr, 32*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_logo64_lz4chr);
 		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_main_menu_lz4, 32*30);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_main_menu_lz4);
 		px_addr(AT_ADDR(0));
 		px_blit(sizeof(ATTR), ATTR);
 		
@@ -525,8 +525,8 @@ static GameState pixelakes_screen(void){
 		memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
 		
 		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_pixelakes_lz4chr, 128*16);
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_pixelakes_lz4, 1024);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_pixelakes_lz4chr);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_pixelakes_lz4);
 	} px_ppu_sync_on();
 	
 	wait_noinput();
@@ -545,10 +545,10 @@ static GameState debug_chr(void){
 		
 		px_bg_table(1);
 		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr);
 		
 		//Top
 		px_inc(PX_INC1);

@@ -15,7 +15,6 @@
 .import _px_blit
 
 out = regsave
-written = regsave + 2
 tmp = tmp1
 token = tmp2
 offset = ptr3
@@ -88,7 +87,8 @@ memcpy_dst_to_dst: jmp $FFFC
 		bne	:+
 			inc	tmp4
 		:
-
+		
+		; TODO better at top?
 		@check:
 		lda	tmp3
 		cmp	ptr3+0
@@ -137,11 +137,6 @@ memcpy_dst_to_dst: jmp $FFFC
 	jsr	popax
 	sta	out+0
 	stx	out+1
-	
-	; written = 0;
-	lda #0
-	sta written+0
-	sta written+1
 	
 	loop:
 	; token = *in++;
@@ -208,15 +203,10 @@ memcpy_dst_to_dst: jmp $FFFC
 	ora offset+1
 	beq L001C
 	
-	; memcpy(&out[written], in, offset);
+	; memcpy(out, in, offset);
 	lda out+0
-	clc
-	adc written+0
+	ldx out+1
 	sta ptr2+0
-	lda out+1
-	adc written+1
-	tax
-	lda ptr2+0
 	stx ptr2+1
 	jsr pushax
 	lda in+0
@@ -226,14 +216,13 @@ memcpy_dst_to_dst: jmp $FFFC
 	; ldy #$00 - not needed as pushax zeroes Y
 	jsr memcpy_src_to_dst
 	
-; written += offset;
-	lda offset+0
+; out += offset;
 	clc
-	adc written+0
-	sta written+0
-	lda offset+1
-	adc written+1
-	sta written+1
+	adc offset+0
+	sta out+0
+	txa
+	adc offset+1
+	sta out+1
 	
 ; in += offset;
 	lda offset+0
@@ -270,19 +259,12 @@ memcpy_dst_to_dst: jmp $FFFC
 		inc in+1
 	:
 	
-	; copysrc = out + written - offset;
+	; copysrc = out - offset;
 	lda out+0
-	clc
-	adc written+0
-	tay
-	lda out+1
-	adc written+1
-	tax
-	tya
 	sec
 	sbc offset+0
 	sta ptr1+0
-	txa
+	lda out+1
 	sbc offset+1
 	sta ptr1+1
 	
@@ -323,28 +305,22 @@ memcpy_dst_to_dst: jmp $FFFC
 	jmp morematches
 	
 	L003C:
-	; memcpy(&out[written], copysrc, offset);
-	lda out
-	clc
-	adc written+0
+	; memcpy(out, copysrc, offset);
+	lda out+0
+	ldx out+1
 	sta ptr2+0
-	lda out+1
-	adc written+1
-	tax
-	lda ptr2+0
 	stx ptr2+1
 	jsr pushax
 	; ldy #$00 - not needed as pushax zeroes Y
 	jsr memcpy_dst_to_dst
 	
-	; written += offset;
-	lda offset+0
+	; out += offset;
 	clc
-	adc written+0
-	sta written+0
-	lda offset+1
-	adc written+1
-	sta written+1
+	adc offset+0
+	sta out+0
+	txa
+	adc offset+1
+	sta out+1
 	
 	jmp loop
 .endproc

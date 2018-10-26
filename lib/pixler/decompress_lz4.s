@@ -14,11 +14,11 @@
 .import	memcpy_upwards
 .import _px_blit
 
-out = regsave
+dst = regsave
+src = sreg
 tmp = tmp1
 token = tmp2
 offset = ptr3
-in = sreg
 
 .data
 
@@ -40,11 +40,10 @@ memcpy_dst_to_dst: jmp $FFFC
 	lda	ptr3+0
 	ldx	ptr3+1
 	jsr	pushax
-	
 	lda	ptr1+0
 	ldx	ptr1+1
-	
 	jsr	_px_blit
+	
 	jmp popax
 .endproc
 
@@ -131,22 +130,22 @@ memcpy_dst_to_dst: jmp $FFFC
 
 .proc	decompress_lz4
 	jsr	popax
-	sta	in+0
-	stx	in+1
+	sta	src+0
+	stx	src+1
 	
 	jsr	popax
-	sta	out+0
-	stx	out+1
+	sta	dst+0
+	stx	dst+1
 	
 	loop:
-	; token = *in++;
+	; token = *src++;
 	ldy #0
-	lda (in), y
+	lda (src), y
 	sta token
 
-	inc in
+	inc src
 	bne :+
-		inc in+1
+		inc src+1
 	:
 	
 	; offset = token >> 4;
@@ -172,14 +171,14 @@ memcpy_dst_to_dst: jmp $FFFC
 	moreliterals:
 	bne L001A
 	
-	; tmp = *in++;
+	; tmp = *src++;
 	ldy #0
-	lda (in), y
+	lda (src), y
 	sta tmp
 	
-	inc in+0
+	inc src+0
 	bne :+
-		inc in+1
+		inc src+1
 	:
 	
 	; offset += tmp;
@@ -203,43 +202,43 @@ memcpy_dst_to_dst: jmp $FFFC
 	ora offset+1
 	beq L001C
 	
-	; memcpy(out, in, offset);
-	lda out+0
-	ldx out+1
+	; memcpy(dst, src, offset);
+	lda dst+0
+	ldx dst+1
 	sta ptr2+0
 	stx ptr2+1
 	jsr pushax
-	lda in+0
-	ldx in+1
+	lda src+0
+	ldx src+1
 	sta ptr1+0
 	stx ptr1+1
 	; ldy #$00 - not needed as pushax zeroes Y
 	jsr memcpy_src_to_dst
 	
-; out += offset;
+; dst += offset;
 	clc
 	adc offset+0
-	sta out+0
+	sta dst+0
 	txa
 	adc offset+1
-	sta out+1
+	sta dst+1
 	
-; in += offset;
+; src += offset;
 	lda offset+0
 	clc
-	adc in+0
-	sta in+0
+	adc src+0
+	sta src+0
 	lda offset+1
-	adc in+1
-	sta in+1
+	adc src+1
+	sta src+1
 	L001C:
 	
-	; memcpy(&offset, in, 2);
+	; memcpy(&offset, src, 2);
 	ldy #0
-	lda (in), y
+	lda (src), y
 	sta offset
 	iny
-	lda (in), y
+	lda (src), y
 	sta offset+1
 	
 	; Terminate if offset is 0.
@@ -250,21 +249,21 @@ memcpy_dst_to_dst: jmp $FFFC
 		rts
 	:
 	
-	; in += 2;
+	; src += 2;
 	lda #2
 	clc
-	adc in+0
-	sta in+0
+	adc src+0
+	sta src+0
 	bcc :+
-		inc in+1
+		inc src+1
 	:
 	
-	; copysrc = out - offset;
-	lda out+0
+	; copysrc = dst - offset;
+	lda dst+0
 	sec
 	sbc offset+0
 	sta ptr1+0
-	lda out+1
+	lda dst+1
 	sbc offset+1
 	sta ptr1+1
 	
@@ -279,14 +278,14 @@ memcpy_dst_to_dst: jmp $FFFC
 	morematches:
 	bne L003C
 	
-	; tmp = *in++;
+	; tmp = *src++;
 	ldy #0
-	lda (in), y
+	lda (src), y
 	sta tmp
 	
-	inc in+0
+	inc src+0
 	bne :+
-		inc in+1
+		inc src+1
 	:
 	
 	; offset += tmp;
@@ -305,22 +304,22 @@ memcpy_dst_to_dst: jmp $FFFC
 	jmp morematches
 	
 	L003C:
-	; memcpy(out, copysrc, offset);
-	lda out+0
-	ldx out+1
+	; memcpy(dst, copysrc, offset);
+	lda dst+0
+	ldx dst+1
 	sta ptr2+0
 	stx ptr2+1
 	jsr pushax
 	; ldy #$00 - not needed as pushax zeroes Y
 	jsr memcpy_dst_to_dst
 	
-	; out += offset;
+	; dst += offset;
 	clc
 	adc offset+0
-	sta out+0
+	sta dst+0
 	txa
 	adc offset+1
-	sta out+1
+	sta dst+1
 	
 	jmp loop
 .endproc

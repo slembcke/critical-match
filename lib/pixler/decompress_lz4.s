@@ -30,6 +30,7 @@ memcpy_dst_to_dst: jmp $FFFC
 ; These memcp-like functions are drop in replacements for memcpy_upwards().
 ; They are patched in using the jump vectors above when decompressing to vram.
 
+; dst: ptr2, src: ptr1, len: ptr3
 .proc memcpy_ram_to_vram
 	lda	ptr2+1
 	sta	PPU_VRAM_ADDR
@@ -46,13 +47,21 @@ memcpy_dst_to_dst: jmp $FFFC
 	jmp popax
 .endproc
 
+; dst: ptr2, src: ptr1, len: ptr3
 .proc memcpy_vram_to_vram
 	lda	#0
 	sta	tmp3
 	sta	tmp4
-	jmp	@check
 	
 	@loop:
+		lda	tmp3
+		cmp	ptr3+0
+		lda	tmp4
+		sbc	ptr3+1
+		bcc	:+
+			jmp popax
+		:
+		
 		; read source byte
 		lda	ptr1+1
 		sta	PPU_VRAM_ADDR
@@ -86,14 +95,7 @@ memcpy_dst_to_dst: jmp $FFFC
 			inc	tmp4
 		:
 		
-		; TODO better at top?
-		@check:
-		lda	tmp3
-		cmp	ptr3+0
-		lda	tmp4
-		sbc	ptr3+1
-		bcc	@loop
-	jmp popax
+		jmp @loop
 .endproc
 
 .export _decompress_lz4_to_ram
@@ -137,35 +139,26 @@ memcpy_dst_to_dst: jmp $FFFC
 	stx	dst+1
 	
 	@loop:
-	; token = *src++;
+	; get_token
 	ldy #0
 	lda (src), y
 	sta token
 
-	inc src
+	inc src+0
 	bne :+
 		inc src+1
 	:
 	
-	; offset = token >> 4;
-	ldx #0
+	; Decode literal count from token upper nibble.
 	lsr a
 	lsr a
 	lsr a
 	lsr a
 	sta offset+0
+	ldx #0
 	stx offset+1
 	
-	; token &= 0xf;
-	; token += 4; // Minmatch
-	lda token
-	and #$0F
-	clc
-	adc #4
-	sta token
-	
 	; if (offset == 15) {
-	lda offset+0
 	cmp #15
 	jsr consume_length_bytes
 	
@@ -209,9 +202,8 @@ memcpy_dst_to_dst: jmp $FFFC
 	
 	; Terminate if offset is 0.
 	lda offset+0
+	ora offset+1
 	bne :+
-		lda offset+1
-		bne :+
 		rts
 	:
 	
@@ -233,11 +225,13 @@ memcpy_dst_to_dst: jmp $FFFC
 	sbc offset+1
 	sta ptr1+1
 	
-	; offset = token;
-	lda #0
-	sta offset+1
 	lda token
+	and #$0F
+	clc
+	adc #4
 	sta offset+0
+	ldx #0
+	stx offset+1
 	
 	; if (token == 19) {
 	cmp #19

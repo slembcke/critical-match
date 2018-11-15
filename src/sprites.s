@@ -56,7 +56,7 @@ PLAYER_FRAME_ADDRS:
 .data
 
 .export _character_pal
-_character_pal: .byte 0
+_character_pal: .byte 3
 
 .code
 

@@ -322,10 +322,10 @@ void player_draw_grapple(void){
 		
 		if(iy <= player.grapple_y) break;
 		
-		px_spr(ix, iy, 0x01, 0x1E);
+		px_spr(ix, iy, 0x01, 0x18);
 	}
 	// Draw the hook.
-	px_spr(ix, iy, 0x00, 0x1F);
+	px_spr(ix, iy, 0x00, 0x08);
 	
 	// Pull the block towards the player.
 	// TODO Not drawing code. Care?

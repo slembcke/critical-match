@@ -99,16 +99,16 @@ static GameState game_loop(void){
 		memcpy(PX.buffer, PALETTE, 32);
 		
 		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr, 128*16);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr);
 		
 		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr, 84*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr);
 		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4, 1024);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0xAA);
@@ -162,7 +162,7 @@ static GameState final_score(s16 scroll_v){
 	px_buffer_inc(PX_INC1);
 	px_ppu_sync_off(); {
 		px_addr(NT_ADDR(0, 10, 12));
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4, 1024);
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4);
 		
 		px_addr(AT_ADDR(0));
 		px_fill(64, 0x55);

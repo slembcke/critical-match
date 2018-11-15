@@ -14,13 +14,10 @@
 .import	memcpy_upwards
 .import _px_blit
 
-out = regsave
-written = regsave + 2
-tmp = tmp1
+dst = regsave
+src = sreg
 token = tmp2
 offset = ptr3
-in = sreg
-outlen = ptr4
 
 .data
 
@@ -33,6 +30,7 @@ memcpy_dst_to_dst: jmp $FFFC
 ; These memcp-like functions are drop in replacements for memcpy_upwards().
 ; They are patched in using the jump vectors above when decompressing to vram.
 
+; dst: ptr2, src: ptr1, len: ptr3
 .proc memcpy_ram_to_vram
 	lda	ptr2+1
 	sta	PPU_VRAM_ADDR
@@ -42,21 +40,28 @@ memcpy_dst_to_dst: jmp $FFFC
 	lda	ptr3+0
 	ldx	ptr3+1
 	jsr	pushax
-	
 	lda	ptr1+0
 	ldx	ptr1+1
-	
 	jsr	_px_blit
+	
 	jmp popax
 .endproc
 
+; dst: ptr2, src: ptr1, len: ptr3
 .proc memcpy_vram_to_vram
 	lda	#0
 	sta	tmp3
 	sta	tmp4
-	jmp	@check
 	
 	@loop:
+		lda	tmp3
+		cmp	ptr3+0
+		lda	tmp4
+		sbc	ptr3+1
+		bcc	:+
+			jmp popax
+		:
+		
 		; read source byte
 		lda	ptr1+1
 		sta	PPU_VRAM_ADDR
@@ -89,14 +94,8 @@ memcpy_dst_to_dst: jmp $FFFC
 		bne	:+
 			inc	tmp4
 		:
-
-		@check:
-		lda	tmp3
-		cmp	ptr3+0
-		lda	tmp4
-		sbc	ptr3+1
-		bcc	@loop
-	jmp popax
+		
+		jmp @loop
 .endproc
 
 .export _decompress_lz4_to_ram
@@ -131,188 +130,146 @@ memcpy_dst_to_dst: jmp $FFFC
 .endproc
 
 .proc	decompress_lz4
-	jsr popax
-	sta	outlen+0
-	stx	outlen+1
+	jsr	popax
+	sta	src+0
+	stx	src+1
 	
 	jsr	popax
-	sta	in+0
-	stx	in+1
+	sta	dst+0
+	stx	dst+1
 	
-	jsr	popax
-	sta	out+0
-	stx	out+1
-	
-	; written = 0;
-	lda #0
-	sta written+0
-	
-	; while (written < outlen) {
-	jmp L0046
-	
-	L0004:
-	; token = *in++;
+	@loop:
+	; get_token
 	ldy #0
-	lda (in), y
+	lda (src), y
 	sta token
 
-	inc in
+	inc src+0
 	bne :+
-		inc in+1
+		inc src+1
 	:
 	
-	; offset = token >> 4;
-	ldx #0
+	; Decode literal count from token upper nibble.
 	lsr a
 	lsr a
 	lsr a
 	lsr a
 	sta offset+0
+	ldx #0
 	stx offset+1
 	
-	; token &= 0xf;
-	; token += 4; // Minmatch
-	lda token
-	and #$0F
-	clc
-	adc #4
-	sta token
-	
 	; if (offset == 15) {
-	lda offset+0
 	cmp #15
-	moreliterals:
-	bne L001A
+	jsr consume_length_bytes
 	
-	; tmp = *in++;
-	ldy #0
-	lda (in), y
-	sta tmp
-	
-	inc in+0
-	bne :+
-		inc in+1
-	:
-	
-	; offset += tmp;
-	clc
-	adc offset+0
-	sta offset+0
-	lda #0
-	adc offset+1
-	sta offset+1
-	
-	; if (tmp == 255)
-	lda tmp
-	cmp #255
-	
-	; goto moreliterals;
-	jmp moreliterals
-	
-	L001A:
-	; if (offset) {
-	lda offset+0
-	ora offset+1
-	beq L001C
-	
-	; memcpy(&out[written], in, offset);
-	lda out+0
-	clc
-	adc written+0
+	; memcpy(dst, src, offset);
+	lda dst+0
+	ldx dst+1
 	sta ptr2+0
-	lda out+1
-	adc written+1
-	tax
-	lda ptr2+0
 	stx ptr2+1
 	jsr pushax
-	lda in+0
-	ldx in+1
+	lda src+0
+	ldx src+1
 	sta ptr1+0
 	stx ptr1+1
 	; ldy #$00 - not needed as pushax zeroes Y
 	jsr memcpy_src_to_dst
 	
-; written += offset;
-	lda offset+0
+; dst += offset;
 	clc
-	adc written+0
-	sta written+0
-	lda offset+1
-	adc written+1
-	sta written+1
+	adc offset+0
+	sta dst+0
+	txa
+	adc offset+1
+	sta dst+1
 	
-; in += offset;
-	lda offset+0
+; src += offset;
 	clc
-	adc in+0
-	sta in+0
+	lda offset+0
+	adc src+0
+	sta src+0
 	lda offset+1
-	adc in+1
-	sta in+1
-	L001C:
+	adc src+1
+	sta src+1
 	
-	; if (written >= outlen) return;
-	lda written+0
-	cmp outlen+0
-	lda written+1
-	sbc outlen+1
-	bcc :+
+	; memcpy(&offset, src, 2);
+	ldy #0
+	lda (src), y
+	sta offset
+	iny
+	lda (src), y
+	sta offset+1
+	
+	; Terminate if offset is 0.
+	lda offset+0
+	ora offset+1
+	bne :+
 		rts
 	:
 	
-	; memcpy(&offset, in, 2);
-	ldy #0
-	lda (in), y
-	sta offset
-	iny
-	lda (in), y
-	sta offset+1
-	
-	; in += 2;
+	; src += 2;
 	lda #2
 	clc
-	adc in+0
-	sta in+0
+	adc src+0
+	sta src+0
 	bcc :+
-		inc in+1
+		inc src+1
 	:
 	
-	; copysrc = out + written - offset;
-	lda out+0
-	clc
-	adc written+0
-	tay
-	lda out+1
-	adc written+1
-	tax
-	tya
+	; copysrc = dst - offset;
+	lda dst+0
 	sec
 	sbc offset+0
 	sta ptr1+0
-	txa
+	lda dst+1
 	sbc offset+1
 	sta ptr1+1
 	
-	; offset = token;
-	lda #0
-	sta offset+1
 	lda token
+	and #$0F
+	clc
+	adc #4
 	sta offset+0
+	ldx #0
+	stx offset+1
 	
 	; if (token == 19) {
 	cmp #19
-	morematches:
-	bne L003C
+	jsr consume_length_bytes
 	
-	; tmp = *in++;
+	; memcpy(dst, copysrc, offset);
+	lda dst+0
+	ldx dst+1
+	sta ptr2+0
+	stx ptr2+1
+	jsr pushax
+	; ldy #$00 - not needed as pushax zeroes Y
+	jsr memcpy_dst_to_dst
+	
+	; dst += offset;
+	clc
+	adc offset+0
+	sta dst+0
+	txa
+	adc offset+1
+	sta dst+1
+	
+	jmp @loop
+.endproc
+
+.proc consume_length_bytes
+	beq :+
+		rts
+	:
+	
+	; tmp = *src++;
 	ldy #0
-	lda (in), y
-	sta tmp
+	lda (src), y
+	tax
 	
-	inc in+0
+	inc src+0
 	bne :+
-		inc in+1
+		inc src+1
 	:
 	
 	; offset += tmp;
@@ -324,43 +281,9 @@ memcpy_dst_to_dst: jmp $FFFC
 	sta offset+1
 	
 	; if (tmp == 255)
-	lda tmp
+	txa
 	cmp #255
 	
-	; goto morematches;
-	jmp morematches
-	
-	L003C:
-	; memcpy(&out[written], copysrc, offset);
-	lda out
-	clc
-	adc written+0
-	sta ptr2+0
-	lda out+1
-	adc written+1
-	tax
-	lda ptr2+0
-	stx ptr2+1
-	jsr pushax
-	; ldy #$00 - not needed as pushax zeroes Y
-	jsr memcpy_dst_to_dst
-	
-	; written += offset;
-	lda offset+0
-	clc
-	adc written+0
-	sta written+0
-	lda offset+1
-	adc written+1
-	L0046:
-	sta written+1
-	
-	; while (written < outlen) {
-	lda written+0
-	cmp outlen+0
-	lda written+1
-	sbc outlen+1
-	jcc L0004
-	
-	rts
+	; goto @more_matches;
+	jmp consume_length_bytes
 .endproc

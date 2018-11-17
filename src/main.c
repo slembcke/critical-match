@@ -117,7 +117,7 @@ static GameState game_loop(void){
 	} px_ppu_sync_on();
 	
 	music_init(GAMEPLAY_MUSIC);
-	music_play(0);
+	// music_play(0);
 	
 	while(true){
 		DEBUG_PROFILE_START();
@@ -283,7 +283,7 @@ static GameState main_menu(void){
 	} px_ppu_sync_on();
 	
 	music_init(TITLE_MUSIC);
-	music_play(0);
+	// music_play(0);
 
 	wait_noinput();
 	
@@ -293,7 +293,7 @@ static GameState main_menu(void){
 			++rand_seed;
 			if(JOY_START(joy_read(0))){
 				music_init(CHARACTER_SELECT_MUSIC);
-				music_play(0);
+				// music_play(0);
 				return game_loop();
 			}
 		}

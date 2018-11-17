@@ -78,7 +78,7 @@ run-mac: $(ROM)
 	open -a Nestopia $(ROM)
 
 run-linux: $(ROM)
-	nestopia -d -w -l 1 -n -s 4 -t $(ROM)
+	nestopia -w -l 1 -n -s 4 -t $(ROM)
 
 tools/png2chr:
 	make -C tools png2chr

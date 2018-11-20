@@ -68,7 +68,7 @@ function keyboard(callback, event){
 		case 81: // 'q' - azerty
 			callback(player, jsnes.Controller.BUTTON_A); break;
 		case 83: // 's' - qwerty, azerty
-		case 79: // ';' - dvorak
+		case 79: // 'o' - dvorak
 			callback(player, jsnes.Controller.BUTTON_B); break;
 		case 9: // Tab
 			callback(player, jsnes.Controller.BUTTON_SELECT); break;

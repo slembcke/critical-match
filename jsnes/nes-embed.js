@@ -13,8 +13,8 @@ var audio_samples_R = new Float32Array(SAMPLE_COUNT);
 var audio_write_cursor = 0, audio_read_cursor = 0;
 
 var nes = new jsnes.NES({
-	onFrame: function(framebuffer){
-		for(var i = 0; i < FRAMEBUFFER_SIZE; i++) framebuffer_u32[i] = 0xFF000000 | framebuffer[i];
+	onFrame: function(framebuffer_24){
+		for(var i = 0; i < FRAMEBUFFER_SIZE; i++) framebuffer_u32[i] = 0xFF000000 | framebuffer_24[i];
 	},
 	onAudioSample: function(l, r){
 		audio_samples_L[audio_write_cursor] = l;
@@ -91,6 +91,7 @@ function nes_init(canvas_id){
 	framebuffer_u8 = new Uint8ClampedArray(buffer);
 	framebuffer_u32 = new Uint32Array(buffer);
 	
+	// Setup audio.
 	var audio_ctx = new window.AudioContext();
 	var script_processor = audio_ctx.createScriptProcessor(AUDIO_BUFFERING, 0, 2);
 	script_processor.onaudioprocess = audio_callback;
@@ -110,15 +111,10 @@ function nes_load_data(canvas_id, rom_data){
 function nes_load_url(canvas_id, path){
 	nes_init(canvas_id);
 	
-	// Load ROM
 	var req = new XMLHttpRequest();
-	
 	req.open("GET", path);
 	req.overrideMimeType("text/plain; charset=x-user-defined");
-	
-	req.onerror = function(){
-		console.log(`Error loading ${path}: ${req.statusText}`);
-	}
+	req.onerror = () => console.log(`Error loading ${path}: ${req.statusText}`);
 	
 	req.onload = function() {
 		if (this.status === 200) {

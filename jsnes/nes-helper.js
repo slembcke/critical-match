@@ -1,5 +1,4 @@
 var BUTTON = {}
-
 BUTTON.A = 0;
 BUTTON.B = 1;
 BUTTON.SELECT = 2;
@@ -10,48 +9,38 @@ BUTTON.LEFT = 6;
 BUTTON.RIGHT = 7;
 
 var KEYCODE = {}
-
 KEYCODE.LEFT = 37;
 KEYCODE.UP = 38;
 KEYCODE.RIGHT = 39;
 KEYCODE.DOWN = 40;
-
 KEYCODE.A = 70;
 KEYCODE.B = 68;
 KEYCODE.SELECT = 65;
 KEYCODE.START = 83;
 
-
-var scriptNode;
-
 var SCREEN_WIDTH = 256;
 var SCREEN_HEIGHT = 240;
 var FRAMEBUFFER_SIZE = SCREEN_WIDTH*SCREEN_HEIGHT;
 
-var imageData = null;
-var buf;
-var buf8;
-var buf32;
-var canvas;
-var ctx;
+var ctx, image;
+var framebuffer_u8, framebuffer_u32;
 
 var nes = new jsnes.NES({
-	onFrame: function(frameBuffer) {
-		buf = frameBuffer;
-		for(var i = 0; i < FRAMEBUFFER_SIZE; i++) buf32[i] = 0xFF000000 | buf[i];
-	},
-	onAudioSample: function(left, right) {}
+	onFrame: function(framebuffer){for(var i = 0; i < FRAMEBUFFER_SIZE; i++) framebuffer_u32[i] = 0xFF000000 | framebuffer[i];},
+	onAudioSample: function(left, right){}
 });
 
-function onAnimationFrame() {
+function onAnimationFrame(){
 	window.requestAnimationFrame(onAnimationFrame);
-	imageData.data.set(buf8);
-	ctx.putImageData(imageData, 0, 0);
+	
+	image.data.set(framebuffer_u8);
+	ctx.putImageData(image, 0, 0);
 	nes.frame();
 }
 
-function loadBinary(path, callback, handleProgress) {
+function loadBinary(path, callback) {
 	var req = new XMLHttpRequest();
+	
 	req.open("GET", path);
 	req.overrideMimeType("text/plain; charset=x-user-defined");
 	req.onload = function() {
@@ -63,41 +52,31 @@ function loadBinary(path, callback, handleProgress) {
 			callback(new Error(req.statusText));
 		}
 	};
+	
 	req.onerror = function() {
 		callback(new Error(req.statusText));
 	};
-	req.onprogress = handleProgress;
+	
 	req.send();
+	
 	return req;
 }
 
 function handleLoaded(data){
-	// INITIALIZE CANVAS
-	canvas = document.getElementById(CANVAS_ID);
+	var canvas = document.getElementById("nes-canvas");
 	ctx = canvas.getContext("2d");
-	imageData = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	image = ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	ctx.fillStyle = "black";
-	// set alpha to opaque
 	ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-	// buffer to write on next animation frame
-	buf = new ArrayBuffer(imageData.data.length);
-	// Get the canvas buffer in 8bit and 32bit
-	buf8 = new Uint8ClampedArray(buf);
-	buf32 = new Uint32Array(buf);
-
-	for(var i = 0; i < buf32.length; ++i) buf32[i] = 0xff000000;
+	
+	// Allocate framebuffer array.
+	var buf = new ArrayBuffer(image.data.length);
+	framebuffer_u8 = new Uint8ClampedArray(buf);
+	framebuffer_u32 = new Uint32Array(buf);
 
 	nes.loadROM(data);
 	window.requestAnimationFrame(onAnimationFrame);
-}
-
-function handleProgress( e ) {
-	if (e.lengthComputable) {
-		//this.setState({ loadedPercent: e.loaded / e.total * 100 });
-		console.log("loadPct=" + (e.loaded / e.total * 100) );
-	}
 }
 
 function keyboardDown(event) {
@@ -154,8 +133,7 @@ function keyboardDown(event) {
 	}
 }
 
-function initNES( nes_file, canvas_id ) {
-	CANVAS_ID = canvas_id;
+function initNES(nes_file, canvas_id){
 	var currentRequest = loadBinary(
 		nes_file,
 		(err, data) => {
@@ -165,7 +143,6 @@ function initNES( nes_file, canvas_id ) {
 				handleLoaded(data);
 			}
 		},
-		handleProgress
 	);
 }
 

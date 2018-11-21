@@ -520,7 +520,7 @@ void grid_draw_indicators(void){
 	
 	// Column warnings.
 	if(COLUMN_HEIGHT[grid.flicker_column] >= GRID_H - 4){
-		px_spr(68 + 16*grid.flicker_column, 50, 0x00, 0x03);
+		px_spr(68 + 16*grid.flicker_column, 50, 0x03, 0x03);
 	}
 	
 	// Draw drop indicator.

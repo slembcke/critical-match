@@ -65,12 +65,12 @@ static GameState game_loop(void){
 		static const u8 PALETTE[] = {
 			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0: dark orange, green, purple
 			CLR_BG, 0x17, 0x28, 0x20, // DROPS1: orange, yellow, white
+			CLR_BG, 0x11, 0x22, 0x32, // BG: blue, light blue, dark cyan
 			CLR_BG, 0x1D, 0x1D, 0x1D, // UNUSED
-			CLR_BG, 0x11, 0x31, 0x1D, // BG: blue, light blue, black
 			
 			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0
 			CLR_BG, 0x17, 0x28, 0x20, // DROPS1
-			CLR_BG, 0x1D, 0x1D, 0x1D, // UNUSED
+			CLR_BG, 0x11, 0x22, 0x32, // BG
 			CLR_BG, 0x2D, 0x18, 0x28, // PLAYER
 		};
 		
@@ -90,7 +90,7 @@ static GameState game_loop(void){
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
 		px_addr(AT_ADDR(0));
-		px_fill(64, 0xFF);
+		px_fill(64, 0xAA);
 		
 		px_spr_clear();
 	} px_ppu_sync_on();

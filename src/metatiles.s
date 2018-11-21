@@ -16,7 +16,7 @@ METATILE0: .byte  $A0,  $00,  $8E,  $00,  $80,  $82,  $80,  $84,  $86,  $88,  $8
 METATILE1: .byte  $A1,  $00,  $8F,  $00,  $81,  $83,  $81,  $85,  $87,  $89,  $87,  $8B,  $87,  $89,  $87,  $8B
 METATILE2: .byte  $B0,  $00,  $9E,  $00,  $90,  $92,  $90,  $94,  $96,  $98,  $96,  $9A,  $96,  $98,  $96,  $9A
 METATILE3: .byte  $B1,  $00,  $9F,  $00,  $91,  $93,  $91,  $95,  $97,  $99,  $97,  $9B,  $97,  $99,  $97,  $9B
-METATILE4: .byte PAL3, PAL0, PAL1, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL1, PAL1
+METATILE4: .byte PAL2, PAL0, PAL2, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL1, PAL1
 
 .code
 

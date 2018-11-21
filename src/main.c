@@ -10,13 +10,7 @@
 
 u8 joy0, joy1;
 
-#define CLR_BG 0x0C
-#define CLR_BLACK 0x1D
-#define CLR_YELLOW 0x28
-#define CLR_1 0x02 // blue
-#define CLR_2 0x07 // red
-#define CLR_3 0x1B // green
-#define CLR_4 0x14 // purple
+#define CLR_BG 0x02
 
 static void wait_noinput(void){
 	while(joy_read(0) || joy_read(1)) px_wait_nmi();
@@ -41,21 +35,6 @@ static void px_ppu_sync_on(){
 static GameState main_menu(void);
 static void pause(void);
 static GameState game_over(void);
-
-static void blit_palette(u8 bg_color){
-	static const u8 PALETTE[] = {
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_1,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_2,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_3,
-		CLR_BG, CLR_BLACK, CLR_YELLOW, CLR_4,
-	};
-	
-	px_buffer_data(32, PAL_ADDR);
-	memcpy(PX.buffer, PALETTE, sizeof(PALETTE));
-	memcpy(PX.buffer + 16, PALETTE, sizeof(PALETTE));
-	
-	px_buffer_set_color(0, bg_color);
-}
 
 static GameState game_loop(void){
 	music_stop();
@@ -84,15 +63,15 @@ static GameState game_loop(void){
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
 		static const u8 PALETTE[] = {
-			0x21, 0x07, 0x1A, 0x04, // dark orange, green, purple
-			0x21, 0x17, 0x28, 0x20, // orange, yellow, white
-			0x21, 0x11, 0x1D, 0x1D, // blue, black, black
-			0x21, 0x1D, 0x1D, 0x1D, // black, black, black
+			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0: dark orange, green, purple
+			CLR_BG, 0x17, 0x28, 0x20, // DROPS1: orange, yellow, white
+			CLR_BG, 0x1D, 0x1D, 0x1D, // UNUSED
+			CLR_BG, 0x11, 0x1D, 0x1D, // BG: blue, black, black
 			
-			0x21, 0x07, 0x1A, 0x04,
-			0x21, 0x17, 0x28, 0x20,
-			0x21, 0x1D, 0x1D, 0x1D,
-			0x21, 0x2D, 0x18, 0x28,
+			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0
+			CLR_BG, 0x17, 0x28, 0x20, // DROPS1
+			CLR_BG, 0x1D, 0x1D, 0x1D, // UNUSED
+			CLR_BG, 0x2D, 0x18, 0x28, // PLAYER
 		};
 		
 		px_buffer_data(32, PAL_ADDR);
@@ -111,7 +90,7 @@ static GameState game_loop(void){
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
 		px_addr(AT_ADDR(0));
-		px_fill(64, 0xAA);
+		px_fill(64, 0xFF);
 		
 		px_spr_clear();
 	} px_ppu_sync_on();
@@ -157,7 +136,7 @@ static GameState final_score(s16 scroll_v){
 	u16 timeout;
 	u16 scroll_y = 0;
 	
-	px_buffer_set_color(0, CLR_BLACK);
+	px_buffer_set_color(0, CLR_BG);
 	
 	px_buffer_inc(PX_INC1);
 	px_ppu_sync_off(); {

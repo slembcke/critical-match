@@ -66,7 +66,7 @@ static GameState game_loop(void){
 			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0: dark orange, green, purple
 			CLR_BG, 0x17, 0x28, 0x20, // DROPS1: orange, yellow, white
 			CLR_BG, 0x1D, 0x1D, 0x1D, // UNUSED
-			CLR_BG, 0x11, 0x1D, 0x1D, // BG: blue, black, black
+			CLR_BG, 0x11, 0x31, 0x1D, // BG: blue, light blue, black
 			
 			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0
 			CLR_BG, 0x17, 0x28, 0x20, // DROPS1

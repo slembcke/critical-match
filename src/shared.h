@@ -38,12 +38,10 @@ u8 bounce4(void);
 #define BLOCK_TYPE_MASK 0x0C
 #define BLOCK_TYPE_OTHER 0x00
 #define BLOCK_TYPE_CHEST 0x04
-#define BLOCK_TYPE_KEY 0x08
 #define BLOCK_TYPE_OPEN 0x0C
 
 // Block status bits.
 #define BLOCK_STATUS_MASK 0xF0
-#define BLOCK_STATUS_MATCHING 0x10
 #define BLOCK_STATUS_UNLOCKED 0x20
 #define BLOCK_GFX_MASK (~BLOCK_STATUS_MASK)
 
@@ -52,7 +50,6 @@ u8 bounce4(void);
 #define BLOCK_BORDER 0x01
 #define BLOCK_GARBAGE 0x02
 #define BLOCK_CHEST (BLOCK_TYPE_CHEST)
-#define BLOCK_KEY (BLOCK_TYPE_KEY | BLOCK_STATUS_MATCHING)
 
 #define GRID_W 8
 #define GRID_H 12
@@ -79,7 +76,6 @@ void grid_init(void);
 bool grid_update(void);
 void grid_update_column_height(void);
 void grid_draw_indicators(void);
-void grid_draw_garbage(void);
 void grid_pause_semaphore(s8 inc);
 void grid_buffer_score(u16 addr);
 

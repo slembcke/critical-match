@@ -97,7 +97,6 @@ static GameState game_loop(void){
 		player_draw_blocks();
 		player_draw();
 		grid_draw_indicators();
-		grid_draw_garbage();
 		coins_draw();
 		
 		player_draw_grapple();

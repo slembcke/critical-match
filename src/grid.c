@@ -31,15 +31,6 @@ u8 COLUMN_HEIGHT[GRID_W];
 #define MAX_COMBO 5
 #define COMBO_LABEL_TIMEOUT 180
 
-// Ticks before adding a block to the meter.
-#define GARBAGE_BLOCK_TICKS 10
-
-// How many frames pass before adding garbage blocks to the board.
-#define GARBAGE_METER_TICKS 40
-
-// How many frames garbage blocks preview for.
-#define GARBAGE_PREVIEW_TIMEOUT 180
-
 typedef struct {
 	// Cursor values used for shuffling.
 	u8 drop_cursor;
@@ -52,19 +43,6 @@ typedef struct {
 	// Game timing.
 	u8 speedup_counter;
 	u8 block_fall_timeout;
-	
-	// How many ticks left before adding garbage.
-	u8 garbage_meter_ticks;
-	// Ticks per garbage block added to the meter.
-	u8 garbage_block_ticks;
-	// Queued blocks of garbage to add.
-	u8 garbage_blocks;
-	// +/- points to adjust garbage with.
-	u8 garbage_pos_points;
-	u8 garbage_neg_points;
-	// Values used for previewing garbage placement.
-	u8 garbage_preview_timeout;
-	u8 garbage_mask;
 	
 	u8 combo;
 	u8 combo_ticks;
@@ -130,47 +108,37 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
-// XOR a block with a neighbor and compare using a mask.
-// Only the 'matching' bit should be left.
-#define BLOCK_MATCH(block, cmp, mask, expect) (((block ^ cmp) & mask) == expect)
 
 static bool grid_match_blocks(void){
 	static u8 queue[8];
 	register u8 cursor = 0;
 	register u8 block;
-	register u8 mask, expect;
+	register u8 mask;
 	
 	for(ix = GRID_W - 2; ix > 0; --ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
 			idx = grid_block_idx(ix, iy);
 			
-			// For simplicity sake, never consider the current block as matching.
-			block = GRID[idx] & ~BLOCK_STATUS_MATCHING;
-			
-			if(block & BLOCK_STATUS_UNLOCKED){
-				continue; // Skip blocks that are already unlocked.
-			} else if((block & BLOCK_TYPE_MASK) != BLOCK_TYPE_OTHER){
-				// Color must match, and neighbor should be matching.
-				mask = BLOCK_COLOR_MASK | BLOCK_STATUS_MATCHING;
-				expect = BLOCK_STATUS_MATCHING;
-			} else if(block == BLOCK_GARBAGE){
-				// Neighbor must be actively matching and already unlocked.
-				mask = BLOCK_STATUS_UNLOCKED | BLOCK_STATUS_MATCHING;
-				expect = mask;
-			} else {
-				// Skip other types of blocks. (empty, border)
-				continue;
-			}
+			block = GRID[idx];
 			
 			if(
-				BLOCK_MATCH(block, GRID_D[idx], mask, expect) ||
-				(COLUMN_HEIGHT[ix] > iy && BLOCK_MATCH(block, GRID_U[idx], mask, expect)) ||
-				(COLUMN_HEIGHT_L[ix] >= iy && BLOCK_MATCH(block, GRID_L[idx], mask, expect)) ||
-				(COLUMN_HEIGHT_R[ix] >= iy && BLOCK_MATCH(block, GRID_R[idx], mask, expect)) ||
-				false
+				(block & BLOCK_STATUS_UNLOCKED) == 0
+				// && (GRID + 0*GRID_W + 1)[idx] == block
+				// && (GRID + 1*GRID_W + 0)[idx] == block
+				// && (GRID + 1*GRID_W + 1)[idx] == block
+				&& (GRID + 0*GRID_W + 1)[idx] == block
+				&& (GRID + 1*GRID_W + 1)[idx] == block
+				&& (GRID + 1*GRID_W + 2)[idx] == block
 			){
-				queue[cursor] = idx;
-				++cursor;
+				// (queue + 0)[cursor] = idx + 0*GRID_W + 0;
+				// (queue + 1)[cursor] = idx + 0*GRID_W + 1;
+				// (queue + 2)[cursor] = idx + 1*GRID_W + 0;
+				// (queue + 3)[cursor] = idx + 1*GRID_W + 1;
+				(queue + 0)[cursor] = idx + 0*GRID_W + 0;
+				(queue + 1)[cursor] = idx + 0*GRID_W + 1;
+				(queue + 2)[cursor] = idx + 1*GRID_W + 1;
+				(queue + 3)[cursor] = idx + 1*GRID_W + 2;
+				cursor += 4;
 				
 				// Ran out of queue space.
 				if(cursor == sizeof(queue)) goto open_queued_chests;
@@ -191,10 +159,10 @@ static bool grid_match_blocks(void){
 			block ^= BLOCK_TYPE_CHEST ^ BLOCK_TYPE_OPEN;
 			
 			// Set them to match against other blocks too.
-			mask = BLOCK_STATUS_UNLOCKED | BLOCK_STATUS_MATCHING;
+			mask = BLOCK_STATUS_UNLOCKED;
 			
 			// Emit coins.
-			coins_add_at(idx);
+			// coins_add_at(idx);
 		} else {
 			// Keys and garbage only unlock.
 			mask = BLOCK_STATUS_UNLOCKED;
@@ -253,12 +221,10 @@ static u8 get_shuffled_block(void){
 		0, 1, 2, 3,
 		0, 1, 2, 3,
 		0, 1, 2, 3,
-		4, 5, 6, 7,
 		0, 1, 2, 3,
 		0, 1, 2, 3,
 		0, 1, 2, 3,
 		0, 1, 2, 3,
-		4, 5, 6, 7,
 	};
 
 	static const u8 BLOCKS[] = {
@@ -266,10 +232,6 @@ static u8 get_shuffled_block(void){
 		BLOCK_CHEST | BLOCK_COLOR_RED,
 		BLOCK_CHEST | BLOCK_COLOR_GREEN,
 		BLOCK_CHEST | BLOCK_COLOR_PURPLE,
-		BLOCK_KEY | BLOCK_COLOR_BLUE,
-		BLOCK_KEY | BLOCK_COLOR_RED,
-		BLOCK_KEY | BLOCK_COLOR_GREEN,
-		BLOCK_KEY | BLOCK_COLOR_PURPLE,
 	};
 	
 	return BLOCKS[lru_shuffle(DROPS, sizeof(DROPS), 0x7, &grid.drop_cursor)];
@@ -327,17 +289,6 @@ static void grid_blit(void){
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
-static void grid_remove_garbage(u8 score){
-	grid.garbage_neg_points += score;
-	while(grid.garbage_neg_points > MAX_COMBO){
-		grid.garbage_neg_points -= MAX_COMBO;
-		if(grid.garbage_blocks > 1){
-			--grid.garbage_blocks;
-			buffer_set_metatile(BLOCK_EMPTY, NT_ADDR(0, 6, 20 - 2*grid.garbage_blocks));
-		}
-	}
-}
-
 static void grid_blocks_tick(void){
 	// High bit marks any block. Low 7 count unlocked chests.
 	register u8 matched_blocks = 0;
@@ -370,8 +321,6 @@ static void grid_blocks_tick(void){
 		u8 score = (matched_blocks & 0x7F)*grid.combo;
 		grid.score += score;
 		
-		grid_remove_garbage(score);
-		
 		grid.combo_label_value = grid.combo;
 		grid.combo_label_timeout = COMBO_LABEL_TIMEOUT;
 		
@@ -386,19 +335,6 @@ static void grid_blocks_tick(void){
 	grid_blit();
 }
 
-static const u8 MASK_BITS[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
-
-// TODO Can be fairly expensive.
-static void grid_shuffle_garbage(u8 count){
-	while(count){
-		ix = get_shuffled_column();
-		if((grid.garbage_mask & MASK_BITS[ix]) == 0){
-			grid.garbage_mask |= MASK_BITS[ix];
-			--count;
-		}
-	}
-}
-
 static void grid_tick(void){
 	grid_blocks_tick();
 	
@@ -406,33 +342,6 @@ static void grid_tick(void){
 	if(!grid_any_falling()){
 		grid_drop_block();
 		grid_update_fall_speed();
-	}
-	
-	if(grid.garbage_blocks > 0){
-		if(++grid.garbage_meter_ticks >= GARBAGE_METER_TICKS){
-			grid.garbage_meter_ticks = 0;
-			
-			grid.garbage_preview_timeout = GARBAGE_PREVIEW_TIMEOUT;
-			grid_shuffle_garbage(grid.garbage_blocks);
-			
-			// Clear out the meter
-			grid.garbage_blocks = 0;
-			for(idx = 0; idx < 6; ++idx){
-				buffer_set_metatile(BLOCK_EMPTY, NT_ADDR(0, 6, 20 - 2*idx));
-			}
-			
-			px_wait_nmi();
-		}
-	} else {
-		grid.garbage_meter_ticks = 0;
-	}
-	
-	if(--grid.garbage_block_ticks == 0){
-		if(grid.garbage_blocks < 6){
-			buffer_set_metatile(BLOCK_GARBAGE, NT_ADDR(0, 6, 20 - 2*grid.garbage_blocks));
-			++grid.garbage_blocks;
-		}
-		grid.garbage_block_ticks = GARBAGE_BLOCK_TICKS;
 	}
 }
 
@@ -494,7 +403,6 @@ void grid_init(void){
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
 	
-	grid.garbage_block_ticks = GARBAGE_BLOCK_TICKS;
 	grid.flicker_column = GRID_W - 2;
 	
 	grid.combo = 1;
@@ -512,12 +420,6 @@ void grid_draw_indicators(void){
 		--grid.combo_label_timeout;
 	}
 	
-	// Draw garbage meter timer.
-	// ticks * 2.5
-	iy = grid.garbage_meter_ticks;
-	iy = (u8)(4*iy + iy)/2;
-	px_spr(40, 172 - iy, 0x02, 0x02);
-	
 	// Column warnings.
 	if(COLUMN_HEIGHT[grid.flicker_column] >= GRID_H - 4){
 		px_spr(68 + 16*grid.flicker_column, 50, 0x03, 0x03);
@@ -534,36 +436,8 @@ void grid_draw_indicators(void){
 	}
 }
 
-void grid_draw_garbage(){
-	ix = grid.flicker_column;
-	if(grid.garbage_mask & MASK_BITS[ix]){
-		iy = COLUMN_HEIGHT[ix];
-		block_sprite(64 + ix*16, 190 - iy*16, BLOCK_GARBAGE);
-	}
-}
-
-static void grid_place_garbage(void){
-	for(ix = 1; ix < GRID_W - 1; ++ix){
-		if(grid.garbage_mask & MASK_BITS[ix]){
-			iy = COLUMN_HEIGHT[ix] + 1;
-			
-			grid_set_block(grid_block_idx(ix, iy), BLOCK_GARBAGE);
-		}
-	}
-	
-	grid.garbage_mask = 0x00;
-	grid_update_column_height();
-	px_wait_nmi();
-}
-
 bool grid_update(void){
 	if(--grid.flicker_column == 0) grid.flicker_column = GRID_W - 2;
-	
-	if(grid.garbage_preview_timeout > 0){
-		if(--grid.garbage_preview_timeout == 0){
-			grid_place_garbage();
-		}
-	}
 	
 	return naco_resume(grid.update_coro, 0);
 }

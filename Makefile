@@ -22,6 +22,7 @@ SRC = \
 
 ASMSRC = \
 	src/zeropage.s \
+	src/match.s \
 	src/sprites.s \
 	src/metatiles.s \
 	gfx/gfx.s \

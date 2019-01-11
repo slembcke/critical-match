@@ -108,6 +108,7 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
+bool grid_match_tetromino();
 
 static bool grid_match_blocks(void){
 	register u8 block;
@@ -119,18 +120,10 @@ static bool grid_match_blocks(void){
 			block = GRID[idx];
 			
 			if(
+				// TODO check block type?
 				(block & BLOCK_STATUS_UNLOCKED) == 0
-				&& (GRID + 0*GRID_W + 1)[idx] == block
-				&& (GRID + 1*GRID_W + 0)[idx] == block
-				&& (GRID + 1*GRID_W + 1)[idx] == block
-				&& (COLUMN_HEIGHT + 0)[ix] >= iy
-				&& (COLUMN_HEIGHT + 1)[ix] >= iy
+				&& grid_match_tetromino()
 			){
-				(GRID + 0*GRID_W + 0)[idx] |= BLOCK_STATUS_UNLOCKED;
-				(GRID + 0*GRID_W + 1)[idx] |= BLOCK_STATUS_UNLOCKED;
-				(GRID + 1*GRID_W + 0)[idx] |= BLOCK_STATUS_UNLOCKED;
-				(GRID + 1*GRID_W + 1)[idx] |= BLOCK_STATUS_UNLOCKED;
-				
 				return true;
 			}
 		}

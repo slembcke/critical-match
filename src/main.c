@@ -277,14 +277,14 @@ static GameState main_menu(void){
 #ifdef DEBUG
 static GameState debug_chr(void){
 	px_ppu_sync_off(); {
-		blit_palette();
+		// blit_palette();
 		
 		px_bg_table(1);
 		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr, 32*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr, 128*16);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr, 84*16);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
+		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
+		// decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr);
 		
 		//Top
 		px_inc(PX_INC1);

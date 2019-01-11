@@ -108,9 +108,10 @@ void grid_set_block(u8 index, u8 block){
 	GRID[index] = block;
 }
 
-bool grid_match_tetromino();
+bool grid_match_tetromino(u8 shape);
 
 static bool grid_match_blocks(void){
+	static u8 shape;
 	register u8 block;
 	
 	for(ix = GRID_W - 2; ix > 0; --ix){
@@ -122,8 +123,9 @@ static bool grid_match_blocks(void){
 			if(
 				// TODO check block type?
 				(block & BLOCK_STATUS_UNLOCKED) == 0
-				&& grid_match_tetromino()
+				&& grid_match_tetromino(shape)
 			){
+				shape = (shape + 1) & 0x3;
 				return true;
 			}
 		}

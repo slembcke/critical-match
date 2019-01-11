@@ -110,10 +110,7 @@ void grid_set_block(u8 index, u8 block){
 
 
 static bool grid_match_blocks(void){
-	static u8 queue[8];
-	register u8 cursor = 0;
 	register u8 block;
-	register u8 mask;
 	
 	for(ix = GRID_W - 2; ix > 0; --ix){
 		for(iy = COLUMN_HEIGHT[ix]; iy > 0; --iy){
@@ -123,55 +120,23 @@ static bool grid_match_blocks(void){
 			
 			if(
 				(block & BLOCK_STATUS_UNLOCKED) == 0
-				// && (GRID + 0*GRID_W + 1)[idx] == block
-				// && (GRID + 1*GRID_W + 0)[idx] == block
-				// && (GRID + 1*GRID_W + 1)[idx] == block
 				&& (GRID + 0*GRID_W + 1)[idx] == block
+				&& (GRID + 1*GRID_W + 0)[idx] == block
 				&& (GRID + 1*GRID_W + 1)[idx] == block
-				&& (GRID + 1*GRID_W + 2)[idx] == block
+				&& (COLUMN_HEIGHT + 0)[ix] >= iy
+				&& (COLUMN_HEIGHT + 1)[ix] >= iy
 			){
-				// (queue + 0)[cursor] = idx + 0*GRID_W + 0;
-				// (queue + 1)[cursor] = idx + 0*GRID_W + 1;
-				// (queue + 2)[cursor] = idx + 1*GRID_W + 0;
-				// (queue + 3)[cursor] = idx + 1*GRID_W + 1;
-				(queue + 0)[cursor] = idx + 0*GRID_W + 0;
-				(queue + 1)[cursor] = idx + 0*GRID_W + 1;
-				(queue + 2)[cursor] = idx + 1*GRID_W + 1;
-				(queue + 3)[cursor] = idx + 1*GRID_W + 2;
-				cursor += 4;
+				(GRID + 0*GRID_W + 0)[idx] |= BLOCK_STATUS_UNLOCKED;
+				(GRID + 0*GRID_W + 1)[idx] |= BLOCK_STATUS_UNLOCKED;
+				(GRID + 1*GRID_W + 0)[idx] |= BLOCK_STATUS_UNLOCKED;
+				(GRID + 1*GRID_W + 1)[idx] |= BLOCK_STATUS_UNLOCKED;
 				
-				// Ran out of queue space.
-				if(cursor == sizeof(queue)) goto open_queued_chests;
+				return true;
 			}
 		}
 	}
 	
-	if(cursor == 0) return false;
-	
-	open_queued_chests:
-	while(cursor > 0){
-		--cursor;
-		idx = queue[cursor];
-		block = GRID[idx];
-		
-		if((block & BLOCK_TYPE_MASK) == BLOCK_TYPE_CHEST){
-			// Flip bits to change chests into open chests.
-			block ^= BLOCK_TYPE_CHEST ^ BLOCK_TYPE_OPEN;
-			
-			// Set them to match against other blocks too.
-			mask = BLOCK_STATUS_UNLOCKED;
-			
-			// Emit coins.
-			// coins_add_at(idx);
-		} else {
-			// Keys and garbage only unlock.
-			mask = BLOCK_STATUS_UNLOCKED;
-		}
-		
-		grid_set_block(idx, block | mask);
-	}
-	
-	return true;
+	return false;
 }
 
 void grid_update_column_height(void){
@@ -349,11 +314,7 @@ uintptr_t grid_update_coro(void){
 	while(true){
 		// Look for matches while waiting for the next tick.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
-			if(
-				// Check every few frames to animate matching nicely.
-				(grid.state_timer & 0x3) == 0 &&
-				grid_match_blocks()
-			){
+			if(grid_match_blocks()){
 				// Prevent the timer from advancing as long as matches are happening.
 				grid.state_timer = 0;
 			}

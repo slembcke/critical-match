@@ -38,7 +38,6 @@ u8 bounce4(void);
 #define BLOCK_TYPE_MASK 0x0C
 #define BLOCK_TYPE_OTHER 0x00
 #define BLOCK_TYPE_CHEST 0x04
-#define BLOCK_TYPE_OPEN 0x0C
 
 // Block status bits.
 #define BLOCK_STATUS_MASK 0xF0

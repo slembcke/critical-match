@@ -1,6 +1,6 @@
 .macpack generic
 
-.import _ix, _iy, _idx
+.importzp _ix, _iy, _idx
 .import _GRID, _COLUMN_HEIGHT
 
 BLOCK_STATUS_UNLOCKED = $20
@@ -21,11 +21,10 @@ BLOCK_STATUS_UNLOCKED = $20
 	bne @no_match
 	
 	; Check rows exist.
-	lda _COLUMN_HEIGHT+0, x
-	cmp _iy
+	lda _iy
+	cmp _COLUMN_HEIGHT+0, x
 	bge @no_match
-	lda _COLUMN_HEIGHT+1, x
-	cmp _iy
+	cmp _COLUMN_HEIGHT+1, x
 	bge @no_match
 	
 	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED

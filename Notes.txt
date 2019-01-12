@@ -1,7 +1,11 @@
-BUGS:
-* Garbage blocks can be added above screen edge.
+TODO:
+* Shape indicator
+* Splash screen
+* Music for gameplay
 
-UPGRADES:
+BUGS:
+
+UPGRADES?
 * High jump.
 * Double jump.
 * Grapple.

@@ -208,8 +208,8 @@ static void grid_shuffle_next_drop(){
 	grid.queued_drops[1] = get_shuffled_block();
 	// TODO column
 	
-	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 6));
-	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 4));
+	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 8));
+	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 6));
 }
 
 static void grid_drop_block(void){

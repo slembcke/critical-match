@@ -67,6 +67,7 @@ clean:
 	rm -rf $(OBJS)
 	rm -rf gfx/*.chr
 	rm -rf gfx/*.lz4chr
+	rm -rf gfx/shapes.bin
 	rm -rf gfx/*.lz4
 	rm -rf $(SONGS:.txt=.s)
 	rm -rf dat/*.lz4
@@ -114,7 +115,7 @@ $(ROM): ld65.cfg $(OBJS)
 %.lz4: %.bin tools/lz4x
 	tools/lz4x -f9 $< $@
 
-gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4)
+gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4) gfx/shapes.bin
 
 audio/%.s: audio/%.txt tools/text2data
 	tools/text2data -ca65 $<

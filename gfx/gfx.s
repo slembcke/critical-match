@@ -18,3 +18,7 @@ inclz4 _gfx_character_lz4chr, "character.lz4chr"
 
 inclz4 _gfx_board_lz4, "board.lz4"
 inclz4 _gfx_game_over_lz4, "game_over.lz4"
+
+.export _gfx_shapes
+_gfx_shapes:
+	.incbin "shapes.bin"

@@ -1,19 +1,22 @@
 import sys
+import struct
+import base64
+import xml.etree.ElementTree
+
 filename = sys.argv[1]
 
-import pprint
-p = pprint.PrettyPrinter(indent=4).pprint
-
-import xml.etree.ElementTree
 map = xml.etree.ElementTree.parse(filename).getroot()
 data = map.find('layer/data')
-
-import base64
 data_u32 = base64.b64decode(data.text).strip()
 
-import struct
-values = struct.unpack("960I", data_u32)
-values = [e - 1 for e in values] + [0]*64
-data_u8 = struct.pack("1024B", *values)
+format = "{0}I".format(len(data_u32)/4)
+values = struct.unpack(format, data_u32)
+values = [e - 1 for e in values]
+
+# Append a blank attribute table if it's the size of a full name table.
+if len(values) == 960: values += [0]*64
+
+format = "{0}B".format(len(values))
+data_u8 = struct.pack(format, *values)
 
 sys.stdout.write(data_u8)

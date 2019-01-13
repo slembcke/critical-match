@@ -6,6 +6,7 @@
 #include "pixler/pixler.h"
 #include "naco/naco.h"
 #include "shared.h"
+#include "gfx/gfx.h"
 
 // Block values in the grid.
 u8 GRID[GRID_BYTES];
@@ -39,6 +40,8 @@ typedef struct {
 	// Where and what to drop next.
 	u8 queued_column;
 	u8 queued_drops[2];
+	
+	u8 shape;
 	
 	// Game timing.
 	u8 speedup_counter;
@@ -111,7 +114,6 @@ void grid_set_block(u8 index, u8 block){
 bool grid_match_tetromino(u8 shape);
 
 static bool grid_match_blocks(void){
-	static u8 shape;
 	register u8 block;
 	
 	for(ix = GRID_W - 2; ix > 0; --ix){
@@ -123,9 +125,8 @@ static bool grid_match_blocks(void){
 			if(
 				// TODO check block type?
 				(block & BLOCK_STATUS_UNLOCKED) == 0
-				&& grid_match_tetromino(shape)
+				&& grid_match_tetromino(grid.shape)
 			){
-				shape = (shape + 1) & 0x3;
 				return true;
 			}
 		}
@@ -249,6 +250,18 @@ static void grid_blit(void){
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
+static void grid_blit_shape(u8 shape){
+	px_buffer_data(4, NT_ADDR(0, 24, 7));
+	memcpy(PX.buffer, gfx_shapes + 8*shape + 8, 4);
+	px_buffer_data(4, NT_ADDR(0, 24, 8));
+	memcpy(PX.buffer, gfx_shapes + 8*shape + 12, 4);
+	
+	// px_addr(NT_ADDR(0, 24, 7));
+	// px_blit(4, gfx_shapes + 8*shape + 8);
+	// px_addr(NT_ADDR(0, 24, 8));
+	// px_blit(4, gfx_shapes + 8*shape + 12);
+}
+
 static void grid_blocks_tick(void){
 	// High bit marks any block. Low 7 count unlocked chests.
 	register u8 matched_blocks = 0;
@@ -306,10 +319,15 @@ static void grid_tick(void){
 }
 
 uintptr_t grid_update_coro(void){
+	grid_blit_shape(0);
+	
 	while(true){
 		// Look for matches while waiting for the next tick.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
 			if(grid_match_blocks()){
+				grid.shape = (grid.shape + 1) & 0x3;
+				grid_blit_shape(grid.shape);
+				
 				// Prevent the timer from advancing as long as matches are happening.
 				grid.state_timer = 0;
 			}

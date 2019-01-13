@@ -83,8 +83,6 @@ static GameState game_loop(void){
 		
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
-		// Fill attribute table with palette 3.
-		// TODO breaks BG grid. Need real table here.
 		px_addr(AT_ADDR(0));
 		px_blit(64, ATTRIB);
 		

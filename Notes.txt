@@ -1,13 +1,6 @@
 TODO:
-* Shape indicator
 * Splash screen
 * Music for gameplay
+* Game balance
 
 BUGS:
-
-UPGRADES?
-* High jump.
-* Double jump.
-* Grapple.
-* Speed.
-* Strength.

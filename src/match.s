@@ -3,7 +3,7 @@
 .importzp _ix, _iy, _idx
 .import _GRID, _COLUMN_HEIGHT
 
-BLOCK_STATUS_UNLOCKED = $20
+BLOCK_STATUS_UNLOCKED_AND_OPEN = $28
 
 .rodata
 
@@ -45,9 +45,9 @@ MATCH_TABLE_H: .hibytes MATCH_TABLE
 	cmp _COLUMN_HEIGHT+1, x
 	bge @no_match
 	
-	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED
+	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
 	lda _GRID, y
-	ora #BLOCK_STATUS_UNLOCKED
+	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
 	sta _GRID+0+0, y
 	sta _GRID+0+1, y
 	sta _GRID+8+0, y
@@ -88,9 +88,9 @@ MATCH_TABLE_H: .hibytes MATCH_TABLE
 	cmp _COLUMN_HEIGHT+2, x
 	bge @no_match
 	
-	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED
+	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
 	lda _GRID, y
-	ora #BLOCK_STATUS_UNLOCKED
+	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
 	sta _GRID+0+0, y
 	sta _GRID+0+1, y
 	sta _GRID+8+1, y
@@ -131,9 +131,9 @@ MATCH_TABLE_H: .hibytes MATCH_TABLE
 		bge @no_match
 	:
 	
-	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED
+	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
 	lda _GRID, y
-	ora #BLOCK_STATUS_UNLOCKED
+	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
 	sta _GRID+0+0, y
 	sta _GRID+0+1, y
 	sta _GRID+8+0, y
@@ -176,9 +176,9 @@ MATCH_TABLE_H: .hibytes MATCH_TABLE
 		bge @no_match
 	:
 	
-	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED
+	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
 	lda _GRID, y
-	ora #BLOCK_STATUS_UNLOCKED
+	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
 	sta _GRID+0+0, y
 	sta _GRID+0+1, y
 	sta _GRID+0+2, y

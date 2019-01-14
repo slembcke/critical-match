@@ -20,12 +20,12 @@ u8 COLUMN_HEIGHT[GRID_W];
 // Min/Max waiting ticks before triggering the next fall.
 // TODO should be 15, but blitting takes too long.
 #define MIN_FALL_FRAMES (16 - OVERHEAD_FRAMES)
-#define MAX_FALL_FRAMES (60 - OVERHEAD_FRAMES)
+#define MAX_FALL_FRAMES (80 - OVERHEAD_FRAMES)
 
 // How many drops happen before speeding up.
-#define DROPS_PER_SPEEDUP 16
+#define DROPS_PER_SPEEDUP 32
 // How many ticks to speed up the timout by.
-#define FALL_TICKS_DEC 5
+#define FALL_TICKS_DEC 4
 
 // How many ticks pass before the combo resets and the max value.
 #define COMBO_TIMEOUT 8
@@ -318,6 +318,20 @@ static void grid_tick(void){
 	}
 }
 
+static void grid_redraw_blocks(){
+	// Blit one row per frame.
+	for(grid.state_timer = GRID_H - 2; grid.state_timer > 0; --grid.state_timer){
+		px_buffer_inc(PX_INC1);
+		
+		for(ix = GRID_W - 2; ix > 0; --ix){
+			idx = grid_block_idx(ix, grid.state_timer);
+			grid_set_block(idx, GRID[idx]);
+		}
+		
+		naco_yield(true);
+	}
+}
+
 uintptr_t grid_update_coro(void){
 	grid_blit_shape(0);
 	
@@ -325,11 +339,14 @@ uintptr_t grid_update_coro(void){
 		// Look for matches while waiting for the next tick.
 		for(grid.state_timer = 0; grid.state_timer < grid.block_fall_timeout; ++grid.state_timer){
 			if(grid_match_blocks()){
+				grid_redraw_blocks();
+				
+				for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer) naco_yield(true);
+				
 				grid.shape = (grid.shape + 1) & 0x3;
 				grid_blit_shape(grid.shape);
 				
-				// Prevent the timer from advancing as long as matches are happening.
-				grid.state_timer = 0;
+				break;
 			}
 			
 			naco_yield(true);
@@ -339,20 +356,9 @@ uintptr_t grid_update_coro(void){
 		while(grid.pause_semaphore > 0) naco_yield(true);
 		
 		grid_tick();
-		// debug_hex((grid.combo << 4) | (grid.combo_ticks << 0));
 		naco_yield(true);
 		
-		// Blit the blocks to the screen over several frames.
-		for(grid.state_timer = GRID_H - 2; grid.state_timer > 0; --grid.state_timer){
-			px_buffer_inc(PX_INC1);
-			
-			for(ix = GRID_W - 2; ix > 0; --ix){
-				idx = grid_block_idx(ix, grid.state_timer);
-				grid_set_block(idx, GRID[idx]);
-			}
-			
-			naco_yield(true);
-		}
+		grid_redraw_blocks();
 	}
 	
 	return false;

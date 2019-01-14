@@ -41,7 +41,6 @@ static GameState game_loop(void){
 	
 	player_init();
 	grid_init();
-	coins_init();
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
@@ -106,7 +105,6 @@ static GameState game_loop(void){
 		player_draw_blocks();
 		player_draw();
 		grid_draw_indicators();
-		coins_draw();
 		
 		player_draw_grapple();
 		
@@ -215,34 +213,6 @@ static GameState game_over(void){
 	px_wait_nmi();
 	
 	return final_score(scroll_v);
-}
-
-static const u8 CURVE[] = {0, 1, 6, 12, 20, 29, 39, 50};
-
-static void scroll_on(bool up){
-	for(idx = sizeof(CURVE) - 1; idx > 0; --idx){
-		iy = CURVE[idx];
-		if(up){
-			PX.scroll_y = 480 - iy;
-		} else {
-			PX.scroll_y = 480 + iy;
-		}
-		px_wait_nmi();
-		// px_wait_frames(10);
-	}
-}
-
-static void scroll_off(bool up){
-	for(idx = 0; idx < sizeof(CURVE); ++idx){
-		iy = CURVE[idx];
-		if(up){
-			PX.scroll_y = 480 + iy;
-		} else {
-			PX.scroll_y = 480 - iy;
-		}
-		px_wait_nmi();
-		// px_wait_frames(10);
-	}
 }
 
 static GameState main_menu(void){

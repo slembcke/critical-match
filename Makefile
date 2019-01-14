@@ -16,7 +16,6 @@ SRC = \
 	src/main.c \
 	src/grid.c \
 	src/player.c \
-	src/coins.c \
 	src/debug.c \
 	lib/pixler/pixler.c
 

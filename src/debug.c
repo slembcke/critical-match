@@ -7,6 +7,7 @@
 #include "pixler/pixler.h"
 #include "shared.h"
 
+#ifdef DEBUG
 void debug_crash(){
 	while(true){}
 }
@@ -51,3 +52,4 @@ GameState debug_chr(void){
 	
 	debug_freeze();
 }
+#endif

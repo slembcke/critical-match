@@ -84,10 +84,6 @@ void player_draw(void);
 void player_draw_blocks(void);
 void player_draw_grapple(void);
 
-void coins_init(void);
-void coins_draw(void);
-void coins_add_at(u8 idx);
-
 typedef struct {} GameState;
 
 // Defined by cc65

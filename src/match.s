@@ -238,46 +238,46 @@ MATCH_TABLE_H: .hibytes MATCH_TABLE
 	rts
 .endproc
 
-.proc match_rotJ
-	ldy _idx
-	ldx _ix
+; .proc match_rotJ
+; 	ldy _idx
+; 	ldx _ix
 	
-	; Check blocks match.
-	lda _GRID, y
-	cmp _GRID+0+1, y
-	bne @no_match
-	cmp _GRID+0+2, y
-	bne @no_match
-	cmp _GRID-8+2, y
-	bne @no_match
+; 	; Check blocks match.
+; 	lda _GRID, y
+; 	cmp _GRID+0+1, y
+; 	bne @no_match
+; 	cmp _GRID+0+2, y
+; 	bne @no_match
+; 	cmp _GRID-8+2, y
+; 	bne @no_match
 	
-	; Check rows exist.
-	lda _iy
-	cmp _COLUMN_HEIGHT+0, x
-	_bgt @no_match
-	cmp _COLUMN_HEIGHT+1, x
-	_bgt @no_match
-	cmp _COLUMN_HEIGHT+2, x
-	_bgt @no_match
+; 	; Check rows exist.
+; 	lda _iy
+; 	cmp _COLUMN_HEIGHT+0, x
+; 	_bgt @no_match
+; 	cmp _COLUMN_HEIGHT+1, x
+; 	_bgt @no_match
+; 	cmp _COLUMN_HEIGHT+2, x
+; 	_bgt @no_match
 	
-	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
-	lda _GRID, y
-	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
-	sta _GRID+0+0, y
-	sta _GRID+0+1, y
-	sta _GRID+0+2, y
-	sta _GRID-8+2, y
+; 	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
+; 	lda _GRID, y
+; 	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
+; 	sta _GRID+0+0, y
+; 	sta _GRID+0+1, y
+; 	sta _GRID+0+2, y
+; 	sta _GRID-8+2, y
 	
-	@match:
-	lda #1
-	ldx #0
-	rts
+; 	@match:
+; 	lda #1
+; 	ldx #0
+; 	rts
 	
-	@no_match:
-	lda #0
-	tax
-	rts
-.endproc
+; 	@no_match:
+; 	lda #0
+; 	tax
+; 	rts
+; .endproc
 
 .proc match_J
 	ldy _idx
@@ -320,85 +320,85 @@ MATCH_TABLE_H: .hibytes MATCH_TABLE
 	rts
 .endproc
 
-.proc match_rotL
-	ldy _idx
-	ldx _ix
+; .proc match_rotL
+; 	ldy _idx
+; 	ldx _ix
 	
-	; Check blocks match.
-	lda _GRID, y
-	cmp _GRID+0+1, y
-	bne @no_match
-	cmp _GRID+0+2, y
-	bne @no_match
-	cmp _GRID-8+0, y
-	bne @no_match
+; 	; Check blocks match.
+; 	lda _GRID, y
+; 	cmp _GRID+0+1, y
+; 	bne @no_match
+; 	cmp _GRID+0+2, y
+; 	bne @no_match
+; 	cmp _GRID-8+0, y
+; 	bne @no_match
 	
-	; Check rows exist.
-	lda _iy
-	cmp _COLUMN_HEIGHT+0, x
-	_bgt @no_match
-	cmp _COLUMN_HEIGHT+1, x
-	_bgt @no_match
-	cmp _COLUMN_HEIGHT+2, x
-	_bgt @no_match
+; 	; Check rows exist.
+; 	lda _iy
+; 	cmp _COLUMN_HEIGHT+0, x
+; 	_bgt @no_match
+; 	cmp _COLUMN_HEIGHT+1, x
+; 	_bgt @no_match
+; 	cmp _COLUMN_HEIGHT+2, x
+; 	_bgt @no_match
 	
-	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
-	lda _GRID, y
-	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
-	sta _GRID+0+0, y
-	sta _GRID+0+1, y
-	sta _GRID+0+2, y
-	sta _GRID-8+0, y
+; 	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
+; 	lda _GRID, y
+; 	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
+; 	sta _GRID+0+0, y
+; 	sta _GRID+0+1, y
+; 	sta _GRID+0+2, y
+; 	sta _GRID-8+0, y
 	
-	@match:
-	lda #1
-	ldx #0
-	rts
+; 	@match:
+; 	lda #1
+; 	ldx #0
+; 	rts
 	
-	@no_match:
-	lda #0
-	tax
-	rts
-.endproc
+; 	@no_match:
+; 	lda #0
+; 	tax
+; 	rts
+; .endproc
 
-.proc match_rotT
-	ldy _idx
-	ldx _ix
+; .proc match_rotT
+; 	ldy _idx
+; 	ldx _ix
 	
-	; Check blocks match.
-	lda _GRID, y
-	cmp _GRID+0+1, y
-	bne @no_match
-	cmp _GRID+0+2, y
-	bne @no_match
-	cmp _GRID-8+1, y
-	bne @no_match
+; 	; Check blocks match.
+; 	lda _GRID, y
+; 	cmp _GRID+0+1, y
+; 	bne @no_match
+; 	cmp _GRID+0+2, y
+; 	bne @no_match
+; 	cmp _GRID-8+1, y
+; 	bne @no_match
 	
-	; Check rows exist.
-	lda _iy
-	cmp _COLUMN_HEIGHT+0, x
-	_bgt @no_match
-	cmp _COLUMN_HEIGHT+1, x
-	_bgt @no_match
-	cmp _COLUMN_HEIGHT+2, x
-	_bgt @no_match
+; 	; Check rows exist.
+; 	lda _iy
+; 	cmp _COLUMN_HEIGHT+0, x
+; 	_bgt @no_match
+; 	cmp _COLUMN_HEIGHT+1, x
+; 	_bgt @no_match
+; 	cmp _COLUMN_HEIGHT+2, x
+; 	_bgt @no_match
 	
-	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
-	lda _GRID, y
-	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
-	sta _GRID+0+0, y
-	sta _GRID+0+1, y
-	sta _GRID+0+2, y
-	sta _GRID-8+1, y
+; 	; Unlock matched blocks. |= BLOCK_STATUS_UNLOCKED_AND_OPEN
+; 	lda _GRID, y
+; 	ora #BLOCK_STATUS_UNLOCKED_AND_OPEN
+; 	sta _GRID+0+0, y
+; 	sta _GRID+0+1, y
+; 	sta _GRID+0+2, y
+; 	sta _GRID-8+1, y
 	
-	@match:
-	lda #1
-	ldx #0
-	rts
+; 	@match:
+; 	lda #1
+; 	ldx #0
+; 	rts
 	
-	@no_match:
-	lda #0
-	tax
-	rts
-.endproc
+; 	@no_match:
+; 	lda #0
+; 	tax
+; 	rts
+; .endproc
 

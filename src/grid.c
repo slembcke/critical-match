@@ -20,12 +20,12 @@ u8 COLUMN_HEIGHT[GRID_W];
 // Min/Max waiting ticks before triggering the next fall.
 // TODO should be 15, but blitting takes too long.
 #define MIN_FALL_FRAMES (16 - OVERHEAD_FRAMES)
-#define MAX_FALL_FRAMES (80 - OVERHEAD_FRAMES)
+#define MAX_FALL_FRAMES (90 - OVERHEAD_FRAMES)
 
 // How many drops happen before speeding up.
-#define DROPS_PER_SPEEDUP 32
+#define DROPS_PER_SPEEDUP 2
 // How many ticks to speed up the timout by.
-#define FALL_TICKS_DEC 4
+#define FALL_TICKS_DEC 1
 
 // How many ticks pass before the combo resets and the max value.
 #define COMBO_TIMEOUT 8
@@ -36,6 +36,7 @@ typedef struct {
 	// Cursor values used for shuffling.
 	u8 drop_cursor;
 	u8 column_cursor;
+	u8 shape_cursor;
 	
 	// Where and what to drop next.
 	u8 queued_column;
@@ -203,6 +204,11 @@ static u8 get_shuffled_column(void){
 	return lru_shuffle(COLUMNS, sizeof(COLUMNS), 0x3, &grid.column_cursor);
 }
 
+static u8 get_shuffled_shape(void){
+	static u8 SHAPES[] = {0, 1, 2, 3, 4, 5};
+	return lru_shuffle(SHAPES, sizeof(SHAPES), 0x3, &grid.shape_cursor);
+}
+
 static void grid_shuffle_next_drop(){
 	grid.queued_column = get_shuffled_column();
 	grid.queued_drops[0] = get_shuffled_block();
@@ -343,9 +349,7 @@ uintptr_t grid_update_coro(void){
 				
 				for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer) naco_yield(true);
 				
-				++grid.shape;
-				if(grid.shape == 6) grid.shape = 0;
-				
+				grid.shape = get_shuffled_shape();
 				grid_blit_shape(grid.shape);
 				
 				break;
@@ -379,12 +383,13 @@ void grid_init(void){
 		get_shuffled_block();
 		get_shuffled_block();
 		get_shuffled_column();
+		get_shuffled_shape();
 	}
 	grid_shuffle_next_drop();
+	grid.shape = get_shuffled_shape();
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
-	grid.shape = 0;
 	
 	grid.flicker_column = GRID_W - 2;
 	

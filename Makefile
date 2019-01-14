@@ -26,7 +26,6 @@ ASMSRC = \
 	src/metatiles.s \
 	gfx/gfx.s \
 	audio/audio.s \
-	dat/data.s \
 	lib/naco/naco.s \
 	lib/pixler/rand8.s \
 	lib/pixler/pixler_boot.s \
@@ -69,7 +68,6 @@ clean:
 	rm -rf gfx/shapes.bin
 	rm -rf gfx/*.lz4
 	rm -rf $(SONGS:.txt=.s)
-	rm -rf dat/*.lz4
 	rm -rf link.log
 	make -C tools clean
 

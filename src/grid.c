@@ -333,7 +333,7 @@ static void grid_redraw_blocks(){
 }
 
 uintptr_t grid_update_coro(void){
-	grid_blit_shape(0);
+	grid_blit_shape(grid.shape);
 	
 	while(true){
 		// Look for matches while waiting for the next tick.
@@ -343,7 +343,9 @@ uintptr_t grid_update_coro(void){
 				
 				for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer) naco_yield(true);
 				
-				grid.shape = (grid.shape + 1) & 0x3;
+				++grid.shape;
+				if(grid.shape == 6) grid.shape = 0;
+				
 				grid_blit_shape(grid.shape);
 				
 				break;
@@ -382,6 +384,7 @@ void grid_init(void){
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
+	grid.shape = 0;
 	
 	grid.flicker_column = GRID_W - 2;
 	
@@ -412,7 +415,7 @@ void grid_draw_indicators(void){
 		static const u8 SPR0[] = {0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};
 		
 		idx = grid.combo_ticks;
-		px_spr(183, 27, 0x02, SPR0[idx]);
+		px_spr(183, 27, 0x00, SPR0[idx]);
 	}
 }
 

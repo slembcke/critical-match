@@ -13,7 +13,7 @@
 #define PLAYER_MAX_FALL (6*PLAYER_MAX_SPEED/2)
 #define PLAYER_JUMP 0x0380
 // 5, 8
-#define PLAYER_JUMP_TICKS 8
+#define PLAYER_JUMP_TICKS 10
 #define MAX_Y ((16 << 8)*(GRID_H - 2))
 
 #define ENABLE_DOUBLE_JUMP 0
@@ -148,7 +148,7 @@ static void player_cursor_update(void){
 	
 	// Calculate the block index under the player's center.
 	ix = (player.pos_x >> 8) + 0;
-	iy = (player.pos_y >> 8) + 2;
+	iy = (player.pos_y >> 8) + 4;
 	idx = grid_block_at(ix, iy);
 	
 	if(player.blocks_held[0]){

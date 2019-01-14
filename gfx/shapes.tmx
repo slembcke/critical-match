@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="4" height="12" tilewidth="8" tileheight="8" infinite="0" nextobjectid="1">
+<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="4" height="14" tilewidth="8" tileheight="8" infinite="0" nextobjectid="1">
  <tileset firstgid="1" name="neschar" tilewidth="8" tileheight="8" tilecount="128" columns="16">
   <image source="neschar.png" width="128" height="64"/>
  </tileset>
  <tileset firstgid="129" name="sheet1" tilewidth="8" tileheight="8" tilecount="128" columns="16">
   <image source="sheet1.png" width="128" height="64"/>
  </tileset>
- <layer name="Tile Layer 1" width="4" height="12" offsetx="28" offsety="-28">
+ <layer name="Tile Layer 1" width="4" height="14" offsetx="44" offsety="-20">
   <data encoding="base64">
-   sQAAALIAAACxAAAAsgAAAKEAAACiAAAAoQAAAKIAAACxAAAAngAAAJ4AAACyAAAAoQAAAJ4AAACeAAAAogAAALEAAAC1AAAApwAAALQAAACjAAAApwAAAKYAAACiAAAAswAAAKcAAAC2AAAAsgAAAKEAAAClAAAApwAAAKQAAACxAAAAswAAALQAAACyAAAAswAAAKcAAACnAAAAtAAAALMAAACnAAAApwAAALQAAAChAAAApQAAAKYAAACiAAAA
+   sQAAALIAAACxAAAAsgAAAKEAAACiAAAAoQAAAKIAAACxAAAAngAAAJ4AAACyAAAAoQAAAJ4AAACeAAAAogAAALEAAAC1AAAApwAAALQAAACjAAAApwAAAKYAAACiAAAAswAAAKcAAAC2AAAAsgAAAKEAAAClAAAApwAAAKQAAACxAAAAswAAALQAAACyAAAAswAAAKcAAACnAAAAtAAAALEAAACyAAAAswAAALQAAACzAAAApwAAAKcAAAC0AAAAswAAALQAAAChAAAAogAAALMAAACnAAAApwAAALQAAAA=
   </data>
  </layer>
 </map>

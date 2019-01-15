@@ -45,6 +45,7 @@ GFX = \
 	gfx/character.png \
 
 MAPS = \
+	gfx/menu.tmx \
 	gfx/board.tmx \
 	gfx/game_over.tmx
 

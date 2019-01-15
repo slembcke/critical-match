@@ -2,5 +2,8 @@ TODO:
 * Splash screen
 * Music for gameplay
 * Game balance
+* Drop cursor palette
+* Tutorial
 
 BUGS:
+* Tall stacks wrap around the screen.

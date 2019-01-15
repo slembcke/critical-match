@@ -249,14 +249,16 @@ static void grid_update_fall_speed(void){
 
 static void grid_blit(void){
 	// Copy score to the screen.
-	grid_buffer_score(NT_ADDR(0, 23, 8));
+	grid_buffer_score(NT_ADDR(0, 23, 9));
 	
 	// Combo
-	px_buffer_data(1, NT_ADDR(0, 24, 14));
+	px_buffer_inc(PX_INC1);
+	px_buffer_data(1, NT_ADDR(0, 24, 15));
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
 static void grid_blit_shape(u8 shape){
+	px_buffer_inc(PX_INC1);
 	px_buffer_data(4, NT_ADDR(0, 4, 10));
 	memcpy(PX.buffer, gfx_shapes + 8*shape + 8, 4);
 	px_buffer_data(4, NT_ADDR(0, 4, 11));

@@ -12,6 +12,18 @@ u8 joy0, joy1;
 
 #define CLR_BG 0x02
 
+static const u8 PALETTE[] = {
+	CLR_BG, 0x07, 0x1A, 0x14, // DROPS0: dark orange, green, purple
+	CLR_BG, 0x17, 0x28, 0x20, // DROPS1: orange, yellow, white
+	CLR_BG, 0x11, 0x22, 0x32, // BG: blue, light blue, dark cyan
+	CLR_BG, 0x28, 0x38, 0x20, // FG
+	
+	CLR_BG, 0x07, 0x1A, 0x14, // DROPS0
+	CLR_BG, 0x17, 0x28, 0x20, // DROPS1
+	CLR_BG, 0x11, 0x22, 0x32, // BG
+	CLR_BG, 0x08, 0x18, 0x28, // PLAYER
+};
+
 static void wait_noinput(void){
 	while(joy_read(0) || joy_read(1)) px_wait_nmi();
 }
@@ -44,18 +56,6 @@ static GameState game_loop(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
-		static const u8 PALETTE[] = {
-			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0: dark orange, green, purple
-			CLR_BG, 0x17, 0x28, 0x20, // DROPS1: orange, yellow, white
-			CLR_BG, 0x11, 0x22, 0x32, // BG: blue, light blue, dark cyan
-			CLR_BG, 0x28, 0x38, 0x20, // FG
-			
-			CLR_BG, 0x07, 0x1A, 0x14, // DROPS0
-			CLR_BG, 0x17, 0x28, 0x20, // DROPS1
-			CLR_BG, 0x11, 0x22, 0x32, // BG
-			CLR_BG, 0x08, 0x18, 0x28, // PLAYER
-		};
-		
 		static const u8 ATTRIB[64] = {
 			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 			0xFF, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xFF,
@@ -66,21 +66,6 @@ static GameState game_loop(void){
 			0xFF, 0xFA, 0xFA, 0xFA, 0xFA, 0xFA, 0xFA, 0xFF,
 			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 		};
-		
-		px_buffer_data(32, PAL_ADDR);
-		memcpy(PX.buffer, PALETTE, 32);
-		
-		px_bg_table(0);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr);
-		decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr);
-		
-		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr);
-		
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
 		px_addr(AT_ADDR(0));
 		px_blit(64, ATTRIB);
@@ -150,7 +135,6 @@ static GameState final_score(s16 scroll_v){
 		grid_buffer_score(NT_ADDR(0, 17, 14));
 		
 		px_spr_clear();
-		px_wait_nmi();
 	} px_ppu_sync_on();
 	
 	for(ix = 0; ix < 240; ++ix){
@@ -231,6 +215,13 @@ static GameState main_menu(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
+		
+		px_addr(AT_ADDR(0));
+		px_fill(64, 0xAA);
+		
+		px_addr(NT_ADDR(0, 11, 16));
+		px_blit(11, "PRESS START");
 	} px_ppu_sync_on();
 	
 	music_init(TITLE_MUSIC);
@@ -246,13 +237,6 @@ static GameState main_menu(void){
 				music_init(CHARACTER_SELECT_MUSIC);
 				// music_play(0);
 				return game_loop();
-			}
-		}
-		
-		for(iy = 0; iy < 4; ++iy){
-			for(ix = 0; ix < 8; ++ix){
-				idx = 0x80 + 8*iy + ix;
-				px_spr(16 + 8*ix, 240 - 46 + 8*iy + bounce4(), idx < 0x92 ? 0x00 : 0x01, idx);
 			}
 		}
 		
@@ -295,7 +279,6 @@ static GameState debug_chr(void){
 		}
 		
 		px_spr_clear();
-		px_wait_nmi();
 	} px_ppu_sync_on();
 	
 	
@@ -313,10 +296,27 @@ void main(void){
 	// The main menu increments this constantly until the player starts the game.
 	rand_seed = 0x0D8E;
 	
+	// Set the palette.
+	waitvsync();
+	px_addr(PAL_ADDR);
+	px_blit(32, PALETTE);
+	
+	// Load BG tiles..
+	px_bg_table(0);
+	decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr);
+	decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr);
+	
+	// Load sprites.
+	px_spr_table(1);
+	decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
+	decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
+	decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
+	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr);
+	
 	// Black out the second screen.
 	px_addr(NT_ADDR(2, 0, 0));
 	px_fill(32*30, 0x00);
 	
 	// debug_chr();
-	game_loop();
+	main_menu();
 }

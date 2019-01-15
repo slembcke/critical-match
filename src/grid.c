@@ -257,9 +257,9 @@ static void grid_blit(void){
 }
 
 static void grid_blit_shape(u8 shape){
-	px_buffer_data(4, NT_ADDR(0, 4, 9));
-	memcpy(PX.buffer, gfx_shapes + 8*shape + 8, 4);
 	px_buffer_data(4, NT_ADDR(0, 4, 10));
+	memcpy(PX.buffer, gfx_shapes + 8*shape + 8, 4);
+	px_buffer_data(4, NT_ADDR(0, 4, 11));
 	memcpy(PX.buffer, gfx_shapes + 8*shape + 12, 4);
 	
 	// px_addr(NT_ADDR(0, 24, 7));

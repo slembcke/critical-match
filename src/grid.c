@@ -215,8 +215,8 @@ static void grid_shuffle_next_drop(){
 	grid.queued_drops[1] = get_shuffled_block();
 	// TODO column
 	
-	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 18));
-	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 16));
+	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 20));
+	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 18));
 }
 
 static void grid_drop_block(void){
@@ -249,10 +249,10 @@ static void grid_update_fall_speed(void){
 
 static void grid_blit(void){
 	// Copy score to the screen.
-	grid_buffer_score(NT_ADDR(0, 24, 8));
+	grid_buffer_score(NT_ADDR(0, 23, 8));
 	
 	// Combo
-	px_buffer_data(1, NT_ADDR(0, 25, 13));
+	px_buffer_data(1, NT_ADDR(0, 24, 14));
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
@@ -418,7 +418,7 @@ void grid_draw_indicators(void){
 	px_spr(68 + 16*grid.queued_column, 46 + bounce4(), 0x01, 0x06);
 	
 	// Combo timer.
-	px_spr(199, 135 - grid.combo_ticks, 0x02, 0x10 + grid.combo_ticks);
+	px_spr(205, 167 - grid.combo_ticks, 0x02, 0x10 + grid.combo_ticks);
 }
 
 bool grid_update(void){

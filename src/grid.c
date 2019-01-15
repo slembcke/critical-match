@@ -215,8 +215,8 @@ static void grid_shuffle_next_drop(){
 	grid.queued_drops[1] = get_shuffled_block();
 	// TODO column
 	
-	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 8));
-	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 6));
+	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 18));
+	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 16));
 }
 
 static void grid_drop_block(void){
@@ -252,14 +252,14 @@ static void grid_blit(void){
 	grid_buffer_score(NT_ADDR(0, 11, 4));
 	
 	// Combo
-	px_buffer_data(1, NT_ADDR(0, 21, 4));
+	px_buffer_data(1, NT_ADDR(0, 27, 8));
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
 static void grid_blit_shape(u8 shape){
-	px_buffer_data(4, NT_ADDR(0, 24, 7));
+	px_buffer_data(4, NT_ADDR(0, 4, 9));
 	memcpy(PX.buffer, gfx_shapes + 8*shape + 8, 4);
-	px_buffer_data(4, NT_ADDR(0, 24, 8));
+	px_buffer_data(4, NT_ADDR(0, 4, 10));
 	memcpy(PX.buffer, gfx_shapes + 8*shape + 12, 4);
 	
 	// px_addr(NT_ADDR(0, 24, 7));
@@ -403,7 +403,7 @@ void grid_draw_indicators(void){
 		ix = grid_block_x(grid.combo_label_location,  4);
 		iy = grid_block_y(grid.combo_label_location, -4);
 		iy -= (u8)(COMBO_LABEL_TIMEOUT - grid.combo_label_timeout)/4;
-		px_spr(ix, iy, (px_ticks >> 2) & 0x3, 0x7A + grid.combo_label_value);
+		px_spr(ix, iy, (px_ticks >> 2) & 0x3, 0x0A + grid.combo_label_value);
 		
 		--grid.combo_label_timeout;
 	}

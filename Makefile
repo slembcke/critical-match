@@ -1,4 +1,4 @@
-PROJECT_NAME = critical-mass
+PROJECT_NAME = critical-match
 ROM = $(PROJECT_NAME).nes
 
 CC65_ROOT = ../cc65

@@ -190,10 +190,10 @@ static u8 get_shuffled_block(void){
 	};
 
 	static const u8 BLOCKS[] = {
-		BLOCK_CHEST | BLOCK_COLOR_BLUE,
-		BLOCK_CHEST | BLOCK_COLOR_RED,
 		BLOCK_CHEST | BLOCK_COLOR_GREEN,
 		BLOCK_CHEST | BLOCK_COLOR_PURPLE,
+		BLOCK_CHEST | BLOCK_COLOR_YELLOW,
+		BLOCK_CHEST | BLOCK_COLOR_WHITE,
 	};
 	
 	return BLOCKS[lru_shuffle(DROPS, sizeof(DROPS), 0x7, &grid.drop_cursor)];

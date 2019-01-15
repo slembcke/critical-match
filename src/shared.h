@@ -29,10 +29,10 @@ u8 bounce4(void);
 
 // Block color.
 #define BLOCK_COLOR_MASK 0x03
-#define BLOCK_COLOR_BLUE 0x00
-#define BLOCK_COLOR_RED 0x01
-#define BLOCK_COLOR_GREEN 0x02
-#define BLOCK_COLOR_PURPLE 0x03
+#define BLOCK_COLOR_GREEN 0x00
+#define BLOCK_COLOR_PURPLE 0x01
+#define BLOCK_COLOR_YELLOW 0x02
+#define BLOCK_COLOR_WHITE 0x03
 
 // Block type.
 #define BLOCK_TYPE_MASK 0x0C

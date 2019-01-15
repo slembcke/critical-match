@@ -210,7 +210,20 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
+static void draw_orbit(){
+	if(idx){
+		px_spr(44 + ix, 183 + iy, 0x00, 0x8D);
+	} else {
+		px_spr(44 - ix, 183 + iy, 0x00, 0x8C);
+	}
+}
+
 static GameState main_menu(void){
+	static const s8 COS[] = {
+		12, 11, 11, 9, 8, 6, 4, 2, 0, -2, -4, -6, -8, -9, -11, -11,
+		-12, -11, -11, -9, -8, -6, -4, -2, 0, 2, 4, 6, 8, 9, 11, 11,
+	};
+	
 	static const u8 ATTRIB[64] = {
 		0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
 		0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
@@ -250,6 +263,15 @@ static GameState main_menu(void){
 			}
 		}
 		
+		idx = (px_ticks & 16) == 0;
+		ix = COS[px_ticks + 0 & 31];
+		iy = COS[px_ticks + 4 & 31] >> 1;
+		draw_orbit();
+		block_sprite(40, 179, BLOCK_CHEST | BLOCK_COLOR_YELLOW);
+		idx = !idx;
+		draw_orbit();
+		
+		px_spr_end();
 		px_wait_nmi();
 	}
 	

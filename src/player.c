@@ -234,7 +234,8 @@ void player_draw(void){
 			idx = ((px_ticks >> 2) & 0x6) + 16 + player.facingRight;
 		} else {
 			// Run
-			idx =((ix >> 1) & 14) + player.facingRight;
+			idx =(
+				(ix >> 1) & 14) + player.facingRight;
 		}
 	} else {
 		if(player.vel_y > 0){
@@ -304,10 +305,10 @@ void player_draw_grapple(void){
 		
 		if(iy <= player.grapple_y) break;
 		
-		px_spr(ix, iy, 0x01, 0x18);
+		px_spr(ix, iy, 0x01, 0x08);
 	}
 	// Draw the hook.
-	px_spr(ix, iy, 0x00, 0x08);
+	px_spr(ix, iy, 0x03, 0x07);
 	
 	// Pull the block towards the player.
 	// TODO Not drawing code. Care?

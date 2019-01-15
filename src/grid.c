@@ -249,10 +249,10 @@ static void grid_update_fall_speed(void){
 
 static void grid_blit(void){
 	// Copy score to the screen.
-	grid_buffer_score(NT_ADDR(0, 11, 4));
+	grid_buffer_score(NT_ADDR(0, 24, 8));
 	
 	// Combo
-	px_buffer_data(1, NT_ADDR(0, 27, 8));
+	px_buffer_data(1, NT_ADDR(0, 25, 13));
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
@@ -394,6 +394,7 @@ void grid_init(void){
 	grid.flicker_column = GRID_W - 2;
 	
 	grid.combo = 1;
+	grid.combo_ticks = COMBO_TIMEOUT;
 	
 	naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 }
@@ -410,18 +411,14 @@ void grid_draw_indicators(void){
 	
 	// Column warnings.
 	if(COLUMN_HEIGHT[grid.flicker_column] >= GRID_H - 4){
-		px_spr(68 + 16*grid.flicker_column, 50, 0x03, 0x03);
+		px_spr(68 + 16*grid.flicker_column, 50, 0x03, 0x05);
 	}
 	
 	// Draw drop indicator.
-	px_spr(68 + 16*grid.queued_column, 46 + bounce4(), 0x01, 0x07);
+	px_spr(68 + 16*grid.queued_column, 46 + bounce4(), 0x01, 0x06);
 	
-	{// Combo meter.
-		static const u8 SPR0[] = {0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};
-		
-		idx = grid.combo_ticks;
-		px_spr(183, 27, 0x00, SPR0[idx]);
-	}
+	// Combo timer.
+	px_spr(199, 135 - grid.combo_ticks, 0x02, 0x10 + grid.combo_ticks);
 }
 
 bool grid_update(void){

@@ -72,7 +72,7 @@ extern u8 COLUMN_HEIGHT[];
 #define grid_block_y(idx, offs) (214 + offs + ~((idx & 0xF8) << 1))
 
 void grid_set_block(u8 index, u8 block);
-void grid_init(void);
+void grid_init(bool tutorial);
 bool grid_update(void);
 void grid_update_column_height(void);
 void grid_draw_indicators(void);

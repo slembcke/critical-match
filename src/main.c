@@ -49,11 +49,11 @@ static GameState main_menu(void);
 static void pause(void);
 static GameState game_over(void);
 
-static GameState game_loop(void){
+static GameState game_loop(bool tutorial){
 	music_stop();
 	
 	player_init();
-	grid_init();
+	grid_init(tutorial);
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
@@ -283,7 +283,7 @@ static GameState main_menu(void){
 	for(timeout = 30*60; timeout > 0; --timeout){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
-			if(JOY_START(joy_read(0)) && menu_item == 0) return game_loop();
+			if(JOY_START(joy_read(0)) && menu_item == 0) return game_loop(false);
 		}
 		
 		joy_prev = joy0;
@@ -293,7 +293,7 @@ static GameState main_menu(void){
 		if(JOY_DOWN(idx) && menu_item < 2) ++menu_item;
 		if(JOY_UP(idx) && menu_item > 0) --menu_item;
 		if(JOY_START(joy0)){
-			if(menu_item == 1) main_menu();
+			if(menu_item == 1) game_loop(true);
 			if(menu_item == 2) credits_screen();
 		}
 		
@@ -313,7 +313,7 @@ static GameState main_menu(void){
 		px_wait_nmi();
 	}
 	
-	return game_loop();
+	return main_menu();
 }
 
 #ifdef DEBUG

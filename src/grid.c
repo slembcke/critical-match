@@ -209,14 +209,17 @@ static u8 get_shuffled_shape(void){
 	return lru_shuffle(SHAPES, sizeof(SHAPES), 0x3, &grid.shape_cursor);
 }
 
+static void grid_show_next_drop(void){
+	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 20));
+	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 18));
+}
+
 static void grid_shuffle_next_drop(){
 	grid.queued_column = get_shuffled_column();
 	grid.queued_drops[0] = get_shuffled_block();
 	grid.queued_drops[1] = get_shuffled_block();
-	// TODO column
 	
-	buffer_set_metatile(grid.queued_drops[0] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 20));
-	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 18));
+	grid_show_next_drop();
 }
 
 static void grid_drop_block(void){
@@ -340,7 +343,7 @@ static void grid_redraw_blocks(){
 	}
 }
 
-uintptr_t grid_update_coro(void){
+static uintptr_t grid_update_coro(void){
 	grid_blit_shape(grid.shape);
 	
 	while(true){
@@ -372,7 +375,15 @@ uintptr_t grid_update_coro(void){
 	return false;
 }
 
-void grid_init(void){
+static uintptr_t grid_tutorial_coro(void){
+	while(true){
+		naco_yield(true);
+	}
+	
+	return false;
+}
+
+static void reset_tiles(void){
 	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
 	
 	// Abuse memcpy to smear the row template.
@@ -381,14 +392,10 @@ void grid_init(void){
 	memset(GRID, BLOCK_BORDER, 8);
 	memset(COLUMN_HEIGHT, 0x0, sizeof(COLUMN_HEIGHT));
 	memset(&grid, 0x0, sizeof(grid));
-	for(idx = 255; idx > 0; --idx){
-		get_shuffled_block();
-		get_shuffled_block();
-		get_shuffled_column();
-		get_shuffled_shape();
-	}
-	grid_shuffle_next_drop();
-	grid.shape = get_shuffled_shape();
+}
+
+void grid_init(bool tutorial){
+	reset_tiles();
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;
@@ -396,9 +403,30 @@ void grid_init(void){
 	grid.flicker_column = GRID_W - 2;
 	
 	grid.combo = 1;
-	grid.combo_ticks = COMBO_TIMEOUT;
+	grid.combo_ticks = 0;
 	
-	naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
+	if(tutorial){
+		grid.shape = 0;
+		
+		grid.queued_column = 1;
+		grid.queued_drops[0] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+		grid.queued_drops[1] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+		grid_show_next_drop();
+		
+		naco_init((naco_func)grid_tutorial_coro, grid.update_coro, sizeof(grid.update_coro));
+	} else {
+		for(idx = 255; idx > 0; --idx){
+			get_shuffled_block();
+			get_shuffled_block();
+			get_shuffled_column();
+			get_shuffled_shape();
+		}
+		
+		grid_shuffle_next_drop();
+		grid.shape = get_shuffled_shape();
+		
+		naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
+	}
 }
 
 void grid_draw_indicators(void){

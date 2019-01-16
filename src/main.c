@@ -307,13 +307,13 @@ static GameState main_menu(void){
 		idx = !idx;
 		draw_orbit();
 		
-		player_sprite(200, 180, 0);
+		// player_sprite(200, 180, 0);
 		
 		px_spr_end();
 		px_wait_nmi();
 	}
 	
-	return main_menu();
+	return game_loop(false);
 }
 
 #ifdef DEBUG

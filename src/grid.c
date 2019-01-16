@@ -376,9 +376,11 @@ static uintptr_t grid_update_coro(void){
 }
 
 static uintptr_t grid_tutorial_coro(void){
+	px_wait_nmi();
+	px_buffer_data(20, NT_ADDR(0, 6, 4));
+	memcpy(PX.buffer, "NOT IMPLEMENTED YET!", 20);
+	
 	while(true){
-		px_buffer_data(12, NT_ADDR(0, 10, 12));
-		memcpy(PX.buffer, "Hello world!", 12);
 		
 		naco_yield(true);
 	}
@@ -399,6 +401,8 @@ static void reset_tiles(void){
 
 void grid_init(bool tutorial){
 	reset_tiles();
+	
+	grid.pause_semaphore = 0;
 	
 	grid.speedup_counter = DROPS_PER_SPEEDUP;
 	grid.block_fall_timeout = MAX_FALL_FRAMES;

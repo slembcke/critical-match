@@ -8,11 +8,11 @@
 #include "shared.h"
 
 #ifdef DEBUG
-void debug_crash(){
+void debug_crash(void){
 	while(true){}
 }
 
-void debug_freeze(){
+void debug_freeze(void){
 	// Finish the current frame.
 	px_ppu_enable();
 	px_wait_nmi();
@@ -30,6 +30,7 @@ void debug_hex(u16 value){
 	PX.buffer[0] = _hextab[(value >> 0xC) & 0xF];
 }
 
+/*
 GameState debug_chr(void){
 	// Top
 	px_inc(PX_INC1);
@@ -52,4 +53,5 @@ GameState debug_chr(void){
 	
 	debug_freeze();
 }
+*/
 #endif

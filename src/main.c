@@ -35,12 +35,12 @@ u8 bounce4(void){
 	return (y & 3);
 }
 
-static void px_ppu_sync_off(){
+static void px_ppu_sync_off(void){
 	px_mask &= ~PX_MASK_RENDER_ENABLE;
 	px_wait_nmi();
 }
 
-static void px_ppu_sync_on(){
+static void px_ppu_sync_on(void){
 	px_mask |= PX_MASK_RENDER_ENABLE;
 	px_wait_nmi();
 }
@@ -76,11 +76,13 @@ static GameState game_loop(bool tutorial){
 		px_spr_clear();
 	} px_ppu_sync_on();
 	
+	wait_noinput();
+	
 	music_init(GAMEPLAY_MUSIC);
 	// music_play(0);
 	
 	while(true){
-		DEBUG_PROFILE_START();
+		// DEBUG_PROFILE_START();
 		
 		joy0 = joy_read(0);
 		joy1 = joy_read(1);
@@ -97,12 +99,16 @@ static GameState game_loop(bool tutorial){
 		player_draw_grapple();
 		
 		px_spr_end();
-		DEBUG_PROFILE_END();
+		// DEBUG_PROFILE_END();
 		px_wait_nmi();
 	}
 	
 	px_wait_nmi();
-	return game_over();
+	if(tutorial){
+		return main_menu();
+	} else {
+		return game_over();
+	}
 }
 
 static void pause(void){
@@ -211,7 +217,7 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
-static GameState credits_screen(){
+static GameState credits_screen(void){
 	timeout = 0;
 	
 	px_ppu_sync_off(); {
@@ -233,7 +239,7 @@ static GameState credits_screen(){
 	return main_menu();
 }
 
-static void draw_orbit(){
+static void draw_orbit(void){
 	if(idx){
 		px_spr(44 + ix, 183 + iy, 0x00, 0x8D);
 	} else {
@@ -316,6 +322,7 @@ static GameState main_menu(void){
 	return game_loop(false);
 }
 
+/*
 #ifdef DEBUG
 static GameState debug_chr(void){
 	px_ppu_sync_off(); {
@@ -355,6 +362,7 @@ static GameState debug_chr(void){
 	debug_freeze();
 }
 #endif
+*/
 
 void main(void){
 	px_bank_select(0);

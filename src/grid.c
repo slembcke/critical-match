@@ -214,7 +214,7 @@ static void grid_show_next_drop(void){
 	buffer_set_metatile(grid.queued_drops[1] & BLOCK_GFX_MASK, NT_ADDR(0, 6, 18));
 }
 
-static void grid_shuffle_next_drop(){
+static void grid_shuffle_next_drop(void){
 	grid.queued_column = get_shuffled_column();
 	grid.queued_drops[0] = get_shuffled_block();
 	grid.queued_drops[1] = get_shuffled_block();
@@ -260,17 +260,12 @@ static void grid_blit(void){
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
-static void grid_blit_shape(u8 shape){
+static void grid_blit_shape(void){
 	px_buffer_inc(PX_INC1);
 	px_buffer_data(4, NT_ADDR(0, 4, 10));
-	memcpy(PX.buffer, gfx_shapes + 8*shape + 8, 4);
+	memcpy(PX.buffer, gfx_shapes + 8*grid.shape + 8, 4);
 	px_buffer_data(4, NT_ADDR(0, 4, 11));
-	memcpy(PX.buffer, gfx_shapes + 8*shape + 12, 4);
-	
-	// px_addr(NT_ADDR(0, 24, 7));
-	// px_blit(4, gfx_shapes + 8*shape + 8);
-	// px_addr(NT_ADDR(0, 24, 8));
-	// px_blit(4, gfx_shapes + 8*shape + 12);
+	memcpy(PX.buffer, gfx_shapes + 8*grid.shape + 12, 4);
 }
 
 static void grid_blocks_tick(void){
@@ -329,7 +324,7 @@ static void grid_tick(void){
 	}
 }
 
-static void grid_redraw_blocks(){
+static void grid_redraw_blocks(void){
 	// Blit one row per frame.
 	for(grid.state_timer = GRID_H - 2; grid.state_timer > 0; --grid.state_timer){
 		px_buffer_inc(PX_INC1);
@@ -343,8 +338,18 @@ static void grid_redraw_blocks(){
 	}
 }
 
+static void grid_reset_tiles(void){
+	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
+	
+	// Abuse memcpy to smear the row template.
+	memcpy(GRID + 0x58, ROW, sizeof(ROW));
+	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
+	memset(GRID, BLOCK_BORDER, 8);
+	memset(COLUMN_HEIGHT, 0x0, sizeof(COLUMN_HEIGHT));
+}
+
 static uintptr_t grid_update_coro(void){
-	grid_blit_shape(grid.shape);
+	grid_blit_shape();
 	
 	while(true){
 		// Look for matches while waiting for the next tick.
@@ -355,7 +360,7 @@ static uintptr_t grid_update_coro(void){
 				for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer) naco_yield(true);
 				
 				grid.shape = get_shuffled_shape();
-				grid_blit_shape(grid.shape);
+				grid_blit_shape();
 				
 				break;
 			}
@@ -375,32 +380,81 @@ static uintptr_t grid_update_coro(void){
 	return false;
 }
 
+
+#define SHOW_TEXT(_row_, _str_) { \
+	px_buffer_data(sizeof(_str_) - 1, NT_ADDR(0, 16 - sizeof(_str_)/2, 8 + _row_)); \
+	memcpy(PX.buffer, _str_, sizeof(_str_ - 1)); \
+}
+
+static void wait_and_clear(u8 frames){
+	for(; frames > 0; --frames) naco_yield(true);
+	grid_redraw_blocks();
+}
+
+static void tutorial_text(const char *str){
+	px_buffer_data(12, NT_ADDR(0, 10, 8));
+	memcpy(PX.buffer, str, 12);
+	px_buffer_data(12, NT_ADDR(0, 10, 9));
+	memcpy(PX.buffer, str + 12, 12);
+}
+
+extern u16 *player_x, *player_y;
+
 static uintptr_t grid_tutorial_coro(void){
-	px_wait_nmi();
-	px_buffer_data(20, NT_ADDR(0, 6, 4));
-	memcpy(PX.buffer, "NOT IMPLEMENTED YET!", 20);
+	static u8 px, py;
+	px = (*player_x) >> 8;
+	py = (*player_y) >> 8;
 	
-	while(true){
-		
-		naco_yield(true);
-	}
+	grid_blit_shape();
+	
+	tutorial_text(" Use d-pad  ""  to move.  ");
+	while(px == (*player_x) >> 8) naco_yield(true);
+	wait_and_clear(30);
+	
+	tutorial_text(" (A) button ""  to jump.  ");
+	while(py == (*player_y) >> 8) naco_yield(true);
+	wait_and_clear(30);
+	
+	GRID[10] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+	grid_redraw_blocks();
+	tutorial_text(" (B) button ""grabs blocks");
+	while(GRID[10]) naco_yield(true);
+	
+	GRID[14] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+	GRID[13] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+	GRID[22] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+	grid_redraw_blocks();
+	tutorial_text("Match shapes""  to score. ");
+	while(!grid_match_blocks()) naco_yield(true);
+	grid_redraw_blocks();
+	wait_and_clear(30);
+	
+	grid_reset_tiles();
+	GRID[81] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
+	grid_redraw_blocks();
+	tutorial_text(" (UP) + (B) "" to grapple.");
+	while(GRID[81]) naco_yield(true);
+	wait_and_clear(30);
+	
+	grid_reset_tiles();
+	memset(GRID + 9, BLOCK_CHEST | BLOCK_COLOR_PURPLE, 8);
+	grid_update_column_height();
+	grid_redraw_blocks();
+	tutorial_text("(DOWN) + (B)""to dig down.");
+	wait_and_clear(6*60);
+	
+	tutorial_text("Work quickly"" for combos.");
+	wait_and_clear(4*60);
+	
+	tutorial_text(" Have fun!! "" Good luck. ");
+	wait_and_clear(4*60);
 	
 	return false;
 }
 
-static void reset_tiles(void){
-	static const u8 ROW[] = {BLOCK_BORDER, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_EMPTY, BLOCK_BORDER};
-	
-	// Abuse memcpy to smear the row template.
-	memcpy(GRID + 0x58, ROW, sizeof(ROW));
-	memcpy(GRID + 0x08, GRID + 0x10, 0x50);
-	memset(GRID, BLOCK_BORDER, 8);
-	memset(COLUMN_HEIGHT, 0x0, sizeof(COLUMN_HEIGHT));
-	memset(&grid, 0x0, sizeof(grid));
-}
-
 void grid_init(bool tutorial){
-	reset_tiles();
+	memset(&grid, 0x0, sizeof(grid));
+	grid_reset_tiles();
 	
 	grid.pause_semaphore = 0;
 	
@@ -415,7 +469,7 @@ void grid_init(bool tutorial){
 	if(tutorial){
 		grid.shape = 0;
 		
-		grid.queued_column = 1;
+		grid.queued_column = 0;
 		grid.queued_drops[0] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 		grid.queued_drops[1] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 		grid_show_next_drop();
@@ -452,7 +506,9 @@ void grid_draw_indicators(void){
 	}
 	
 	// Draw drop indicator.
-	px_spr(68 + 16*grid.queued_column, 46 + bounce4(), 0x01, 0x06);
+	if(grid.queued_column){
+		px_spr(68 + 16*grid.queued_column, 46 + bounce4(), 0x01, 0x06);
+	}
 	
 	// Combo timer.
 	px_spr(205, 167 - grid.combo_ticks, 0x02, 0x10 + grid.combo_ticks);

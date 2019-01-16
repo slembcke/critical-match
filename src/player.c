@@ -47,6 +47,9 @@ typedef struct {
 
 static Player player;
 
+// Used by the tutorial.
+u16 *player_x = &player.pos_x, *player_y = &player.pos_y;
+
 void player_init(void){
 	bzero(&player, sizeof(player));
 	player.pos_x = 64 << 8;

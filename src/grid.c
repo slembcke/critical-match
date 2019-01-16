@@ -377,6 +377,9 @@ static uintptr_t grid_update_coro(void){
 
 static uintptr_t grid_tutorial_coro(void){
 	while(true){
+		px_buffer_data(12, NT_ADDR(0, 10, 12));
+		memcpy(PX.buffer, "Hello world!", 12);
+		
 		naco_yield(true);
 	}
 	

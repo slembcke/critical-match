@@ -46,6 +46,7 @@ GFX = \
 
 MAPS = \
 	gfx/menu.tmx \
+	gfx/credits.tmx \
 	gfx/board.tmx \
 	gfx/game_over.tmx
 

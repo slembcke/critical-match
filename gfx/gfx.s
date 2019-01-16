@@ -17,6 +17,7 @@ inclz4 _gfx_explosion_lz4chr, "explosion.lz4chr"
 inclz4 _gfx_character_lz4chr, "character.lz4chr"
 
 inclz4 _gfx_menu_lz4, "menu.lz4"
+inclz4 _gfx_credits_lz4, "credits.lz4"
 inclz4 _gfx_board_lz4, "board.lz4"
 inclz4 _gfx_game_over_lz4, "game_over.lz4"
 

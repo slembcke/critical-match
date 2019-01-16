@@ -9,6 +9,7 @@
 #include "gfx/gfx.h"
 
 u8 joy0, joy1;
+static u16 timeout;
 
 #define CLR_BG 0x02
 
@@ -210,6 +211,28 @@ static GameState game_over(void){
 	return final_score(scroll_v);
 }
 
+static GameState credits_screen(){
+	timeout = 0;
+	
+	px_ppu_sync_off(); {
+		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_credits_lz4);
+		
+		px_addr(AT_ADDR(0));
+		px_fill(64, 0xAA);
+		
+		px_spr_clear();
+	} px_ppu_sync_on();
+	
+	wait_noinput();
+	for(timeout = 30*60; timeout > 0; --timeout){
+		if(joy_read(0) != 0) break;
+		px_wait_nmi();
+	}
+	
+	wait_noinput();
+	return main_menu();
+}
+
 static void draw_orbit(){
 	if(idx){
 		px_spr(44 + ix, 183 + iy, 0x00, 0x8D);
@@ -235,7 +258,11 @@ static GameState main_menu(void){
 		0xFF, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xFF,
 	};
 	
-	u16 timeout;
+	static u8 menu_item;
+	static u8 joy_prev;
+	
+	timeout = 0;
+	menu_item = 0;
 	
 	music_stop();
 	
@@ -256,20 +283,31 @@ static GameState main_menu(void){
 	for(timeout = 30*60; timeout > 0; --timeout){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
-			if(JOY_START(joy_read(0))){
-				music_init(CHARACTER_SELECT_MUSIC);
-				// music_play(0);
-				return game_loop();
-			}
+			if(JOY_START(joy_read(0)) && menu_item == 0) return game_loop();
 		}
 		
+		joy_prev = joy0;
+		joy0 = joy_read(0);
+		idx = (joy0 ^ joy_prev) & joy0;
+		
+		if(JOY_DOWN(idx) && menu_item < 2) ++menu_item;
+		if(JOY_UP(idx) && menu_item > 0) --menu_item;
+		if(JOY_START(joy0)){
+			if(menu_item == 1) main_menu();
+			if(menu_item == 2) credits_screen();
+		}
+		
+		// Draw cursor/atom.
 		idx = (px_ticks & 16) == 0;
 		ix = COS[px_ticks + 0 & 31];
-		iy = COS[px_ticks + 4 & 31] >> 1;
+		iy = (COS[px_ticks + 4 & 31] >> 1) + 16*menu_item;
+		
 		draw_orbit();
-		block_sprite(40, 179, BLOCK_CHEST | BLOCK_COLOR_YELLOW);
+		block_sprite(40, 179 + 16*menu_item, BLOCK_CHEST | BLOCK_COLOR_YELLOW);
 		idx = !idx;
 		draw_orbit();
+		
+		player_sprite(200, 180, 0);
 		
 		px_spr_end();
 		px_wait_nmi();

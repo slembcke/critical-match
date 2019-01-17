@@ -237,8 +237,7 @@ void player_draw(void){
 			idx = ((px_ticks >> 2) & 0x6) + 16 + player.facingRight;
 		} else {
 			// Run
-			idx =(
-				(ix >> 1) & 14) + player.facingRight;
+			idx = ((ix >> 1) & 14) + player.facingRight;
 		}
 	} else {
 		if(player.vel_y > 0){

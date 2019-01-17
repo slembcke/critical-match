@@ -313,7 +313,13 @@ static GameState main_menu(void){
 		idx = !idx;
 		draw_orbit();
 		
-		// player_sprite(200, 180, 0);
+		ix = px_ticks & 127;
+		idx = ((ix >> 1) & 14) + 1;
+		if(px_ticks & 128){
+			ix = (ix ^ 0xFF) & 0x7F;
+			idx -= 1;
+		}
+		player_sprite(64 + ix, 153, idx);
 		
 		px_spr_end();
 		px_wait_nmi();

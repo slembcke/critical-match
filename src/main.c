@@ -239,6 +239,11 @@ static GameState credits_screen(void){
 	return main_menu();
 }
 
+static const s8 COS_32[] = {
+	12, 11, 11, 9, 8, 6, 4, 2, 0, -2, -4, -6, -8, -9, -11, -11,
+	-12, -11, -11, -9, -8, -6, -4, -2, 0, 2, 4, 6, 8, 9, 11, 11,
+};
+
 static void draw_orbit(void){
 	if(idx){
 		px_spr(44 + ix, 183 + iy, 0x00, 0x8D);
@@ -247,12 +252,13 @@ static void draw_orbit(void){
 	}
 }
 
+static void draw_orbit2(void){
+	ix += COS_32[idx + 0 & 31];
+	iy += (COS_32[idx + 4 & 31] >> 1);
+	px_spr(ix + 4, iy + 3, idx & 16 ? 0x20 : 0x00, 0x8D);
+}
+
 static GameState main_menu(void){
-	static const s8 COS[] = {
-		12, 11, 11, 9, 8, 6, 4, 2, 0, -2, -4, -6, -8, -9, -11, -11,
-		-12, -11, -11, -9, -8, -6, -4, -2, 0, 2, 4, 6, 8, 9, 11, 11,
-	};
-	
 	static const u8 ATTRIB[64] = {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x55, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50,
@@ -303,10 +309,39 @@ static GameState main_menu(void){
 			if(menu_item == 2) credits_screen();
 		}
 		
+		// Draw atoms.
+		ix = 2*8, iy = 2*8;
+		idx = px_ticks + 12;
+		draw_orbit2();
+		
+		ix = 8*8, iy = 3*8;
+		idx = px_ticks + 0;
+		draw_orbit2();
+		
+		ix = 12*8, iy = 2*8;
+		idx = px_ticks + 14;
+		draw_orbit2();
+		
+		ix = 20*8, iy = 4*8;
+		idx = px_ticks + 6;
+		draw_orbit2();
+		
+		ix = 25*8, iy = 2*8;
+		idx = px_ticks + 10;
+		draw_orbit2();
+		
+		ix = 3*8, iy = 12*8;
+		idx = px_ticks + 2;
+		draw_orbit2();
+		
+		ix = 27*8, iy = 12*8;
+		idx = px_ticks + 8;
+		draw_orbit2();
+		
 		// Draw cursor/atom.
 		idx = (px_ticks & 16) == 0;
-		ix = COS[px_ticks + 0 & 31];
-		iy = (COS[px_ticks + 4 & 31] >> 1) + 16*menu_item;
+		ix = COS_32[px_ticks + 0 & 31];
+		iy = (COS_32[px_ticks + 4 & 31] >> 1) + 16*menu_item;
 		
 		draw_orbit();
 		block_sprite(40, 179 + 16*menu_item, BLOCK_CHEST | BLOCK_COLOR_YELLOW);

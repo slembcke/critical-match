@@ -3,8 +3,8 @@
 .define FT_DPCM_ENABLE 0
 FT_DPCM_OFF = $c000 ; $c000..$ffc0, 64-byte steps
 
-.define FT_SFX_ENABLE 0
-FT_SFX_STREAMS = 4
+.define FT_SFX_ENABLE 1
+FT_SFX_STREAMS = 1
 
 .define FT_THREAD 1
 .define FT_PAL_SUPPORT 0

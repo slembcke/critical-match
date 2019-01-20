@@ -74,8 +74,11 @@ static void player_update_motion(void){
 	
 	if(JOY_BTN_1(player.joy)){
 		if(player.jump_ticks > 0){
+			if(player.jump_ticks == PLAYER_JUMP_TICKS) sound_play(0);
+			
 			player.vel_y = PLAYER_JUMP;
 			--player.jump_ticks;
+			
 		}
 		
 		if(ENABLE_DOUBLE_JUMP && !JOY_BTN_1(player.prev_joy)){

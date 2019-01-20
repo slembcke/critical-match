@@ -51,9 +51,7 @@ MAPS = \
 	gfx/game_over.tmx
 
 SONGS = \
-	audio/character-select.txt \
-	audio/gameplay2.txt \
-	audio/title2.txt
+	audio/gameplay2.txt
 
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
@@ -116,10 +114,13 @@ $(ROM): ld65.cfg $(OBJS)
 
 gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4) gfx/shapes.bin
 
+audio/sounds.s: audio/sounds.nsf tools/nsf2data
+	tools/nsf2data $< -ca65 -ntsc
+
 audio/%.s: audio/%.txt tools/text2data
 	tools/text2data -ca65 $<
 
-audio/audio.o: $(SONGS:.txt=.s)
+audio/audio.o: $(SONGS:.txt=.s) audio/sounds.s
 
 dat/data.o:
 

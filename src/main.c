@@ -78,11 +78,10 @@ static GameState game_loop(bool tutorial){
 	
 	wait_noinput();
 	
-	music_init(GAMEPLAY_MUSIC);
 	// music_play(0);
 	
 	while(true){
-		// DEBUG_PROFILE_START();
+		DEBUG_PROFILE_START();
 		
 		joy0 = joy_read(0);
 		joy1 = joy_read(1);
@@ -99,7 +98,7 @@ static GameState game_loop(bool tutorial){
 		player_draw_grapple();
 		
 		px_spr_end();
-		// DEBUG_PROFILE_END();
+		DEBUG_PROFILE_END();
 		px_wait_nmi();
 	}
 	
@@ -286,7 +285,6 @@ static GameState main_menu(void){
 		px_blit(64, ATTRIB);
 	} px_ppu_sync_on();
 	
-	music_init(TITLE_MUSIC);
 	// music_play(0);
 
 	wait_noinput();
@@ -435,6 +433,9 @@ void main(void){
 	// Black out the second screen.
 	px_addr(NT_ADDR(2, 0, 0));
 	px_fill(32*30, 0x00);
+	
+	music_init(MUSIC);
+	sound_init(SOUNDS);
 	
 	// debug_chr();
 	main_menu();

@@ -10,15 +10,16 @@ extern u8 ix, iy, idx;
 
 extern u8 joy0, joy1;
 
-typedef struct {} Music;
-extern const Music TITLE_MUSIC[];
-extern const Music CHARACTER_SELECT_MUSIC[];
-extern const Music GAMEPLAY_MUSIC[];
+typedef struct {} AudioChunk;
+extern const AudioChunk MUSIC[];
+extern const AudioChunk SOUNDS[];
 
-void music_init(const Music *music);
+void music_init(const AudioChunk *music);
+void sound_init(const AudioChunk *sounds);
 void music_play(u8 song);
 void music_pause();
 void music_stop();
+void sound_play(u16 sound);
 
 void player_sprite(u8 x, u8 y, u8 frame);
 void cursor_sprite(u8 x, u8 y, u8 height);

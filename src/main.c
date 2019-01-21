@@ -293,18 +293,35 @@ static GameState main_menu(void){
 	for(timeout = 30*60; timeout > 0; --timeout){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
-			if(JOY_START(joy_read(0)) && menu_item == 0) return game_loop(false);
+			if(JOY_START(joy_read(0)) && menu_item == 0){
+				sound_play(SOUND_MATCH);
+				return game_loop(false);
+			}
 		}
 		
 		joy_prev = joy0;
 		joy0 = joy_read(0);
 		idx = (joy0 ^ joy_prev) & joy0;
 		
-		if(JOY_DOWN(idx) && menu_item < 2) ++menu_item;
-		if(JOY_UP(idx) && menu_item > 0) --menu_item;
+		if(JOY_DOWN(idx) && menu_item < 2){
+			sound_play(SOUND_PICKUP);
+			++menu_item;
+		}
+		
+		if(JOY_UP(idx) && menu_item > 0){
+			sound_play(SOUND_PICKUP);
+			--menu_item;
+		}
+		
 		if(JOY_START(joy0)){
-			if(menu_item == 1) game_loop(true);
-			if(menu_item == 2) credits_screen();
+			if(menu_item == 1){
+				sound_play(SOUND_MATCH);
+				game_loop(true);
+			}
+			if(menu_item == 2){
+				sound_play(SOUND_MATCH);
+				credits_screen();
+			}
 		}
 		
 		// Draw atoms.

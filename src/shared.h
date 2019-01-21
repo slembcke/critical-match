@@ -19,6 +19,14 @@ void sound_init(const AudioChunk *sounds);
 void music_play(u8 song);
 void music_pause();
 void music_stop();
+
+enum {
+	SOUND_JUMP,
+	SOUND_MATCH,
+	SOUND_PICKUP,
+	SOUND_DROP,
+};
+
 void sound_play(u16 sound);
 
 void player_sprite(u8 x, u8 y, u8 frame);

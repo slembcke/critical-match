@@ -74,7 +74,7 @@ static void player_update_motion(void){
 	
 	if(JOY_BTN_1(player.joy)){
 		if(player.jump_ticks > 0){
-			if(player.jump_ticks == PLAYER_JUMP_TICKS) sound_play(0);
+			if(player.jump_ticks == PLAYER_JUMP_TICKS) sound_play(SOUND_JUMP);
 			
 			player.vel_y = PLAYER_JUMP;
 			--player.jump_ticks;
@@ -374,6 +374,7 @@ void player_pick_up(void){
 	
 	// Flush the PPU buffer again.
 	px_wait_nmi();
+	sound_play(SOUND_PICKUP);
 }
 
 void player_drop(void){
@@ -394,6 +395,7 @@ void player_drop(void){
 		
 		// Flush the PPU buffer again.
 		px_wait_nmi();
+		sound_play(SOUND_DROP);
 	} else {
 		// TODO play "denied" sound?
 	}

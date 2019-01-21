@@ -128,6 +128,7 @@ static bool grid_match_blocks(void){
 				(block & BLOCK_STATUS_UNLOCKED) == 0
 				&& grid_match_tetromino(grid.shape)
 			){
+				sound_play(SOUND_DROP);
 				return true;
 			}
 		}
@@ -304,6 +305,8 @@ static void grid_blocks_tick(void){
 		grid.combo_label_timeout = COMBO_LABEL_TIMEOUT;
 		
 		if(grid.combo < MAX_COMBO) ++grid.combo;
+		
+		sound_play(SOUND_MATCH);
 		grid.combo_ticks = COMBO_TIMEOUT;
 	} else if(grid.combo_ticks == 0){
 		grid.combo = 1;

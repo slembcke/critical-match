@@ -6,21 +6,21 @@
 		{
 			"label": "run-mac",
 			"type": "shell",
-			"command": "make run-mac",
+			"command": "make -j4 run-mac",
 			"group": "build",
 			"problemMatcher": []
 		},
 		{
 			"label": "run-linux",
 			"type": "shell",
-			"command": "make run-linux",
+			"command": "make -j4 run-linux",
 			"group": "build",
 			"problemMatcher": []
 		},
 		{
 			"label": "rom",
 			"type": "shell",
-			"command": "make rom",
+			"command": "make -j4 rom",
 			"group": "build",
 			"problemMatcher": []
 		},

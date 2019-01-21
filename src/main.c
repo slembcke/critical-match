@@ -78,7 +78,7 @@ static GameState game_loop(bool tutorial){
 	
 	wait_noinput();
 	
-	music_play(0);
+	// music_play(0);
 	
 	while(true){
 		DEBUG_PROFILE_START();

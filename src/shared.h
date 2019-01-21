@@ -21,10 +21,17 @@ void music_pause();
 void music_stop();
 
 enum {
-	SOUND_JUMP,
-	SOUND_MATCH,
-	SOUND_PICKUP,
-	SOUND_DROP,
+	// Magic numbers from Famitone.
+	// Is there a better way to expose these?
+	SOUND_CH0 = (0*15) << 8,
+	SOUND_CH1 = (1*15) << 8,
+	SOUND_CH2 = (2*15) << 8,
+	SOUND_CH3 = (3*15) << 8,
+	
+	SOUND_JUMP = 0 | SOUND_CH0,
+	SOUND_MATCH = 1 | SOUND_CH1,
+	SOUND_PICKUP = 2 | SOUND_CH0,
+	SOUND_DROP = 3 | SOUND_CH0,
 };
 
 void sound_play(u16 sound);

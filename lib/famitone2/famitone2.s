@@ -1,10 +1,11 @@
 ;FamiTone2 v1.12
 
 .define FT_DPCM_ENABLE 0
-FT_DPCM_OFF = $c000 ; $c000..$ffc0, 64-byte steps
+; FT_DPCM_OFF = $c000 ; $c000..$ffc0, 64-byte steps
+; FT_DPCM_PTR		= (FT_DPCM_OFF&$3fff)>>6
 
 .define FT_SFX_ENABLE 1
-FT_SFX_STREAMS = 1
+FT_SFX_STREAMS = 4
 
 .define FT_THREAD 1
 .define FT_PAL_SUPPORT 0
@@ -30,21 +31,10 @@ FT_SFX_STREAMS = 1
 ; 	.endif
 ; .endif
 
-FT_DPCM_PTR		= (FT_DPCM_OFF&$3fff)>>6
-
-
-;zero page variables
-
-FT_TEMP_PTR			= FT_TEMP		;word
-FT_TEMP_PTR_L		= FT_TEMP_PTR+0
-FT_TEMP_PTR_H		= FT_TEMP_PTR+1
-FT_TEMP_VAR1		= FT_TEMP+2
-FT_TEMP_SIZE        = 3
-
 .zeropage
 
-FT_TEMP:
-	.res FT_TEMP_SIZE
+FT_TEMP_PTR: .res 2
+FT_TEMP_VAR1: .res 1
 
 ;envelope structure offsets, 5 bytes per envelope, grouped by variable type
 
@@ -160,8 +150,8 @@ FT_SFX_BUF			= FT_SFX_BASE_ADR+4	;11 bytes
 FT_BASE_SIZE 		= FT_SFX_BUF+11-FT_BASE_ADR
 
 .bss
-FT_BASE_ADR:
-	.res FT_BASE_SIZE
+
+FT_BASE_ADR: .res FT_BASE_SIZE + 4*FT_SFX_STRUCT_SIZE
 
 ;aliases for sound effect channels to use in user calls
 
@@ -235,8 +225,8 @@ FamiToneInit:
 
 	stx FT_SONG_LIST_L		;store music data pointer for further use
 	sty FT_SONG_LIST_H
-	stx FT_TEMP_PTR_L
-	sty FT_TEMP_PTR_H
+	stx FT_TEMP_PTR+0
+	sty FT_TEMP_PTR+1
 
 	.if(FT_PITCH_FIX)
 	tax						;set SZ flags for A
@@ -344,27 +334,27 @@ FamiToneMusicStop:
 FamiToneMusicPlay:
 
 	ldx FT_SONG_LIST_L
-	stx FT_TEMP_PTR_L
+	stx FT_TEMP_PTR+0
 	ldx FT_SONG_LIST_H
-	stx FT_TEMP_PTR_H
+	stx FT_TEMP_PTR+1
 
 	ldy #0
 	cmp (FT_TEMP_PTR),y		;check if there is such sub song
 	bcs @skip
 
 	asl a					;multiply song number by 14
-	sta FT_TEMP_PTR_L		;use pointer LSB as temp variable
+	sta FT_TEMP_PTR+0		;use pointer LSB as temp variable
 	asl a
 	tax
 	asl a
-	adc FT_TEMP_PTR_L
-	stx FT_TEMP_PTR_L
-	adc FT_TEMP_PTR_L
+	adc FT_TEMP_PTR+0
+	stx FT_TEMP_PTR+0
+	adc FT_TEMP_PTR+0
 	adc #5					;add offset
 	tay
 
 	lda FT_SONG_LIST_L		;restore pointer LSB
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 
 	jsr FamiToneMusicStop	;stop music, initialize channels and envelopes
 
@@ -454,9 +444,9 @@ FamiToneMusicPause:
 FamiToneUpdate:
 
 	.if(FT_THREAD)
-	lda FT_TEMP_PTR_L
+	lda FT_TEMP_PTR+0
 	pha
-	lda FT_TEMP_PTR_H
+	lda FT_TEMP_PTR+1
 	pha
 	.endif
 
@@ -551,9 +541,9 @@ FamiToneUpdate:
 @env_read:
 
 	lda FT_ENV_ADR_L,x		;load envelope data address into temp
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	lda FT_ENV_ADR_H,x
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 	ldy FT_ENV_PTR,x		;load envelope pointer
 
 @env_read_value:
@@ -767,9 +757,9 @@ FamiToneUpdate:
 
 	.if(FT_THREAD)
 	pla
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 	pla
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	.endif
 
 	rts
@@ -783,9 +773,9 @@ _FT2SetInstrument:
 	tay
 	lda FT_INSTRUMENT_H
 	adc #0					;use carry to extend range for 64 instruments
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 	lda FT_INSTRUMENT_L
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 
 	lda (FT_TEMP_PTR),y		;duty cycle
 	sta FT_TEMP_VAR1
@@ -841,18 +831,18 @@ _FT2ChannelUpdate:
 
 @no_repeat:
 	lda FT_CHN_PTR_L,x		;load channel pointer into temp
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	lda FT_CHN_PTR_H,x
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 @no_repeat_r:
 	ldy #0
 
 @read_byte:
 	lda (FT_TEMP_PTR),y		;read byte of the channel
 
-	inc FT_TEMP_PTR_L		;advance pointer
+	inc FT_TEMP_PTR+0		;advance pointer
 	bne @no_inc_ptr1
-	inc FT_TEMP_PTR_H
+	inc FT_TEMP_PTR+1
 @no_inc_ptr1:
 
 	ora #0
@@ -884,10 +874,10 @@ _FT2ChannelUpdate:
 
 @set_reference:
 	clc						;remember return address+3
-	lda FT_TEMP_PTR_L
+	lda FT_TEMP_PTR+0
 	adc #3
 	sta FT_CHN_RETURN_L,x
-	lda FT_TEMP_PTR_H
+	lda FT_TEMP_PTR+1
 	adc #0
 	sta FT_CHN_RETURN_H,x
 	lda (FT_TEMP_PTR),y		;read length of the reference (how many rows)
@@ -897,18 +887,18 @@ _FT2ChannelUpdate:
 	sta FT_TEMP_VAR1		;remember in temp
 	iny
 	lda (FT_TEMP_PTR),y
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 	lda FT_TEMP_VAR1
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	ldy #0
 	jmp @read_byte
 
 @set_speed:
 	lda (FT_TEMP_PTR),y
 	sta FT_SONG_SPEED
-	inc FT_TEMP_PTR_L		;advance pointer after reading the speed value
+	inc FT_TEMP_PTR+0		;advance pointer after reading the speed value
 	bne @read_byte
-	inc FT_TEMP_PTR_H
+	inc FT_TEMP_PTR+1
 	bne @read_byte ;bra
 
 @set_loop:
@@ -916,9 +906,9 @@ _FT2ChannelUpdate:
 	sta FT_TEMP_VAR1
 	iny
 	lda (FT_TEMP_PTR),y
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 	lda FT_TEMP_VAR1
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	dey
 	jmp @read_byte
 
@@ -938,9 +928,9 @@ _FT2ChannelUpdate:
 	rts
 
 @no_ref:
-	lda FT_TEMP_PTR_L
+	lda FT_TEMP_PTR+0
 	sta FT_CHN_PTR_L,x
-	lda FT_TEMP_PTR_H
+	lda FT_TEMP_PTR+1
 	sta FT_CHN_PTR_H,x
 	rts
 
@@ -993,16 +983,16 @@ FamiToneSamplePlay:
 
 _FT2SamplePlay:
 
-	sta FT_TEMP		;sample number*3, offset in the sample table
+	sta <FT_TEMP		;sample number*3, offset in the sample table
 	asl a
 	clc
-	adc FT_TEMP
+	adc <FT_TEMP
 	
 	adc FT_DPCM_LIST_L
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	lda #0
 	adc FT_DPCM_LIST_H
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 
 	lda #%00001111			;stop DPCM
 	sta APU_SND_CHN
@@ -1035,8 +1025,8 @@ _FT2SamplePlay:
 
 FamiToneSfxInit:
 
-	stx FT_TEMP_PTR_L
-	sty FT_TEMP_PTR_H
+	stx FT_TEMP_PTR+0
+	sty FT_TEMP_PTR+1
 	
 	ldy #0
 	
@@ -1103,9 +1093,9 @@ FamiToneSfxPlay:
 	jsr _FT2SfxClearChannel	;stops the effect if it plays
 
 	lda FT_SFX_ADR_L
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	lda FT_SFX_ADR_H
-	sta FT_TEMP_PTR_H
+	sta FT_TEMP_PTR+1
 
 	lda (FT_TEMP_PTR),y		;read effect pointer from the table
 	sta FT_SFX_PTR_L,x		;store it
@@ -1132,9 +1122,9 @@ _FT2SfxUpdate:
 	rts						;return otherwise, no active effect
 
 @sfx_active:
-	sta FT_TEMP_PTR_H		;load effect pointer into temp
+	sta FT_TEMP_PTR+1		;load effect pointer into temp
 	lda FT_SFX_PTR_L,x
-	sta FT_TEMP_PTR_L
+	sta FT_TEMP_PTR+0
 	ldy FT_SFX_OFF,x
 	clc
 
@@ -1220,6 +1210,7 @@ _FT2SfxUpdate:
 
 	.endif
 
+.rodata
 
 ;dummy envelope used to initialize all channels with silence
 

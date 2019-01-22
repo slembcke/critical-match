@@ -55,7 +55,7 @@ SONGS = \
 
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
-.PHONY: default clean rom run-mac run-linux
+.PHONY: default clean rom run-mac run-linux itch
 
 default: rom
 
@@ -123,6 +123,15 @@ audio/%.s: audio/%.txt tools/text2data
 audio/audio.o: $(SONGS:.txt=.s) audio/sounds.s
 
 dat/data.o:
+
+ITCH_DIR = /tmp/$(PROJECT_NAME)
+itch: rom
+	rm -rf $(ITCH_DIR) $(ITCH_DIR).zip
+	mkdir -p $(ITCH_DIR)
+	cp $(ROM) $(ITCH_DIR)
+	cp jsnes/itch.html $(ITCH_DIR)/index.html
+	cp jsnes/nes-embed.js $(ITCH_DIR)
+	zip -rj $(ITCH_DIR).zip $(ITCH_DIR)
 
 # Cancel built in rule for .c files.
 %.o: %.c

@@ -437,15 +437,9 @@ void main(void){
 	
 	// Load BG tiles..
 	px_bg_table(0);
-	decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_neschar_lz4chr);
-	decompress_lz4_to_vram(CHR_ADDR(0, 0x80), gfx_sheet1_lz4chr);
 	
 	// Load sprites.
 	px_spr_table(1);
-	decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
-	decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
-	decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
-	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr);
 	
 	// Black out the second screen.
 	px_addr(NT_ADDR(2, 0, 0));

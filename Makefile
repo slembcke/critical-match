@@ -112,7 +112,7 @@ $(ROM): ld65.cfg $(OBJS)
 %.lz4: %.bin tools/lz4x
 	tools/lz4x -f9 $< $@
 
-gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4) gfx/shapes.bin
+gfx/gfx.o: $(GFX:.png=.chr) $(MAPS:.tmx=.lz4) gfx/shapes.bin
 
 audio/sounds.s: audio/sounds.nsf tools/nsf2data
 	tools/nsf2data $< -ca65 -ntsc

@@ -104,14 +104,15 @@ static void pause(void){
 
 static GameState final_score(s16 scroll_v){
 	u16 timeout;
-	u16 scroll_y = 0;
+	u16 scroll_y = 48 << 8;
 	
 	px_buffer_inc(PX_INC1);
 	px_ppu_sync_off(); {
 		px_addr(NT_ADDR(0, 10, 12));
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4);
+		// PX.scroll_y = 240 - (scroll_y >> 8);
 		
-		// Score
+		// Show score
 		grid_buffer_score(NT_ADDR(0, 17, 14));
 		
 		px_spr_clear();

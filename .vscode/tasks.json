@@ -18,6 +18,13 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "run-win",
+			"type": "shell",
+			"command": "make -j4 run-win",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
 			"label": "rom",
 			"type": "shell",
 			"command": "make -j4 rom",

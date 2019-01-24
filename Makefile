@@ -84,6 +84,9 @@ run-mac: $(ROM)
 run-linux: $(ROM)
 	nestopia -w -l 1 -n -s 2 -t $(ROM)
 
+run-win: $(ROM)
+	../Mesen/Mesen.exe $(ROM)
+
 tools/png2chr:
 	make -C tools png2chr
 

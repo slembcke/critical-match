@@ -61,7 +61,6 @@ SONGS = \
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
 .PHONY: default clean rom run-mac run-linux itch
-.PHONY: tools/png2chr tools/chr2png tools/lz4x tools/text2data
 
 default: rom
 

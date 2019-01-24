@@ -1,59 +1,37 @@
+#include <string.h>
+
 #include <png.h>
+
 #include "common.h"
 
-static u8 pixel(const u8 * const data, const u32 x, const u32 y, const u32 w) {
+static void savechr(FILE *f, const u8 *data, u32 stride, u32 h){
+	const u32 rows = h/8;
+	const u32 cols = stride/8;
 
-	return data[y * w + x];
-}
+	printf("Converting %ux%u PNG to %u CHR tiles.\n", stride, h, rows * cols);
 
-static void savechr(FILE *f, const u8 * const data, const u32 w, const u32 h) {
-
-	const u32 rows = h / 8;
-	const u32 cols = w / 8;
-
-	if (cols * rows > 512)
-		die("Too large to fit in the 8kb CHR ROM\n");
-
-	printf("Converting %ux%u PNG to %u CHR tiles.\n",
-		w, h, rows * cols);
-
-	u8 buf[8], buf2[8];
-
-	u32 r, c;
-	for (r = 0; r < rows; r++) {
-		for (c = 0; c < cols; c++) {
-			u32 x, y;
-			memset(buf, 0, 8);
-			memset(buf2, 0, 8);
-			u32 bufy = 0;
-			for (y = r * 8; y < r * 8 + 8; y++, bufy++) {
-				u32 bufx = 0;
-				for (x = c * 8; x < c * 8 + 8; x++, bufx++) {
-					const u8 pix = pixel(data, x, y, w);
-					if (pix > 3)
-						die("Palette has too many colors (%u) at %u,%u\n",
-							pix, x, y);
-					if (pix & 1)
-						buf[bufy] |= 1 << (7 - bufx);
-					if (pix & 2)
-						buf2[bufy] |= 1 << (7 - bufx);
+	for(u32 r = 0; r < rows; r++) {
+		for(u32 c = 0; c < cols; c++) {
+			u8 buf0[8] = {}, buf1[8] = {};
+			for(u32 y = r * 8; y < r * 8 + 8; y++) {
+				for(u32 x = c * 8; x < c * 8 + 8; x++) {
+					const u8 pix = data[y*stride + x];
+					if(pix & 1) buf0[y % 8] |= 1 << (7 - x%8);
+					if(pix & 2) buf1[y % 8] |= 1 << (7 - x%8);
 				}
 			}
-			fwrite(buf, 8, 1, f);
-			fwrite(buf2, 8, 1, f);
+			
+			fwrite(buf0, 8, 1, f);
+			fwrite(buf1, 8, 1, f);
 		}
 	}
 }
 
-int main(int argc, char **argv) {
-
-	if (argc < 2) {
-		die("Usage: %s file.png [file.chr]\n", argv[0]);
-	}
+int main(int argc, char **argv){
+	if (argc < 2) die("Usage: %s file.png [file.chr]\n", argv[0]);
 
 	FILE *f = fopen(argv[1], "r");
-	if (!f)
-		die("Can't open file\n");
+	if(!f) die("Can't open file\n");
 
 	const u32 namelen = strlen(argv[1]);
 

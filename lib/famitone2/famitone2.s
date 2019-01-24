@@ -5,7 +5,7 @@
 ; FT_DPCM_PTR		= (FT_DPCM_OFF&$3fff)>>6
 
 .define FT_SFX_ENABLE 1
-FT_SFX_STREAMS = 4
+FT_SFX_STREAMS = 2
 
 .define FT_THREAD 1
 .define FT_PAL_SUPPORT 0
@@ -151,7 +151,7 @@ FT_BASE_SIZE 		= FT_SFX_BUF+11-FT_BASE_ADR
 
 .bss
 
-FT_BASE_ADR: .res FT_BASE_SIZE + 4*FT_SFX_STRUCT_SIZE
+FT_BASE_ADR: .res FT_BASE_SIZE + (FT_SFX_STREAMS - 1)*FT_SFX_STRUCT_SIZE
 
 ;aliases for sound effect channels to use in user calls
 

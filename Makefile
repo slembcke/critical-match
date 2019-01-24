@@ -17,7 +17,6 @@ SRC = \
 	src/grid.c \
 	src/player.c \
 	src/debug.c \
-	lib/pixler/pixler.c
 
 ASMSRC = \
 	src/zeropage.s \

@@ -1,2 +1,0 @@
-px_buffer_clear()
-px_spr_clear()

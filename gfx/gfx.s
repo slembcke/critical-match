@@ -10,10 +10,8 @@ lz4_header_bytes = 8
 ; .segment "PRG0"
 .rodata
 
-inclz4 _gfx_neschar_lz4chr, "neschar.lz4chr"
-inclz4 _gfx_sheet1_lz4chr, "sheet1.lz4chr"
+inclz4 _gfx_chr0_lz4chr, "CHR0.lz4chr"
 inclz4 _gfx_explosion_lz4chr, "explosion.lz4chr"
-
 inclz4 _gfx_character_lz4chr, "character.lz4chr"
 
 inclz4 _gfx_menu_lz4, "menu.lz4"

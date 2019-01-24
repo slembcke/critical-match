@@ -8,6 +8,8 @@
 *lz4chr
 link.log
 
+*-pal?.png
+
 tools/png2chr
 tools/chr2png
 tools/lz4x

@@ -143,7 +143,6 @@ itch: rom
 	zip -rj $(ITCH_DIR).zip $(ITCH_DIR)
 
 tiles: gfx/CHR0.chr tools/chr2png
-	mkdir -p gfx/tiles
 	tools/chr2png $(PAL0) $< $(<:.chr=-pal0.png)
 	tools/chr2png $(PAL1) $< $(<:.chr=-pal1.png)
 	tools/chr2png $(PAL2) $< $(<:.chr=-pal2.png)

@@ -114,7 +114,10 @@ int main(int argc, char *argv[]){
 	u8 *data = calloc(st.st_size, 1);
 	fread(data, st.st_size, 1, infile);
 	
-	savepng(outfile, data, st.st_size / 16, (uint8_t[]){0x00, 0x11, 0x27, 0x1A});
+	u8 pal[4];
+	sscanf(argv[1], "%02hhx %02hhx %02hhx %02hhx", pal + 0, pal + 1, pal + 2, pal + 3);
+	
+	savepng(outfile, data, st.st_size / 16, pal);
 	
 	return EXIT_SUCCESS;
 }

@@ -44,6 +44,11 @@ GFX = \
 	gfx/explosion.png \
 	gfx/character.png \
 
+PAL0 = "02 07 1A 14"
+PAL1 = "02 17 28 20"
+PAL2 = "02 11 22 32"
+PAL3 = "02 28 38 20"
+
 MAPS = \
 	gfx/menu.tmx \
 	gfx/credits.tmx \
@@ -56,6 +61,7 @@ SONGS = \
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
 .PHONY: default clean rom run-mac run-linux itch
+.PHONY: tools/png2chr tools/chr2png tools/lz4x tools/text2data
 
 default: rom
 
@@ -67,6 +73,7 @@ clean:
 	rm -rf gfx/*.lz4chr
 	rm -rf gfx/shapes.bin
 	rm -rf gfx/*.lz4
+	rm -rf gfx/*-pal?.png
 	rm -rf $(SONGS:.txt=.s)
 	rm -rf link.log
 	make -C tools clean
@@ -77,10 +84,13 @@ run-mac: $(ROM)
 	open -a Nestopia $(ROM)
 
 run-linux: $(ROM)
-	nestopia -w -l 1 -n -s 4 -t $(ROM)
+	nestopia -w -l 1 -n -s 2 -t $(ROM)
 
 tools/png2chr:
 	make -C tools png2chr
+
+tools/chr2png:
+	make -C tools chr2png
 
 tools/lz4x:
 	make -C tools lz4x
@@ -132,6 +142,13 @@ itch: rom
 	cp jsnes/itch.html $(ITCH_DIR)/index.html
 	cp jsnes/nes-embed.js $(ITCH_DIR)
 	zip -rj $(ITCH_DIR).zip $(ITCH_DIR)
+
+tiles: gfx/CHR0.chr tools/chr2png
+	mkdir -p gfx/tiles
+	tools/chr2png $(PAL0) $< $(<:.chr=-pal0.png)
+	tools/chr2png $(PAL1) $< $(<:.chr=-pal1.png)
+	tools/chr2png $(PAL2) $< $(<:.chr=-pal2.png)
+	tools/chr2png $(PAL3) $< $(<:.chr=-pal3.png)
 
 # Cancel built in rule for .c files.
 %.o: %.c

@@ -13,16 +13,10 @@ INCLUDE = -I . -I $(CC65_ROOT)/include -I lib
 ASMINC = -I lib/ -I $(CC65_ROOT)/libsrc/nes
 
 SRC = \
-	src/main.c \
-	src/grid.c \
-	src/player.c \
-	src/debug.c \
+	src/main.c
 
 ASMSRC = \
 	src/zeropage.s \
-	src/match.s \
-	src/sprites.s \
-	src/metatiles.s \
 	gfx/gfx.s \
 	audio/audio.s \
 	lib/naco/naco.s \
@@ -38,20 +32,15 @@ ASMSRC = \
 	lib/famitone2/famitone2.s
 
 GFX = \
-	gfx/CHR0.png \
-	gfx/explosion.png \
-	gfx/character.png \
+	gfx/CHR0.png
 
-PAL0 = "02 07 1A 14"
+PAL0 = "0C 21 20 28"
 PAL1 = "02 17 28 20"
 PAL2 = "02 11 22 32"
 PAL3 = "02 28 38 20"
 
 MAPS = \
-	gfx/menu.tmx \
-	gfx/credits.tmx \
-	gfx/board.tmx \
-	gfx/game_over.tmx
+	gfx/splash.tmx
 
 SONGS = \
 	audio/gameplay2.txt
@@ -122,7 +111,7 @@ $(ROM): ld65.cfg $(OBJS)
 %.lz4: %.bin tools/lz4x
 	tools/lz4x -f9 $< $@
 
-gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4) gfx/shapes.bin
+gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4)
 
 audio/sounds.s: audio/sounds.nsf tools/nsf2data
 	tools/nsf2data $< -ca65 -ntsc

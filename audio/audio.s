@@ -42,10 +42,14 @@
 
 .rodata
 
+FT_DPCM_PTR = (FT_DPCM_OFF & $3fff) >> 6
+FT_DPCM_OFF:
+	.incbin "after_the_rain.dmc"
+
 .export _MUSIC
 _MUSIC:
-	.include "gameplay2.s"
+	.include "after_the_rain.s"
 
-.export _SOUNDS
-_SOUNDS:
-.include "sounds.s"
+; .export _SOUNDS
+; _SOUNDS:
+; 	.include "sounds.s"

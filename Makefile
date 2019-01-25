@@ -1,4 +1,4 @@
-PROJECT_NAME = critical-match
+PROJECT_NAME = GGJ2019
 ROM = $(PROJECT_NAME).nes
 
 CC65_ROOT = ../cc65
@@ -43,7 +43,7 @@ MAPS = \
 	gfx/splash.tmx
 
 SONGS = \
-	audio/gameplay2.txt
+	audio/after_the_rain.txt
 
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
 
@@ -113,8 +113,8 @@ $(ROM): ld65.cfg $(OBJS)
 
 gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4)
 
-audio/sounds.s: audio/sounds.nsf tools/nsf2data
-	tools/nsf2data $< -ca65 -ntsc
+# audio/sounds.s: audio/sounds.nsf tools/nsf2data
+# 	tools/nsf2data $< -ca65 -ntsc
 
 audio/%.s: audio/%.txt tools/text2data
 	tools/text2data -ca65 $<

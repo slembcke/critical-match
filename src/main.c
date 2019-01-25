@@ -34,7 +34,7 @@ void main(void){
 	decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_CHR0_lz4chr);
 	
 	music_init(MUSIC);
-	sound_init(SOUNDS);
+	// sound_init(SOUNDS);
 	
 	px_inc(PX_INC1);
 	decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_splash_lz4);

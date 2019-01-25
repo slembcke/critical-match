@@ -1,8 +1,6 @@
 ;FamiTone2 v1.12
 
-.define FT_DPCM_ENABLE 0
-; FT_DPCM_OFF = $c000 ; $c000..$ffc0, 64-byte steps
-; FT_DPCM_PTR		= (FT_DPCM_OFF&$3fff)>>6
+.define FT_DPCM_ENABLE 1
 
 .define FT_SFX_ENABLE 1
 FT_SFX_STREAMS = 2
@@ -983,10 +981,10 @@ FamiToneSamplePlay:
 
 _FT2SamplePlay:
 
-	sta <FT_TEMP		;sample number*3, offset in the sample table
+	sta FT_TEMP_PTR		;sample number*3, offset in the sample table
 	asl a
 	clc
-	adc <FT_TEMP
+	adc FT_TEMP_PTR
 	
 	adc FT_DPCM_LIST_L
 	sta FT_TEMP_PTR+0

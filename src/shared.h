@@ -15,7 +15,6 @@ extern const AudioChunk MUSIC[];
 extern const AudioChunk SOUNDS[];
 
 void music_init(const AudioChunk *music);
-void sound_init(const AudioChunk *sounds);
 void music_play(u8 song);
 void music_pause();
 void music_stop();
@@ -34,6 +33,7 @@ enum {
 	SOUND_DROP = 3 | SOUND_CH0,
 };
 
+void sound_init(const AudioChunk *sounds);
 void sound_play(u16 sound);
 
 void player_sprite(u8 x, u8 y, u8 frame);

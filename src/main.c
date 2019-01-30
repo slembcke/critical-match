@@ -121,6 +121,8 @@ static GameState final_score(s16 scroll_v){
 		scroll_y += scroll_v;
 		
 		if(scroll_y > (240 << 8)){
+			if(scroll_v > 64) sound_play(SOUND_PICKUP);
+			
 			scroll_v = -scroll_v/2;
 			scroll_y = (240 << 8);
 		}
@@ -139,6 +141,9 @@ static GameState final_score(s16 scroll_v){
 		if(JOY_START(joy_read(0))) break;
 		px_wait_nmi();
 	}
+	
+	sound_play(SOUND_MATCH);
+	px_wait_frames(1*60);
 	
 	exit(0);
 }
@@ -175,6 +180,8 @@ static GameState game_over(void){
 			px_spr_clear();
 		}
 		
+		if((px_ticks & 0x7) == 0) sound_play(SOUND_DROP);
+		
 		PX.scroll_y = 480 - (scroll_y >> 8);
 		px_wait_nmi();
 		
@@ -201,6 +208,8 @@ static GameState credits_screen(void){
 	}
 	
 	wait_noinput();
+	
+	sound_play(SOUND_MATCH);
 	return main_menu();
 }
 

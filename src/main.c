@@ -9,7 +9,6 @@
 #include "gfx/gfx.h"
 
 u8 joy0, joy1;
-static u16 timeout;
 
 #define CLR_BG 0x02
 
@@ -103,7 +102,6 @@ static void pause(void){
 }
 
 static GameState final_score(s16 scroll_v){
-	u16 timeout;
 	u16 scroll_y = 48 << 8;
 	
 	px_buffer_inc(PX_INC1);
@@ -137,7 +135,7 @@ static GameState final_score(s16 scroll_v){
 	wait_noinput();
 	
 	// Wait a while or until start is pressed.
-	for(timeout = 30*60; timeout > 0; --timeout){
+	while(true){
 		if(JOY_START(joy_read(0))) break;
 		px_wait_nmi();
 	}
@@ -190,8 +188,6 @@ static GameState game_over(void){
 }
 
 static GameState credits_screen(void){
-	timeout = 0;
-	
 	px_ppu_sync_off(); {
 		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_credits_lz4);
 		
@@ -199,7 +195,7 @@ static GameState credits_screen(void){
 	} px_ppu_sync_on();
 	
 	wait_noinput();
-	for(timeout = 30*60; timeout > 0; --timeout){
+	while(true){
 		if(joy_read(0) != 0) break;
 		px_wait_nmi();
 	}
@@ -231,7 +227,6 @@ static GameState main_menu(void){
 	static u8 menu_item;
 	static u8 joy_prev;
 	
-	timeout = 0;
 	menu_item = 0;
 	
 	music_stop();
@@ -246,7 +241,7 @@ static GameState main_menu(void){
 	wait_noinput();
 	
 	// Randomize the seed based on start time.
-	for(timeout = 30*60; timeout > 0; --timeout){
+	while(true){
 		for(idx = 0; idx < 60; ++idx){
 			++rand_seed;
 			if(JOY_START(joy_read(0)) && menu_item == 0){

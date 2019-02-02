@@ -25,7 +25,7 @@ ASMSRC = \
 	src/metatiles.s \
 	gfx/gfx.s \
 	audio/audio.s \
-	lib/naco/naco.s \
+	lib/pixler/pixler_coroutine.s \
 	lib/pixler/rand8.s \
 	lib/pixler/pixler_boot.s \
 	lib/pixler/pixler_zeropage.s \

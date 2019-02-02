@@ -9,16 +9,28 @@
 
 ; Error handler to call when resuming a coroutine that has finished.
 .import _exit
-CORO_ABORT = _exit
+CORO_ERROR = _exit
 
 .zeropage
 
 ; Pointer to the currently running coroutine.
-; TODO document buffer layout.
 CORO_BUFF_PTR: .res 2
+
+; struct {
+; 	// Current top of the C stack
+; 	u8 *c_stack_ptr;
+; 	// # of C stack bytes to be transferred to the CPU stack.
+; 	u8 cpu_stack_bytes
+	
+; 	// C Stack buffer.
+; 	// At a minimum contains the coroutine resume address,
+; 	// and the address function that handles the coroutine completion.
+; 	u8 c_stack_buff[];
+; }
 
 .code
 
+; Swap the stack stored by the coroutine with the one from the C runtime.
 .proc naco_swap_sp
 	ldy #0
 	lda (CORO_BUFF_PTR), y
@@ -37,8 +49,14 @@ CORO_BUFF_PTR: .res 2
 	rts
 .endproc
 
-.export _naco_init
-.proc _naco_init ; naco_func func, u8 *naco_buffer, size_t buffer_size -> void
+; During initialization:
+; * The pointer to the top of the stack is calculated and stored.
+; * The coroutine start address is calculated and pushed onto the coroutine's stack.
+; * The "catch" address is pushed onto the stack.
+; * The number of stack bytes to be copied from the coroutine's stack to the CPU stack is stored.
+;   At init time, this value is always 2 for the "catch" function jump address.
+.export _px_coro_init
+.proc _px_coro_init ; naco_func func, u8 *naco_buffer, size_t buffer_size -> void
 	func = ptr1
 	size = sreg
 	
@@ -87,10 +105,11 @@ CORO_BUFF_PTR: .res 2
 	jmp naco_swap_sp
 .endproc
 
+; Shared by resume/yield/catch
 .proc naco_finish
 	value = sreg
 	
-	; Pop the resume address from the coroutine stack.
+	; Pop the jump address from the current stack.
 	jsr popax
 	pha
 	txa
@@ -103,10 +122,11 @@ CORO_BUFF_PTR: .res 2
 	rts
 .endproc
 
-.export _naco_resume
-.proc _naco_resume ; void *naco_buffer, u16 value -> u16
+; Resume a coroutine.
+.export _px_coro_resume
+.proc _px_coro_resume ; void *naco_buffer, u16 value -> u16
 	value = sreg
-	tmp = tmp1
+	stack_bytes = tmp1
 	
 	; Save the resume value;
 	sta value+0
@@ -124,30 +144,30 @@ CORO_BUFF_PTR: .res 2
 	
 	jsr naco_swap_sp
 	
-	; Stash the stack register.
-	tsx
-	
+	; Load # stack bytes to copy.
 	ldy #2
 	lda (CORO_BUFF_PTR), y
-	sta tmp
+	sta stack_bytes
+	
+	; Save the stack register.
+	tsx
+	txa
+	sta (CORO_BUFF_PTR), y
+	
 	ldy #0
 	:	lda (sp), y
 		pha
 		iny
-		cpy tmp
+		cpy stack_bytes
 		bne :-
 	jsr addysp
-	
-	; Save the old stack register value.
-	ldy #2
-	txa
-	sta (CORO_BUFF_PTR), y
 	
 	jmp naco_finish
 .endproc
 
-.export _naco_yield
-.proc _naco_yield ; u16 value -> u16
+; Yield from a coroutine back to the main thread.
+.export _px_coro_yield
+.proc _px_coro_yield ; u16 value -> u16
 	value = sreg
 	
 	; Save the resume value;
@@ -161,15 +181,18 @@ CORO_BUFF_PTR: .res 2
 	jsr pushax
 	
 	; Calculate stack offset. -(s - stack_offset)
-	clc
 	tsx
 	txa
 	ldy #2
+	clc ; For 2's complement.
 	sbc (CORO_BUFF_PTR), y
 	eor #$FF
-	sta (CORO_BUFF_PTR), y
-	tay
 	
+	; Save the value back to the coroutine buffer.
+	sta (CORO_BUFF_PTR), y
+	
+	; Copy bytes from the CPU stack to the coroutine stock.
+	tay
 	jsr subysp
 	:	dey
 		pla
@@ -181,6 +204,9 @@ CORO_BUFF_PTR: .res 2
 	jmp naco_finish
 .endproc
 
+; This is called when a coroutine's body function returns.
+; It handles the special case, and sets CORO_ERROR to be called if
+; the coroutine is accidentally resumed after completing.
 .proc naco_catch ; u16 -> u16
 	value = sreg
 	
@@ -189,8 +215,8 @@ CORO_BUFF_PTR: .res 2
 	stx value+1
 	
 	; Push error func.
-	lda #>(CORO_ABORT - 1)
-	ldx #<(CORO_ABORT - 1)
+	lda #>(CORO_ERROR - 1)
+	ldx #<(CORO_ERROR - 1)
 	jsr pushax
 	
 	; Zero out the stack offset.

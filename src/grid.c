@@ -4,7 +4,6 @@
 #include <lz4.h>
 
 #include "pixler/pixler.h"
-#include "naco/naco.h"
 #include "shared.h"
 #include "gfx/gfx.h"
 
@@ -227,7 +226,7 @@ static void grid_drop_block(void){
 	idx = grid_block_idx(grid.queued_column, GRID_H - 2);
 	
 	// Game over if the drop location isn't clear.
-	if(GRID[idx] != BLOCK_EMPTY) naco_yield(false);
+	if(GRID[idx] != BLOCK_EMPTY) px_coro_yield(false);
 	
 	// Push the first block directly onto the screen.
 	grid_set_block(idx, grid.queued_drops[0]);
@@ -337,7 +336,7 @@ static void grid_redraw_blocks(void){
 			grid_set_block(idx, GRID[idx]);
 		}
 		
-		naco_yield(true);
+		px_coro_yield(true);
 	}
 }
 
@@ -360,7 +359,7 @@ static uintptr_t grid_update_coro(void){
 			if(grid_match_blocks()){
 				grid_redraw_blocks();
 				
-				for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer) naco_yield(true);
+				for(grid.state_timer = 0; grid.state_timer < 60; ++grid.state_timer) px_coro_yield(true);
 				
 				grid.shape = get_shuffled_shape();
 				grid_blit_shape();
@@ -368,14 +367,14 @@ static uintptr_t grid_update_coro(void){
 				break;
 			}
 			
-			naco_yield(true);
+			px_coro_yield(true);
 		}
 		
 		// Don't tick during some animations and other events.
-		while(grid.pause_semaphore > 0) naco_yield(true);
+		while(grid.pause_semaphore > 0) px_coro_yield(true);
 		
 		grid_tick();
-		naco_yield(true);
+		px_coro_yield(true);
 		
 		grid_redraw_blocks();
 	}
@@ -390,7 +389,7 @@ static uintptr_t grid_update_coro(void){
 }
 
 static void wait_and_clear(u8 frames){
-	for(; frames > 0; --frames) naco_yield(true);
+	for(; frames > 0; --frames) px_coro_yield(true);
 	grid_redraw_blocks();
 }
 
@@ -411,24 +410,24 @@ static uintptr_t grid_tutorial_coro(void){
 	grid_blit_shape();
 	
 	tutorial_text(" Use d-pad  ""  to move.  ");
-	while(px == (*player_x) >> 8) naco_yield(true);
+	while(px == (*player_x) >> 8) px_coro_yield(true);
 	wait_and_clear(30);
 	
 	tutorial_text(" (A) button ""  to jump.  ");
-	while(py == (*player_y) >> 8) naco_yield(true);
+	while(py == (*player_y) >> 8) px_coro_yield(true);
 	wait_and_clear(30);
 	
 	GRID[10] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	grid_redraw_blocks();
 	tutorial_text(" (B) button ""grabs blocks");
-	while(GRID[10]) naco_yield(true);
+	while(GRID[10]) px_coro_yield(true);
 	
 	GRID[14] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	GRID[13] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	GRID[22] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	grid_redraw_blocks();
 	tutorial_text("Match shapes""  to score. ");
-	while(!grid_match_blocks()) naco_yield(true);
+	while(!grid_match_blocks()) px_coro_yield(true);
 	grid_redraw_blocks();
 	wait_and_clear(30);
 	
@@ -436,7 +435,7 @@ static uintptr_t grid_tutorial_coro(void){
 	GRID[81] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 	grid_redraw_blocks();
 	tutorial_text(" (UP) + (B) "" to grapple.");
-	while(GRID[81]) naco_yield(true);
+	while(GRID[81]) px_coro_yield(true);
 	wait_and_clear(30);
 	
 	grid_reset_tiles();
@@ -477,7 +476,7 @@ void grid_init(bool tutorial){
 		grid.queued_drops[1] = BLOCK_CHEST | BLOCK_COLOR_PURPLE;
 		grid_show_next_drop();
 		
-		naco_init((naco_func)grid_tutorial_coro, grid.update_coro, sizeof(grid.update_coro));
+		px_coro_init((naco_func)grid_tutorial_coro, grid.update_coro, sizeof(grid.update_coro));
 	} else {
 		for(idx = 255; idx > 0; --idx){
 			get_shuffled_block();
@@ -489,7 +488,7 @@ void grid_init(bool tutorial){
 		grid_shuffle_next_drop();
 		grid.shape = get_shuffled_shape();
 		
-		naco_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
+		px_coro_init((naco_func)grid_update_coro, grid.update_coro, sizeof(grid.update_coro));
 	}
 }
 
@@ -520,7 +519,7 @@ void grid_draw_indicators(void){
 bool grid_update(void){
 	if(--grid.flicker_column == 0) grid.flicker_column = GRID_W - 2;
 	
-	return naco_resume(grid.update_coro, 0);
+	return px_coro_resume(grid.update_coro, 0);
 }
 
 void grid_pause_semaphore(s8 inc){

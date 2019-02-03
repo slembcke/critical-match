@@ -1,7 +1,11 @@
-.include "zeropage.inc"
-.include "pixler.inc"
+.macpack generic
 
+.include "zeropage.inc"
 .import pushax, popax
+
+.include "pixler.inc"
+.include "pixler_lz4.inc"
+
 .import _px_blit
 
 .import px_lz4
@@ -15,19 +19,35 @@
 
 ; dst: ptr2, src: ptr1, len: ptr3
 .proc ram_to_vram
-	lda	ptr2+1
+	lda	dst+1
 	sta	PPU_VRAM_ADDR
-	lda	ptr2+0
+	lda	dst+0
 	sta	PPU_VRAM_ADDR
 	
-	lda	ptr3+0
-	ldx	ptr3+1
+	lda	offset+0
+	ldx	offset+1
 	jsr	pushax
-	lda	ptr1+0
-	ldx	ptr1+1
+	lda	src+0
+	ldx	src+1
 	jsr	_px_blit
 	
-	jmp popax
+; dst += offset;
+	lda dst+0
+	add offset+0
+	sta dst+0
+	lda dst+1
+	adc offset+1
+	sta dst+1
+	
+; src += offset;
+	lda src+0
+	add offset+0
+	sta src+0
+	lda src+1
+	adc offset+1
+	sta src+1
+	
+	rts
 .endproc
 
 ; dst: ptr2, src: ptr1, len: ptr3

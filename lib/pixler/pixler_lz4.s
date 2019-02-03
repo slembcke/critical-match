@@ -8,14 +8,10 @@
 
 .macpack generic
 .include "zeropage.inc"
-.include "pixler.inc"
-
 .import pushax, popax
 
-dst = regsave
-src = sreg
-token = tmp2
-offset = ptr3
+.include "pixler.inc"
+.include "pixler_lz4.inc"
 
 .data
 
@@ -25,6 +21,18 @@ px_lz4_src_to_dst: jmp $FFFC
 px_lz4_dst_to_dst: jmp $FFFC
 
 .code
+
+.proc px_lz4_read_src
+	ldy #0
+	lda (src), y
+
+	inc src+0
+	bne :+
+		inc src+1
+	:
+	
+	rts
+.endproc
 
 .export px_lz4
 .proc	px_lz4
@@ -38,14 +46,8 @@ px_lz4_dst_to_dst: jmp $FFFC
 	
 	@loop:
 	; get_token
-	ldy #0
-	lda (src), y
+	jsr px_lz4_read_src
 	sta token
-
-	inc src+0
-	bne :+
-		inc src+1
-	:
 	
 	; Decode literal count from token upper nibble.
 	lsr a
@@ -60,40 +62,13 @@ px_lz4_dst_to_dst: jmp $FFFC
 	cmp #15
 	jsr consume_length_bytes
 	
-	; memcpy(dst, src, offset);
-	lda dst+0
-	ldx dst+1
-	sta ptr2+0
-	stx ptr2+1
-	jsr pushax
-	lda src+0
-	ldx src+1
-	sta ptr1+0
-	stx ptr1+1
-	; ldy #$00 - not needed as pushax zeroes Y
+	; Copy literals
 	jsr px_lz4_src_to_dst
 	
-; dst += offset;
-	add offset+0
-	sta dst+0
-	txa
-	adc offset+1
-	sta dst+1
-	
-; src += offset;
-	lda offset+0
-	add src+0
-	sta src+0
-	lda offset+1
-	adc src+1
-	sta src+1
-	
 	; memcpy(&offset, src, 2);
-	ldy #0
-	lda (src), y
+	jsr px_lz4_read_src
 	sta offset
-	iny
-	lda (src), y
+	jsr px_lz4_read_src
 	sta offset+1
 	
 	; Terminate if offset is 0.
@@ -101,14 +76,6 @@ px_lz4_dst_to_dst: jmp $FFFC
 	ora offset+1
 	bne :+
 		rts
-	:
-	
-	; src += 2;
-	lda #2
-	add src+0
-	sta src+0
-	bcc :+
-		inc src+1
 	:
 	
 	; copysrc = dst - offset;

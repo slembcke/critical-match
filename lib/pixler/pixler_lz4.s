@@ -111,15 +111,8 @@ px_lz4_dst_to_dst: jmp $FFFC
 		rts
 	:
 	
-	; tmp = *src++;
-	ldy #0
-	lda (src), y
+	jsr px_lz4_read_src
 	tax
-	
-	inc src+0
-	bne :+
-		inc src+1
-	:
 	
 	; run_length += tmp;
 	add run_length+0
@@ -128,7 +121,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 		inc run_length+1
 	:
 	
-	; if (tmp == 255)
+	; Max value means we need to consume more run length bytes.
 	txa
 	cmp #255
 	

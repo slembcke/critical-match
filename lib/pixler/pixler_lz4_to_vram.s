@@ -1,51 +1,48 @@
 .macpack generic
 
 .include "zeropage.inc"
-.import pushax, popax
+.import pushax, popax, _exit
 
 .include "pixler.inc"
 .include "pixler_lz4.inc"
 
 .import _px_blit
 
-.import px_lz4
+.import px_lz4_read_src
 .import px_lz4_src_to_dst
 .import px_lz4_dst_to_dst
+.import px_lz4
 
 .code
 
-; These memcpy-like functions are drop in replacements for memcpy_upwards().
-; They are patched in using the jump vectors above when decompressing to vram.
-
-; dst: ptr2, src: ptr1, len: ptr3
 .proc ram_to_vram
+	; Set the VRAM address.
 	lda	dst+1
 	sta	PPU_VRAM_ADDR
 	lda	dst+0
 	sta	PPU_VRAM_ADDR
 	
-	lda	offset+0
-	ldx	offset+1
-	jsr	pushax
-	lda	src+0
-	ldx	src+1
-	jsr	_px_blit
+	; ; Currently doesn't handle literal runs of > 255
+	; lda offset+1
+	; beq :+
+	; 	jmp _exit
+	; :
 	
-; dst += offset;
-	lda dst+0
-	add offset+0
-	sta dst+0
-	lda dst+1
-	adc offset+1
-	sta dst+1
-	
-; src += offset;
-	lda src+0
-	add offset+0
-	sta src+0
-	lda src+1
-	adc offset+1
-	sta src+1
+	ldx offset+0
+	@loop:
+		beq @loop_end
+		
+		jsr px_lz4_read_src
+		sta PPU_VRAM_IO
+		
+		inc dst+0
+		bne :+
+			inc dst+1
+		:
+		
+		dex
+		jmp @loop
+	@loop_end:
 	
 	rts
 .endproc
@@ -101,8 +98,8 @@
 		jmp @loop
 .endproc
 
-.export _decompress_lz4_to_vram
-.proc _decompress_lz4_to_vram
+.export _px_lz4_to_vram
+.proc _px_lz4_to_vram
 	jsr pushax
 	
 	lda #<ram_to_vram

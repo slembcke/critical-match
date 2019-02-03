@@ -56,7 +56,7 @@ static GameState game_loop(bool tutorial){
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
+		px_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
 		px_spr_clear();
 	} px_ppu_sync_on();
@@ -107,7 +107,7 @@ static GameState final_score(s16 scroll_v){
 	px_buffer_inc(PX_INC1);
 	px_ppu_sync_off(); {
 		px_addr(NT_ADDR(0, 10, 12));
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4);
+		px_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4);
 		// PX.scroll_y = 240 - (scroll_y >> 8);
 		
 		// Show score
@@ -196,7 +196,7 @@ static GameState game_over(void){
 
 static GameState credits_screen(void){
 	px_ppu_sync_off(); {
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_credits_lz4);
+		px_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_credits_lz4);
 		
 		px_spr_clear();
 	} px_ppu_sync_on();
@@ -242,7 +242,7 @@ static GameState main_menu(void){
 	
 	px_inc(PX_INC1);
 	px_ppu_sync_off(); {
-		decompress_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_menu_lz4);
+		px_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_menu_lz4);
 	} px_ppu_sync_on();
 	
 	// music_play(0);
@@ -346,10 +346,10 @@ static GameState debug_chr(void){
 		
 		px_bg_table(1);
 		px_spr_table(1);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
-		decompress_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
-		// decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr);
+		px_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_neschar_lz4chr);
+		px_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
+		px_lz4_to_vram(CHR_ADDR(1, 0x80), gfx_sheet1_lz4chr);
+		// px_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr);
 		
 		//Top
 		px_inc(PX_INC1);
@@ -397,13 +397,13 @@ void main(void){
 	
 	// Load BG tiles..
 	px_bg_table(0);
-	decompress_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_chr0_lz4chr);
+	px_lz4_to_vram(CHR_ADDR(0, 0x00), gfx_chr0_lz4chr);
 	
 	// Load sprites.
 	px_spr_table(1);
-	decompress_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_chr0_lz4chr);
-	decompress_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
-	decompress_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr);
+	px_lz4_to_vram(CHR_ADDR(1, 0x00), gfx_chr0_lz4chr);
+	px_lz4_to_vram(CHR_ADDR(1, 0x20), gfx_explosion_lz4chr);
+	px_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_character_lz4chr);
 	
 	// Black out the second screen.
 	px_addr(NT_ADDR(2, 0, 0));

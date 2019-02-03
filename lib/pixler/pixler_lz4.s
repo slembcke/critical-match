@@ -22,6 +22,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 
 .code
 
+.export px_lz4_read_src
 .proc px_lz4_read_src
 	ldy #0
 	lda (src), y

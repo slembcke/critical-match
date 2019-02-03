@@ -11,7 +11,7 @@
 .import pushax, popax
 
 .include "pixler.inc"
-.include "pixler_lz4.inc"
+.include "lz4.inc"
 
 .data
 

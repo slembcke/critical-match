@@ -25,17 +25,17 @@ ASMSRC = \
 	src/metatiles.s \
 	gfx/gfx.s \
 	audio/audio.s \
-	lib/pixler/pixler_coroutine.s \
+	lib/pixler/coroutine.s \
 	lib/pixler/rand8.s \
-	lib/pixler/pixler_boot.s \
-	lib/pixler/pixler_zeropage.s \
-	lib/pixler/pixler_nmi.s \
-	lib/pixler/pixler_banks.s \
-	lib/pixler/pixler_buffer.s \
-	lib/pixler/pixler_blit.s \
-	lib/pixler/pixler_sprite.s \
-	lib/pixler/pixler_lz4.s \
-	lib/pixler/pixler_lz4_to_vram.s \
+	lib/pixler/boot.s \
+	lib/pixler/zeropage.s \
+	lib/pixler/nmi.s \
+	lib/pixler/uxrom.s \
+	lib/pixler/buffer.s \
+	lib/pixler/blit.s \
+	lib/pixler/sprite.s \
+	lib/pixler/lz4.s \
+	lib/pixler/lz4_to_vram.s \
 	lib/famitone2/famitone2.s \
 	# lib/pixler/pixler_lz4_to_ram.s \
 

@@ -4,7 +4,7 @@
 .import pushax, popax, _exit
 
 .include "pixler.inc"
-.include "pixler_lz4.inc"
+.include "lz4.inc"
 
 .import _px_blit
 

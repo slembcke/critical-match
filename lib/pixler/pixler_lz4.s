@@ -99,20 +99,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 	jsr consume_length_bytes
 	
 	; memcpy(dst, copysrc, offset);
-	lda dst+0
-	ldx dst+1
-	sta ptr2+0
-	stx ptr2+1
-	jsr pushax
-	; ldy #$00 - not needed as pushax zeroes Y
 	jsr px_lz4_dst_to_dst
-	
-	; dst += offset;
-	add offset+0
-	sta dst+0
-	txa
-	adc offset+1
-	sta dst+1
 	
 	jmp @loop
 .endproc

@@ -41,7 +41,7 @@
 		:
 		
 		dex
-		jmp @loop
+		bne @loop
 	@loop_end:
 	
 	rts
@@ -49,51 +49,61 @@
 
 ; dst: ptr2, src: ptr1, len: ptr3
 .proc vram_to_vram
-	lda	#0
-	sta	tmp3
-	sta	tmp4
+	lda offset+0
+	; eor #$FF
+	; iny
+	tay
 	
 	@loop:
-		lda	tmp3
-		cmp	ptr3+0
-		lda	tmp4
-		sbc	ptr3+1
-		bcc	:+
-			jmp popax
+		; lda	offset+0
+		tya
+		ora	offset+1
+		bne	:+
+			rts
 		:
 		
-		; read source byte
+		; Set source address.
 		lda	ptr1+1
 		sta	PPU_VRAM_ADDR
 		lda	ptr1+0
 		sta	PPU_VRAM_ADDR
 		
+		; Read twice, the first value is garbage.
 		ldx	PPU_VRAM_IO
 		ldx	PPU_VRAM_IO
 		
+		; Set destination address.
+		lda	dst+1
+		sta	PPU_VRAM_ADDR
+		lda	dst+0
+		sta	PPU_VRAM_ADDR
+		
+		; Write byte.
+		stx	PPU_VRAM_IO
+		
+		; Update counters.
 		inc	ptr1+0
 		bne	:+
 			inc	ptr1+1
 		:
 		
-		; write dst byte
-		lda	ptr2+1
-		sta	PPU_VRAM_ADDR
-		lda	ptr2+0
-		sta	PPU_VRAM_ADDR
-		
-		stx	PPU_VRAM_IO
-		
-		inc	ptr2+0
+		inc	dst+0
 		bne	:+
-			inc	ptr2+1
+			inc	dst+1
 		:
+		
+		; dey
+		; bne :+
+		; 	dec offset+1
+		; :
 		
 		; increase counter
-		inc	tmp3
-		bne	:+
-			inc	tmp4
-		:
+		tya
+		sub #1
+		tay
+		lda offset+1
+		sbc #0
+		sta offset+1
 		
 		jmp @loop
 .endproc

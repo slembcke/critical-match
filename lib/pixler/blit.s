@@ -1,44 +1,42 @@
 .include "zeropage.inc"
 .include "pixler.inc"
 
-.import incsp2
+.import popax
 
 .export _px_blit
 .proc _px_blit ; u16 len, u16 addr
-	_len = 0
-	; _addr = x|a
-	
+	; Store address to ptr1.
 	sta ptr1 + 0
 	stx ptr1 + 1
 	
-	ldy #(_len+1)
-	lda (sp), y
+	; Store length to sreg.
+	jsr popax
+	sta sreg+0
+	stx sreg+1
+	
+	txa
 	beq @remainder
-
+	
 	tax
 	ldy #0
-	:
+	@copy_block:
 		:	lda (ptr1), y
 			sta PPU_VRAM_IO
 			iny
 			bne :-
-		inc ptr1 + 1
+		inc ptr1+1
 		dex
-		bne :--
-
-	@remainder:
-	ldy #(_len+0)
-	lda (sp), y
-	sta tmp1 + 0
+		bne @copy_block
 	
+	@remainder:
 	ldy #0
-	:	cpy tmp1 + 0
-		beq :+
+	:	cpy sreg+0
+		beq @break
 		lda (ptr1), y
 		sta PPU_VRAM_IO
 		iny
-		jmp :-
-	:
+		bne :-
+	@break:
 	
-	jmp incsp2
+	rts
 .endproc

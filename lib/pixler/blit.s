@@ -1,42 +1,7 @@
 .include "zeropage.inc"
 .include "pixler.inc"
 
-.importzp px_ctrl
-
 .import incsp2
-
-.export _px_fill
-.proc _px_fill ; u16 len, u8 chr
-	_len = 0
-	; _chr = a
-	
-	tax
-	ldy #(_len+1)
-	lda (sp), y
-	beq @remainder
-
-	tay
-	txa
-	ldx #0
-	:
-		:	sta PPU_VRAM_IO
-			inx
-			bne :-
-		dey
-		bne :--
-	tax
-
-	@remainder:
-	ldy #(_len+0)
-	lda (sp), y
-	tay
-	txa
-	: sta PPU_VRAM_IO
-		dey
-		bne :-
-	
-	jmp incsp2
-.endproc
 
 .export _px_blit
 .proc _px_blit ; u16 len, u16 addr

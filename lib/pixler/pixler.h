@@ -66,7 +66,7 @@ extern PX_t PX;
 #pragma zpsym("PX");
 
 // UNROM secondary bank selection routine.
-void px_bank_select(u8 bank);
+void px_uxrom_select(u8 bank);
 
 // Macros for statically determining various PPU addresses.
 

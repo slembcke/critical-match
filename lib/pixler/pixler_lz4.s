@@ -15,9 +15,11 @@
 
 .data
 
-.export px_lz4_src_to_dst, px_lz4_dst_to_dst
 ; Jump vectors for the memcpy functions.
+.export px_lz4_src_to_dst
 px_lz4_src_to_dst: jmp $FFFC
+
+.export px_lz4_dst_to_dst
 px_lz4_dst_to_dst: jmp $FFFC
 
 .code
@@ -55,24 +57,24 @@ px_lz4_dst_to_dst: jmp $FFFC
 	lsr a
 	lsr a
 	lsr a
-	sta offset+0
+	sta run_length+0
 	ldx #0
-	stx offset+1
+	stx run_length+1
 	
-	; if (offset == 15) {
+	; if (run_length == 15) {
 	cmp #15
 	jsr consume_length_bytes
 	
 	; Copy literals
 	jsr px_lz4_src_to_dst
 	
-	; memcpy(&offset, src, 2);
+	; memcpy(&run_length, src, 2);
 	jsr px_lz4_read_src
-	sta offset
+	sta offset+0
 	jsr px_lz4_read_src
 	sta offset+1
 	
-	; Terminate if offset is 0.
+	; Terminate if run_length is 0.
 	lda offset+0
 	ora offset+1
 	bne :+
@@ -90,15 +92,15 @@ px_lz4_dst_to_dst: jmp $FFFC
 	lda token
 	and #$0F
 	add #4
-	sta offset+0
+	sta run_length+0
 	ldx #0
-	stx offset+1
+	stx run_length+1
 	
 	; if (token == 19) {
 	cmp #19
 	jsr consume_length_bytes
 	
-	; memcpy(dst, copysrc, offset);
+	; memcpy(dst, copysrc, run_length);
 	jsr px_lz4_dst_to_dst
 	
 	jmp @loop
@@ -119,11 +121,11 @@ px_lz4_dst_to_dst: jmp $FFFC
 		inc src+1
 	:
 	
-	; offset += tmp;
-	add offset+0
-	sta offset+0
+	; run_length += tmp;
+	add run_length+0
+	sta run_length+0
 	bcc :+
-		inc offset+1
+		inc run_length+1
 	:
 	
 	; if (tmp == 255)

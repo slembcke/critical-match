@@ -1,4 +1,5 @@
 dst = regsave
 src = sreg
 token = tmp2
-offset = ptr3
+run_length = ptr3
+offset = run_length

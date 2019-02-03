@@ -23,12 +23,12 @@
 	sta	PPU_VRAM_ADDR
 	
 	; ; Currently doesn't handle literal runs of > 255
-	; lda offset+1
+	; lda run_length+1
 	; beq :+
 	; 	jmp _exit
 	; :
 	
-	ldx offset+0
+	ldx run_length+0
 	@loop:
 		beq @loop_end
 		
@@ -49,15 +49,15 @@
 
 ; dst: ptr2, src: ptr1, len: ptr3
 .proc vram_to_vram
-	lda offset+0
+	lda run_length+0
 	; eor #$FF
 	; iny
 	tay
 	
 	@loop:
-		; lda	offset+0
+		; lda	run_length+0
 		tya
-		ora	offset+1
+		ora	run_length+1
 		bne	:+
 			rts
 		:
@@ -94,16 +94,16 @@
 		
 		; dey
 		; bne :+
-		; 	dec offset+1
+		; 	dec run_length+1
 		; :
 		
 		; increase counter
 		tya
 		sub #1
 		tay
-		lda offset+1
+		lda run_length+1
 		sbc #0
-		sta offset+1
+		sta run_length+1
 		
 		jmp @loop
 .endproc

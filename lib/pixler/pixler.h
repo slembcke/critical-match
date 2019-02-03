@@ -145,8 +145,8 @@ void px_wait_frames(u8 frames);
 // .incbin "mydata.lz4", 8
 // .word 0
 
-void decompress_lz4_to_ram(void *dst, void *src);
-void decompress_lz4_to_vram(u16 addr, void *src);
+void px_lz4_to_ram(void *dst, void *src);
+void px_lz4_to_vram(u16 addr, void *src);
 
 // Fast, but low quality random numbers based on a LFSR.
 
@@ -163,7 +163,7 @@ typedef uintptr_t (*naco_func)(uintptr_t value);
 // Initialize a coroutine's stack buffer and body function.
 // 7 bytes of buffer space are used for coroutine state.
 // Coroutine does not begin executing until px_coro_resume() is called.
-void px_coro_init(naco_func func, void *naco_buffer, size_t buffer_size);
+void px_coro_init(naco_func func, void *naco_buffer, u16 buffer_size);
 
 // Execute a coroutine until it calls px_coro_yield().
 // The return value is the value the coroutine passes to px_coro_yield();

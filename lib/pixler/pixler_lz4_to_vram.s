@@ -22,14 +22,10 @@
 	lda	dst+0
 	sta	PPU_VRAM_ADDR
 	
-	; ; Currently doesn't handle literal runs of > 255
-	; lda run_length+1
-	; beq :+
-	; 	jmp _exit
-	; :
-	
 	ldx run_length+0
 	@loop:
+		txa
+		ora run_length+1
 		beq @loop_end
 		
 		jsr px_lz4_read_src
@@ -40,8 +36,13 @@
 			inc dst+1
 		:
 		
+		; Decrement counter.
+		txa
+		bne :+
+			dec run_length+1
+		:
 		dex
-		bne @loop
+		jmp @loop
 	@loop_end:
 	
 	rts

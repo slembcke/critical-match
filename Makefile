@@ -35,9 +35,9 @@ ASMSRC = \
 	lib/pixler/pixler_blit.s \
 	lib/pixler/pixler_sprite.s \
 	lib/pixler/pixler_lz4.s \
-	lib/pixler/pixler_lz4_to_ram.s \
 	lib/pixler/pixler_lz4_to_vram.s \
 	lib/famitone2/famitone2.s \
+	# lib/pixler/pixler_lz4_to_ram.s \
 
 GFX = \
 	gfx/CHR0.png \

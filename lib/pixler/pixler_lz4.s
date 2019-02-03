@@ -24,6 +24,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 
 .code
 
+; Read a byte from the input stream.
 .export px_lz4_read_src
 .proc px_lz4_read_src
 	ldy #0
@@ -37,6 +38,8 @@ px_lz4_dst_to_dst: jmp $FFFC
 	rts
 .endproc
 
+; Decompress lz4 data (w/o the header)
+; Requires px_lz4_src_to_dst and px_lz4_dst_to_dst to be set.
 .export px_lz4
 .proc	px_lz4
 	jsr	popax
@@ -48,7 +51,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 	stx	dst+1
 	
 	@loop:
-	; get_token
+	; Read and save token
 	jsr px_lz4_read_src
 	sta token
 	
@@ -61,27 +64,27 @@ px_lz4_dst_to_dst: jmp $FFFC
 	ldx #0
 	stx run_length+1
 	
-	; if (run_length == 15) {
+	; Check if we need to consume more length bytes
 	cmp #15
 	jsr consume_length_bytes
 	
 	; Copy literals
 	jsr px_lz4_src_to_dst
 	
-	; memcpy(&run_length, src, 2);
+	; Read offset value.
 	jsr px_lz4_read_src
 	sta offset+0
 	jsr px_lz4_read_src
 	sta offset+1
 	
-	; Terminate if run_length is 0.
+	; Terminate if offset is 0.
 	lda offset+0
 	ora offset+1
 	bne :+
 		rts
 	:
 	
-	; copysrc = dst - offset;
+	; Calculate backref start.
 	lda dst+0
 	sub offset+0
 	sta back_src+0
@@ -89,6 +92,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 	sbc offset+1
 	sta back_src+1
 	
+	; Decode backref length from token lower nibble.
 	lda token
 	and #$0F
 	add #4
@@ -96,11 +100,11 @@ px_lz4_dst_to_dst: jmp $FFFC
 	ldx #0
 	stx run_length+1
 	
-	; if (token == 19) {
+	; Check if we have to consume additional length bytes.
 	cmp #19
 	jsr consume_length_bytes
 	
-	; memcpy(dst, copysrc, run_length);
+	; Copy backref bytes.
 	jsr px_lz4_dst_to_dst
 	
 	jmp @loop
@@ -114,7 +118,6 @@ px_lz4_dst_to_dst: jmp $FFFC
 	jsr px_lz4_read_src
 	tax
 	
-	; run_length += tmp;
 	add run_length+0
 	sta run_length+0
 	bcc :+
@@ -123,7 +126,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 	
 	; Max value means we need to consume more run length bytes.
 	txa
-	cmp #255
+	cmp #$FF
 	
 	jmp consume_length_bytes
 .endproc

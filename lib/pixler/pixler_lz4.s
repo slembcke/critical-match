@@ -84,10 +84,10 @@ px_lz4_dst_to_dst: jmp $FFFC
 	; copysrc = dst - offset;
 	lda dst+0
 	sub offset+0
-	sta ptr1+0
+	sta back_src+0
 	lda dst+1
 	sbc offset+1
-	sta ptr1+1
+	sta back_src+1
 	
 	lda token
 	and #$0F

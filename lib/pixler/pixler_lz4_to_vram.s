@@ -47,12 +47,8 @@
 	rts
 .endproc
 
-; dst: ptr2, src: ptr1, len: ptr3
 .proc vram_to_vram
-	lda run_length+0
-	; eor #$FF
-	; iny
-	tay
+	ldy run_length+0
 	
 	@loop:
 		; lda	run_length+0
@@ -63,9 +59,9 @@
 		:
 		
 		; Set source address.
-		lda	ptr1+1
+		lda	back_src+1
 		sta	PPU_VRAM_ADDR
-		lda	ptr1+0
+		lda	back_src+0
 		sta	PPU_VRAM_ADDR
 		
 		; Read twice, the first value is garbage.
@@ -81,10 +77,10 @@
 		; Write byte.
 		stx	PPU_VRAM_IO
 		
-		; Update counters.
-		inc	ptr1+0
+		; Increment pointers.
+		inc	back_src+0
 		bne	:+
-			inc	ptr1+1
+			inc	back_src+1
 		:
 		
 		inc	dst+0
@@ -92,18 +88,12 @@
 			inc	dst+1
 		:
 		
-		; dey
-		; bne :+
-		; 	dec run_length+1
-		; :
-		
-		; increase counter
+		; Decrement counter.
 		tya
-		sub #1
-		tay
-		lda run_length+1
-		sbc #0
-		sta run_length+1
+		bne :+
+			dec run_length+1
+		:
+		dey
 		
 		jmp @loop
 .endproc

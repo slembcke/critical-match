@@ -54,7 +54,7 @@ static GameState game_loop(bool tutorial){
 	player_init();
 	grid_init(tutorial);
 	
-	px_inc(PX_INC1);
+	px_inc_h();
 	px_ppu_sync_off(); {
 		px_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_board_lz4);
 		
@@ -240,7 +240,7 @@ static GameState main_menu(void){
 	
 	music_stop();
 	
-	px_inc(PX_INC1);
+	px_inc_h();
 	px_ppu_sync_off(); {
 		px_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_menu_lz4);
 	} px_ppu_sync_on();
@@ -352,18 +352,18 @@ static GameState debug_chr(void){
 		// px_lz4_to_vram(CHR_ADDR(1, 0xA0), gfx_squidman_lz4chr);
 		
 		//Top
-		px_inc(PX_INC1);
+		px_inc_h();
 		px_addr(NT_ADDR(0, 8, 6));
 		px_blit(16, _hextab);
 		
 		// Side
-		px_inc(PX_INC32);
+		px_inc_v();
 		px_addr(NT_ADDR(0, 6, 8));
 		px_blit(16, _hextab);
 		
 		
 		// Grid
-		px_inc(PX_INC1);
+		px_inc_h();
 		for(iy = 0; iy < 16; ++iy){
 			px_addr(NT_ADDR(0, 8, 8 + iy));
 			for(ix = 0; ix < 16; ++ix){

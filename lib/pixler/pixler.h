@@ -92,7 +92,8 @@ void px_uxrom_select(u8 bank);
 #define px_addr(addr) {	PPU.vram.address = addr >> 8; PPU.vram.address = addr & 0xFF;}
 
 // Set the PPU auto-increment direction.
-void px_inc(u8 direction);
+void px_inc_h(void);
+void px_inc_v(void);
 
 // Fill a range of PPU bytes.
 void px_fill(u16 len, char chr);

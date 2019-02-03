@@ -33,17 +33,17 @@ void debug_hex(u16 value){
 /*
 GameState debug_chr(void){
 	// Top
-	px_inc(PX_INC1);
+	px_inc_h();
 	px_addr(NT_ADDR(0, 8, 6));
 	px_blit(16, _hextab);
 	
 	// Side
-	px_inc(PX_INC32);
+	px_inc_v();
 	px_addr(NT_ADDR(0, 6, 8));
 	px_blit(16, _hextab);
 	
 	// Grid
-	px_inc(PX_INC1);
+	px_inc_h();
 	for(iy = 0; iy < 16; ++iy){
 		px_addr(NT_ADDR(0, 8, 8 + iy));
 		for(ix = 0; ix < 16; ++ix){

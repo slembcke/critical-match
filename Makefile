@@ -32,6 +32,7 @@ ASMSRC = \
 	lib/pixler/nmi.s \
 	lib/pixler/uxrom.s \
 	lib/pixler/buffer.s \
+	lib/pixler/inc.s \
 	lib/pixler/blit.s \
 	lib/pixler/sprite.s \
 	lib/pixler/lz4.s \

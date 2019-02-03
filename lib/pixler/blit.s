@@ -5,24 +5,6 @@
 
 .import incsp2
 
-.export _px_inc
-.proc _px_inc ; u8 direction
-	cmp #0
-	beq @horiz
-		lda px_ctrl
-		ora #$04
-		jmp :+
-	@horiz:
-		lda px_ctrl
-		and #(~$04 & $FF)
-	:
-	
-	sta px_ctrl
-	sta PPU_CTRL
-	
-	rts
-.endproc
-
 .export _px_fill
 .proc _px_fill ; u16 len, u8 chr
 	_len = 0

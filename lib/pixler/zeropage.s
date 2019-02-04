@@ -6,6 +6,9 @@ px_mask: .res 1
 .exportzp px_ctrl, _px_ctrl = px_ctrl
 px_ctrl: .res 1
 
+.exportzp px_nmi_ready
+px_nmi_ready: .res 1
+
 .exportzp px_ticks, _px_ticks = px_ticks
 px_ticks: .res 1
 

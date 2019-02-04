@@ -30,6 +30,7 @@ ASMSRC = \
 	lib/pixler/boot.s \
 	lib/pixler/zeropage.s \
 	lib/pixler/nmi.s \
+	lib/pixler/wait_frames.s \
 	lib/pixler/uxrom.s \
 	lib/pixler/buffer.s \
 	lib/pixler/buffer_inc.s \

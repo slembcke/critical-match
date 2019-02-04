@@ -1,5 +1,6 @@
 .include "pixler.inc"
 
+.importzp px_nmi_ready
 .importzp px_ticks
 .importzp px_mask, px_ctrl
 .importzp PX_scroll_x
@@ -8,10 +9,6 @@
 .import FamiToneUpdate
 
 .export px_nmi
-
-.zeropage
-
-px_nmi_ready: .byte 0
 
 .code
 
@@ -117,18 +114,5 @@ px_nmi_ready: .byte 0
 		bne :-
 	
 	inc px_ticks
-	rts
-.endproc
-
-.export _px_wait_frames
-.proc _px_wait_frames ; u8 frames
-	tax
-	:	cpx #0
-		beq :+
-		jsr _px_wait_nmi
-		dex
-		jmp :-
-	:
-	
 	rts
 .endproc

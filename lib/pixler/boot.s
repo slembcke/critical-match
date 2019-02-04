@@ -3,12 +3,11 @@
 
 .import NES_MAPPER, NES_PRG_BANKS, NES_CHR_BANKS, NES_MIRRORING
 .import __CSTACK_START__, __CSTACK_SIZE__
-.import initlib, copydata
+.import copydata
 .import _waitvsync
 .import _main
 .importzp px_ctrl
 .import px_nmi
-.import px_bank_select
 
 .export start, _exit = start
 .export __STARTUP__:absolute = 1
@@ -66,21 +65,28 @@
 	; After this PPU should definitely be warmed up and ready to use!
 	jsr _waitvsync
 	
-	; Clear the nametables.
-	lda #>PPU_NAMETBL0
-	sta PPU_VRAM_ADDR
-	lda #<PPU_NAMETBL0
-	sta PPU_VRAM_ADDR
-	ldy #16 ; Page counter. (4 pages per nametable)
-	ldx #0 ; Byte counter.
+	; Clear PPU memory.
+	; This includes a lot of duplicate writes to
+	; mirrored memory, but it doesn't really matter.
 	lda #0
+	sta PPU_VRAM_ADDR
+	sta PPU_VRAM_ADDR
+	ldy #$40 ; Number of pages.
+	ldx #0 ; Byte counter.
 	:	sta PPU_VRAM_IO
-			inx
-			bne :-
+		inx
+		bne :-
 		dey
 		bne :-
 	
-	; TODO px_spr_clear()?
+	; Set BG color to black.
+	lda #>PPU_PAL0
+	sta PPU_VRAM_ADDR
+	lda #<PPU_PAL0
+	sta PPU_VRAM_ADDR
+	lda #$30
+	sta PPU_VRAM_IO
+	
 	; Move sprites offscreen.
 	ldy #64 ; Sprite counter.
 	ldx #0 ; Byte counter.

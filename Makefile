@@ -5,6 +5,7 @@ CC65_ROOT = ../cc65
 CC = $(CC65_ROOT)/bin/cc65
 AS = $(CC65_ROOT)/bin/ca65
 LD = $(CC65_ROOT)/bin/ld65
+AR = $(CC65_ROOT)/bin/ar65
 
 CFLAGS = -t nes -Oirs --register-space 16
 # CFLAGS += -DDEBUG
@@ -25,6 +26,11 @@ ASMSRC = \
 	src/metatiles.s \
 	gfx/gfx.s \
 	audio/audio.s \
+	lib/famitone2/famitone2.s \
+
+OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
+
+PX_SRC = \
 	lib/pixler/coroutine.s \
 	lib/pixler/rand8.s \
 	lib/pixler/boot.s \
@@ -42,8 +48,10 @@ ASMSRC = \
 	lib/pixler/sprite.s \
 	lib/pixler/lz4.s \
 	lib/pixler/lz4_to_vram.s \
-	lib/famitone2/famitone2.s \
-	# lib/pixler/pixler_lz4_to_ram.s \
+	lib/pixler/lz4_to_ram.s \
+
+PX_OBJS = $(PX_SRC:.s=.o)
+PX_LIB = lib/pixler/px.lib
 
 GFX = \
 	gfx/CHR0.png \
@@ -64,8 +72,6 @@ MAPS = \
 SONGS = \
 	audio/gameplay2.txt
 
-OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o)
-
 .PHONY: default clean rom run-mac run-linux itch
 
 default: rom
@@ -74,6 +80,7 @@ clean:
 	rm -rf $(ROM)
 	rm -rf $(SRC:.c=.s)
 	rm -rf $(OBJS)
+	rm -rf $(PX_OBJS)
 	rm -rf gfx/*.chr
 	rm -rf gfx/*.lz4chr
 	rm -rf gfx/shapes.bin
@@ -106,8 +113,11 @@ tools/lz4x:
 tools/text2data:
 	make -C tools text2data
 
-$(ROM): ld65.cfg $(OBJS)
-	$(LD) -C ld65.cfg $(OBJS) nes.lib -m link.log -o $@
+$(PX_LIB): $(PX_OBJS)
+	$(AR) r $@ $^
+
+$(ROM): ld65.cfg $(OBJS) $(PX_LIB)
+	$(LD) -C ld65.cfg $(OBJS) $(PX_LIB) nes.lib -m link.log -o $@
 
 %.s: %.c src/shared.h
 	$(CC) $(CFLAGS) $< --add-source $(INCLUDE) -o $@
@@ -120,6 +130,7 @@ $(ROM): ld65.cfg $(OBJS)
 
 %.lz4chr: %.chr tools/lz4x
 	tools/lz4x -f9 $< $@
+	touch $@
 
 %.bin: %.hex
 	xxd -r $< > $@
@@ -129,6 +140,7 @@ $(ROM): ld65.cfg $(OBJS)
 
 %.lz4: %.bin tools/lz4x
 	tools/lz4x -f9 $< $@
+	touch $@
 
 gfx/gfx.o: $(GFX:.png=.lz4chr) $(MAPS:.tmx=.lz4) gfx/shapes.bin
 

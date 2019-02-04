@@ -2,6 +2,7 @@
 *.s
 *.o
 *.d
+*.lib
 *.bin
 *.lz4
 *.chr

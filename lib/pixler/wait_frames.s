@@ -1,4 +1,4 @@
-.importzp _px_wait_nmi
+.import _px_wait_nmi
 
 .export _px_wait_frames
 .proc _px_wait_frames ; u8 frames

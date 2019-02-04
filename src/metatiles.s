@@ -4,10 +4,13 @@
 
 .macpack generic
 
-.importzp px_nmi_tmp
 .importzp px_buffer_cursor
 
 .import incsp1
+
+.zeropage
+
+metatiles_tmp: .res 4
 
 .rodata
 
@@ -22,8 +25,8 @@ METATILE4: .byte PAL2, PAL0, PAL2, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL
 .code
 
 .proc exec_set_metatile
-	_addr = px_nmi_tmp + 0
-	_attr = px_nmi_tmp + 2
+	_addr = metatiles_tmp + 0
+	_attr = metatiles_tmp + 2
 	
 	; Pop metatile index.
 	pla

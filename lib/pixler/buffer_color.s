@@ -21,7 +21,7 @@
 	
 	px_buffer_write_func exec
 	
-	lda px_buffer_cursor
+	txa
 	add #cmd_bytes
 	sta px_buffer_cursor
 	

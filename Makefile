@@ -33,6 +33,7 @@ ASMSRC = \
 	lib/pixler/uxrom.s \
 	lib/pixler/buffer.s \
 	lib/pixler/buffer_inc.s \
+	lib/pixler/buffer_color.s \
 	lib/pixler/inc.s \
 	lib/pixler/fill.s \
 	lib/pixler/blit.s \

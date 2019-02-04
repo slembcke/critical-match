@@ -1,12 +1,11 @@
 .macpack generic
 
 .include "zeropage.inc"
-.import incsp1
+.import popa
 
 .include "pixler.inc"
 .include "buffer.inc"
 
-.importzp px_buffer_cursor
 .importzp PX_buffer
 
 .zeropage
@@ -15,14 +14,6 @@
 px_nmi_tmp: .res 4
 
 .code
-
-; Restores the stack and jumps to the caller of px_buffer_exec
-.proc exec_terminator
-	pla
-	tax
-	txs
-	rts
-.endproc
 
 .export _px_buffer_clear
 .proc _px_buffer_clear
@@ -41,7 +32,7 @@ px_nmi_tmp: .res 4
 	
 	ldx px_buffer_cursor
 	px_buffer_write_arg 0
-	px_buffer_write_func exec_terminator
+	px_buffer_write_func terminator
 	
 	jsr _px_buffer_clear
 	
@@ -50,6 +41,14 @@ px_nmi_tmp: .res 4
 	ldx #$FF
 	txs
 	rts
+	
+	; Restores the stack and jumps to the caller of px_buffer_exec
+	.proc terminator
+		pla
+		tax
+		txs
+		rts
+	.endproc
 .endproc
 
 .proc exec_data
@@ -81,8 +80,7 @@ px_nmi_tmp: .res 4
 	px_buffer_write_func exec_data
 	
 	; Write len.
-	ldy #(_len)
-	lda (sp), y
+	jsr popa
 	px_buffer_write_arg 2
 	
 	; Increment cursor
@@ -98,41 +96,5 @@ px_nmi_tmp: .res 4
 	lda #$01
 	sta PX_buffer + 1
 	
-	jmp incsp1
-.endproc
-
-.proc exec_set_color
-	lda #>PPU_PAL0
-	sta PPU_VRAM_ADDR
-	pla
-	sta PPU_VRAM_ADDR
-	
-	pla
-	sta PPU_VRAM_IO
-	
 	rts
-.endproc
-
-.export _px_buffer_set_color
-.proc _px_buffer_set_color ; u8 idx, u8 color
-	_idx = 0
-	; _color = a
-	cmd_bytes = (2 + 2)
-	
-	; Write color.
-	ldx px_buffer_cursor
-	px_buffer_write_arg 1
-	
-	; Write idx
-	ldy #(_idx)
-	lda (sp), y
-	px_buffer_write_arg 0
-	
-	px_buffer_write_func exec_set_color
-	
-	lda px_buffer_cursor
-	add #cmd_bytes
-	sta px_buffer_cursor
-	
-	jmp incsp1
 .endproc

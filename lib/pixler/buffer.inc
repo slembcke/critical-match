@@ -1,3 +1,5 @@
+.importzp px_buffer_cursor
+
 .macro px_buffer_write_func f
 	lda #<(f - 1)
 	sta $0100, x

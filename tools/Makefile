@@ -1,4 +1,4 @@
-CFLAGS += -Wall -Wextra -I /usr/local/include -L /usr/local/lib
+CFLAGS += -std=c99 -Wall -Wextra -I /usr/local/include
 
 .phony: all clean
 
@@ -7,7 +7,9 @@ all: png2chr chr2png text2data nsf2data lz4x png2tiles
 clean:
 	rm -rf *.o *.dSYM png2chr chr2png text2data nsf2data lz4x png2tiles
 
-png2chr: png2chr.o common.o
+slib.o: slib.h
+
+png2chr: png2chr.o slib.o
 	$(CC) -o $@ $^ $(CFLAGS) -lpng
 
 chr2png: chr2png.o common.o

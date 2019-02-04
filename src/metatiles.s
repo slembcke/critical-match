@@ -1,5 +1,6 @@
 .include "zeropage.inc"
 .include "pixler/pixler.inc"
+.include "pixler/buffer.inc"
 
 .macpack generic
 

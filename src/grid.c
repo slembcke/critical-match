@@ -105,7 +105,7 @@ void grid_set_block(u8 index, u8 block){
 	asm("adc %v+0", addr); \
 	asm("sta %v+0", addr);
 	
-	px_buffer_inc(PX_INC1);
+	px_buffer_inc_h();
 	buffer_set_metatile(block & ~BLOCK_STATUS_MASK, addr);
 	
 	GRID[index] = block;
@@ -255,13 +255,13 @@ static void grid_blit(void){
 	grid_buffer_score(NT_ADDR(0, 23, 9));
 	
 	// Combo
-	px_buffer_inc(PX_INC1);
+	px_buffer_inc_h();
 	px_buffer_data(1, NT_ADDR(0, 24, 15));
 	PX.buffer[0] = _hextab[grid.combo];
 }
 
 static void grid_blit_shape(void){
-	px_buffer_inc(PX_INC1);
+	px_buffer_inc_h();
 	px_buffer_data(4, NT_ADDR(0, 4, 10));
 	memcpy(PX.buffer, gfx_shapes + 8*grid.shape + 8, 4);
 	px_buffer_data(4, NT_ADDR(0, 4, 11));
@@ -329,7 +329,7 @@ static void grid_tick(void){
 static void grid_redraw_blocks(void){
 	// Blit one row per frame.
 	for(grid.state_timer = GRID_H - 2; grid.state_timer > 0; --grid.state_timer){
-		px_buffer_inc(PX_INC1);
+		px_buffer_inc_h();
 		
 		for(ix = GRID_W - 2; ix > 0; --ix){
 			idx = grid_block_idx(ix, grid.state_timer);
@@ -528,7 +528,7 @@ void grid_pause_semaphore(s8 inc){
 
 // Rewrite?
 void grid_buffer_score(u16 addr){
-	px_buffer_inc(PX_INC1);
+	px_buffer_inc_h();
 	px_buffer_data(5, addr);
 	memset(PX.buffer, 0x00, 5);
 	ultoa(grid.score, PX.buffer, 10);

@@ -113,7 +113,8 @@ void px_buffer_exec(void);
 void px_buffer_clear(void);
 
 // Add a command to set the PPU increment direction.
-void px_buffer_inc(u8 direction);
+void px_buffer_inc_h(void);
+void px_buffer_inc_v(void);
 
 // Reserve space to copy bytes to the PPU.
 // The buffer address is returned via PX.buffer.

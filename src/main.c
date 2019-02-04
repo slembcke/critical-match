@@ -104,7 +104,7 @@ static void pause(void){
 static GameState final_score(s16 scroll_v){
 	u16 scroll_y = 48 << 8;
 	
-	px_buffer_inc(PX_INC1);
+	px_buffer_inc_h();
 	px_ppu_sync_off(); {
 		px_addr(NT_ADDR(0, 10, 12));
 		px_lz4_to_vram(NT_ADDR(0, 0, 0), gfx_game_over_lz4);

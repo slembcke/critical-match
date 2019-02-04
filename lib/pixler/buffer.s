@@ -1,18 +1,15 @@
-.include "zeropage.inc"
-.include "pixler.inc"
-
-.importzp px_ctrl
-.importzp PX_buffer
-
-.import incsp1
-.import METATILE0, METATILE1, METATILE2, METATILE3, METATILE4
-
 .macpack generic
 
-.zeropage
+.include "zeropage.inc"
+.import incsp1
 
-.exportzp px_buffer_cursor
-px_buffer_cursor: .byte 0
+.include "pixler.inc"
+.include "buffer.inc"
+
+.importzp px_buffer_cursor
+.importzp PX_buffer
+
+.zeropage
 
 .exportzp px_nmi_tmp
 px_nmi_tmp: .res 4
@@ -31,22 +28,6 @@ px_nmi_tmp: .res 4
 .proc _px_buffer_clear
 	ldx #0
 	stx px_buffer_cursor
-	
-	rts
-.endproc
-
-.proc exec_data
-	pla
-	sta PPU_VRAM_ADDR
-	pla
-	sta PPU_VRAM_ADDR
-	
-	pla
-	tax
-	:	pla
-		sta PPU_VRAM_IO
-		dex
-		bne :-
 	
 	rts
 .endproc
@@ -71,37 +52,18 @@ px_nmi_tmp: .res 4
 	rts
 .endproc
 
-.proc exec_inc_h
-	lda px_ctrl
-	and #(~$04 & $FF)
-	sta px_ctrl
-	sta PPU_CTRL
-	rts
-.endproc
-
-.proc exec_inc_v
-	lda px_ctrl
-	ora #$04
-	sta px_ctrl
-	sta PPU_CTRL
-	rts
-.endproc
-
-.export _px_buffer_inc
-.proc _px_buffer_inc ; pxInc direction
-	ldx px_buffer_cursor
+.proc exec_data
+	pla
+	sta PPU_VRAM_ADDR
+	pla
+	sta PPU_VRAM_ADDR
 	
-	cmp #0
-	beq @horiz
-		px_buffer_write_func exec_inc_v
-		jmp :+
-	@horiz:
-		px_buffer_write_func exec_inc_h
-	:
-	
-	inx
-	inx
-	stx px_buffer_cursor
+	pla
+	tax
+	:	pla
+		sta PPU_VRAM_IO
+		dex
+		bne :-
 	
 	rts
 .endproc

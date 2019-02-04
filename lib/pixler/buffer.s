@@ -5,8 +5,8 @@
 
 .export _px_buffer_clear
 .proc _px_buffer_clear
-	ldx #0
-	stx px_buffer_cursor
+	ldy #0
+	sty px_buffer_cursor
 	
 	rts
 .endproc
@@ -18,7 +18,7 @@
 	tsx
 	txa
 	
-	ldx px_buffer_cursor
+	ldy px_buffer_cursor
 	px_buffer_write_arg 0
 	px_buffer_write_func terminator
 	

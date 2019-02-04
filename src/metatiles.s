@@ -6,7 +6,7 @@
 
 .importzp px_buffer_cursor
 
-.import incsp1
+.import popa
 
 .zeropage
 
@@ -92,9 +92,9 @@ METATILE4: .byte PAL2, PAL0, PAL2, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL
 
 .export _buffer_set_metatile
 .proc _buffer_set_metatile
-	_index = 0
+	_index = tmp1
 	_addr = ptr1
-	_qmask = tmp1
+	_qmask = tmp2
 	cmd_bytes = (2 + 7)
 	
 	; Save tile address.
@@ -106,9 +106,9 @@ METATILE4: .byte PAL2, PAL0, PAL2, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL
 	px_buffer_write_ax 1
 	
 	; Write tile index.
-	ldx px_buffer_cursor
-	ldy #(_index)
-	lda (sp), y
+	jsr popa
+	sta _index
+	ldy px_buffer_cursor
 	px_buffer_write_arg 0
 	
 	; Calculate quadrant index.
@@ -122,12 +122,11 @@ METATILE4: .byte PAL2, PAL0, PAL2, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL
 	:
 	
 	; Load the quadrant mask.
-	tay
-	lda QUADRANT_MASK, y
+	tax
+	lda QUADRANT_MASK, x
 	sta _qmask
 	
 	; Write attribute byte address high byte.
-	ldx px_buffer_cursor
 	lda _addr + 1
 	and #%11111100 ; Mask table address.
 	ora #%00000011 ; Attribute memory start high bits.
@@ -139,10 +138,10 @@ METATILE4: .byte PAL2, PAL0, PAL2, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL
 	ror a
 	ror _addr + 1
 	ror a
-	tay
+	tax
 	and #%00000111
 	sta _addr + 0
-	tya
+	txa
 	lsr a
 	lsr a
 	and #%00111000
@@ -158,18 +157,16 @@ METATILE4: .byte PAL2, PAL0, PAL2, PAL0, PAL0, PAL0, PAL1, PAL1, PAL0, PAL0, PAL
 	px_buffer_write_arg 5
 	
 	; Write attribute byte.
-	ldy #(_index)
-	lda (sp), y
-	tay
-	lda METATILE4, y
+	ldx _index
+	lda METATILE4, x
 	and _qmask
 	px_buffer_write_arg 6
 	
 	px_buffer_write_func exec_set_metatile
 	
-	lda px_buffer_cursor
+	tya
 	add #cmd_bytes
 	sta px_buffer_cursor
 
-	jmp incsp1
+	rts
 .endproc

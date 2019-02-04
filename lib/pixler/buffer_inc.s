@@ -5,13 +5,12 @@
 
 .export _px_buffer_inc_h
 .proc _px_buffer_inc_h
-	ldx px_buffer_cursor
-	
+	ldy px_buffer_cursor
 	px_buffer_write_func exec
 	
-	inx
-	inx
-	stx px_buffer_cursor
+	iny
+	iny
+	sty px_buffer_cursor
 	
 	rts
 	
@@ -20,19 +19,19 @@
 		and #(~$04 & $FF)
 		sta px_ctrl
 		sta PPU_CTRL
+		
 		rts
 	.endproc
 .endproc
 
 .export _px_buffer_inc_v
 .proc _px_buffer_inc_v
-	ldx px_buffer_cursor
-	
+	ldy px_buffer_cursor
 	px_buffer_write_func exec
 	
-	inx
-	inx
-	stx px_buffer_cursor
+	iny
+	iny
+	sty px_buffer_cursor
 	
 	rts
 	
@@ -41,6 +40,7 @@
 		ora #$04
 		sta px_ctrl
 		sta PPU_CTRL
+		
 		rts
 	.endproc
 .endproc

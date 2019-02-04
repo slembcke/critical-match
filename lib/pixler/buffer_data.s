@@ -17,12 +17,11 @@
 	
 	ldy px_buffer_cursor
 	px_buffer_write_ax 0
-	
-	ldx px_buffer_cursor
 	px_buffer_write_func exec
 	
 	; Write len.
 	jsr popa
+	ldy px_buffer_cursor
 	px_buffer_write_arg 2
 	
 	; Increment cursor, a == len
@@ -31,7 +30,7 @@
 	sta px_buffer_cursor
 	
 	; Set PX_buffer
-	txa
+	tya
 	adc #cmd_bytes
 	sta PX_buffer + 0
 	lda #$01

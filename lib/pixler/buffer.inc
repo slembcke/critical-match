@@ -2,9 +2,9 @@
 
 .macro px_buffer_write_func f
 	lda #<(f - 1)
-	sta $0100, x
+	sta $0100, y
 	lda #>(f - 1)
-	sta $0101, x
+	sta $0101, y
 .endmacro
 
 .macro px_buffer_write_arg idx, value
@@ -14,7 +14,7 @@
 		.endif
 		
 		addr = $0102 + idx
-		sta addr, x
+		sta addr, y
 	.endscope
 .endmacro
 

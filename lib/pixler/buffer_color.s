@@ -12,16 +12,17 @@
 	cmd_bytes = (2 + 2)
 	
 	; Write color.
-	ldx px_buffer_cursor
+	ldy px_buffer_cursor
 	px_buffer_write_arg 1
 	
 	; Write idx
 	jsr popa
+	ldy px_buffer_cursor
 	px_buffer_write_arg 0
-	
+
 	px_buffer_write_func exec
 	
-	txa
+	tya
 	add #cmd_bytes
 	sta px_buffer_cursor
 	

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <alloca.h>
 
 #include <png.h>
 
@@ -8,6 +9,33 @@ typedef struct {
 	uint w, h;
 	u8 *pixels;
 } Image;
+
+typedef struct {
+	u8 bytes[16];
+} Tile;
+
+static inline void pixel_to_chr(u8 pixel, u8 *output, u8 bit){
+	if(pixel & 1) output[0] |= bit;
+	if(pixel & 2) output[8] |= bit;
+}
+
+static Tile tile_to_chr(const u8 *pixels, uint stride){
+	Tile tile = {};
+	
+	for(uint y = 0; y < 8; y++) {
+		const u8 *row = pixels + y*stride;
+		pixel_to_chr(row[0], tile.bytes + y, 0x80);
+		pixel_to_chr(row[1], tile.bytes + y, 0x40);
+		pixel_to_chr(row[2], tile.bytes + y, 0x20);
+		pixel_to_chr(row[3], tile.bytes + y, 0x10);
+		pixel_to_chr(row[4], tile.bytes + y, 0x08);
+		pixel_to_chr(row[5], tile.bytes + y, 0x04);
+		pixel_to_chr(row[6], tile.bytes + y, 0x02);
+		pixel_to_chr(row[7], tile.bytes + y, 0x01);
+	}
+	
+	return tile;
+}
 
 int main(int argc, char **argv){
 	SLIB_ASSERT_HARD(argc == 3, "Usage: %s infile outfile", argv[0]);
@@ -30,6 +58,7 @@ int main(int argc, char **argv){
 	png_read_png(png_ptr, info, PNG_TRANSFORM_PACKING|PNG_TRANSFORM_STRIP_16|PNG_TRANSFORM_STRIP_ALPHA, NULL);
 	
 	Image image = {};
+	
 	image.w = png_get_image_width(png_ptr, info);
 	image.h = png_get_image_height(png_ptr, info);
 	image.pixels = alloca(image.w * image.h);
@@ -52,35 +81,11 @@ int main(int argc, char **argv){
 	
 	SLIB_LOG("%ux%u png to %u tiles.", image.w, image.h, rows * cols);
 	
-	for(u32 r = 0; r < rows; r++) {
-		for(u32 c = 0; c < cols; c++) {
-			u8 buf0[8] = {}, buf1[8] = {};
-			u8 *tile = image.pixels + 8*(c + r*image.w);
-			
-			for(u32 y = 0; y < 8; y++) {
-				for(u32 x = 0; x < 8; x++) {
-					u8 *row = tile + y*image.w;
-					if(row[0]&1) buf0[y] |= 0x80;
-					if(row[0]&2) buf1[y] |= 0x80;
-					if(row[1]&1) buf0[y] |= 0x40;
-					if(row[1]&2) buf1[y] |= 0x40;
-					if(row[2]&1) buf0[y] |= 0x20;
-					if(row[2]&2) buf1[y] |= 0x20;
-					if(row[3]&1) buf0[y] |= 0x10;
-					if(row[3]&2) buf1[y] |= 0x10;
-					if(row[4]&1) buf0[y] |= 0x08;
-					if(row[4]&2) buf1[y] |= 0x08;
-					if(row[5]&1) buf0[y] |= 0x04;
-					if(row[5]&2) buf1[y] |= 0x04;
-					if(row[6]&1) buf0[y] |= 0x02;
-					if(row[6]&2) buf1[y] |= 0x02;
-					if(row[7]&1) buf0[y] |= 0x01;
-					if(row[7]&2) buf1[y] |= 0x01;
-				}
-			}
-			
-			fwrite(buf0, 8, 1, outfile);
-			fwrite(buf1, 8, 1, outfile);
+	for(u32 r = 0; r < image.h/8; r++) {
+		for(u32 c = 0; c < image.w/8; c++) {
+			const u8 *pixels = image.pixels + 8*(c + r*image.w);
+			Tile tile = tile_to_chr(pixels, image.w);
+			fwrite(&tile, sizeof(tile), 1, outfile);
 		}
 	}
 	

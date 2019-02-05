@@ -14,27 +14,26 @@ typedef struct {
 	u8 bytes[16];
 } Tile;
 
-static inline void pixel_to_chr(u8 pixel, u8 *output, u8 bit){
-	if(pixel & 1) output[0] |= bit;
-	if(pixel & 2) output[8] |= bit;
+// Convert a row of 8 pixels to a CHR byte.
+static inline uint row_to_chr(const u8 *row, u8 bit){
+	return (0
+			| ((row[0] & bit) << 7) | ((row[1] & bit) << 6) | ((row[2] & bit) << 5) | ((row[3] & bit) << 4)
+			| ((row[4] & bit) << 3) | ((row[5] & bit) << 2) | ((row[6] & bit) << 1) | ((row[7] & bit) << 0)
+	);
+
 }
 
 static Tile tile_to_chr(const u8 *pixels, uint stride){
-	Tile tile = {};
-	
-	for(uint y = 0; y < 8; y++) {
-		const u8 *row = pixels + y*stride;
-		pixel_to_chr(row[0], tile.bytes + y, 0x80);
-		pixel_to_chr(row[1], tile.bytes + y, 0x40);
-		pixel_to_chr(row[2], tile.bytes + y, 0x20);
-		pixel_to_chr(row[3], tile.bytes + y, 0x10);
-		pixel_to_chr(row[4], tile.bytes + y, 0x08);
-		pixel_to_chr(row[5], tile.bytes + y, 0x04);
-		pixel_to_chr(row[6], tile.bytes + y, 0x02);
-		pixel_to_chr(row[7], tile.bytes + y, 0x01);
-	}
-	
-	return tile;
+	return (Tile){{
+		row_to_chr(pixels + 0*stride, 1) >> 0, row_to_chr(pixels + 1*stride, 1) >> 0,
+		row_to_chr(pixels + 2*stride, 1) >> 0, row_to_chr(pixels + 3*stride, 1) >> 0,
+		row_to_chr(pixels + 4*stride, 1) >> 0, row_to_chr(pixels + 5*stride, 1) >> 0,
+		row_to_chr(pixels + 6*stride, 1) >> 0, row_to_chr(pixels + 7*stride, 1) >> 0,
+		row_to_chr(pixels + 0*stride, 2) >> 1, row_to_chr(pixels + 1*stride, 2) >> 1,
+		row_to_chr(pixels + 2*stride, 2) >> 1, row_to_chr(pixels + 3*stride, 2) >> 1,
+		row_to_chr(pixels + 4*stride, 2) >> 1, row_to_chr(pixels + 5*stride, 2) >> 1,
+		row_to_chr(pixels + 6*stride, 2) >> 1, row_to_chr(pixels + 7*stride, 2) >> 1,
+	}};
 }
 
 int main(int argc, char **argv){

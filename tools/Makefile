@@ -5,14 +5,14 @@ CFLAGS += -std=c99 -Wall -Wextra -I /usr/local/include
 all: png2chr chr2png text2data nsf2data lz4x png2tiles
 
 clean:
-	rm -rf *.o *.dSYM png2chr chr2png text2data nsf2data lz4x png2tiles
+	rm -rf *.o *.dSYM png2chr chr2png text2data nsf2data lz4x
 
 slib.o: slib.h
 
 png2chr: png2chr.o slib.o
 	$(CC) -o $@ $^ $(CFLAGS) -lpng
 
-chr2png: chr2png.o common.o
+chr2png: chr2png.o slib.o
 	$(CC) -o $@ $^ $(CFLAGS) -lpng
 
 text2data: text2data.cpp

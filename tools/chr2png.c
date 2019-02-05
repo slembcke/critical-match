@@ -1,10 +1,11 @@
-#include <string.h>
+#include <alloca.h>
+#include <strings.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include <png.h>
 
-#include "common.h"
+#include "slib.h"
 
 // http://wiki.nesdev.com/w/index.php/PPU_palettes
 static const png_color NES_PALETTE[] = {
@@ -14,110 +15,85 @@ static const png_color NES_PALETTE[] = {
 	{236, 238, 236}, {168, 204, 236}, {188, 188, 236}, {212, 178, 236}, {236, 174, 236}, {236, 174, 212}, {236, 180, 176}, {228, 196, 144}, {204, 210, 120}, {180, 222, 120}, {168, 226, 144}, {152, 226, 180}, {160, 214, 228}, {160, 162, 160}, {  0,   0,   0}, {  0,   0,   0},
 };
 
-static void savepng(FILE *f, const u8 data[], const u32 tile_count, uint8_t palette[]){
-	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-	if(!png_ptr) die("PNG error\n");
-	
-	png_infop info = png_create_info_struct(png_ptr);
-	if(!info) die("PNG error\n");
-	if(setjmp(png_jmpbuf(png_ptr))) die("PNG error\n");
-	
-	// Calculate a suitable resolution.
-	u32 w, h;
-	if(tile_count < 16){
-		h = 8;
-		w = 8*tile_count;
-	} else if(tile_count % 16){
-		h = 8*tile_count/16 + 1;
-		w = 8*16;
-	} else {
-		h = 8*tile_count/16;
-		w = 8*16;
-	}
-	
-	printf("Saving to a %ux%u PNG.\n", w, h);
-	
-	png_init_io(png_ptr, f);
-	png_set_IHDR(png_ptr, info, w, h, 2, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-	
-	const png_color colors[] = {NES_PALETTE[palette[0]], NES_PALETTE[palette[1]], NES_PALETTE[palette[2]], NES_PALETTE[palette[3]]};
-	png_set_PLTE(png_ptr, info, colors, 4);
-	
-	png_write_info(png_ptr, info);
-	png_set_packing(png_ptr);
-
-	// Convert to a single buffer
-	u8 *pdata = calloc(w * h, 1);
-	const u8 *ptr = data;
-	for(u32 i = 0; i < tile_count; i++){
-		const u32 row = (i / 16) * 8;
-		const u32 col = (i % 16) * 8;
-		u8 rows[8][8] = {};
-			
-		for(u32 j = 0; j < 8; j++){
-			const u8 pix = *ptr;
-			ptr++;
-			
-			if(pix & 0x80) rows[j][0] |= 1;
-			if(pix & 0x40) rows[j][1] |= 1;
-			if(pix & 0x20) rows[j][2] |= 1;
-			if(pix & 0x10) rows[j][3] |= 1;
-			if(pix & 0x08) rows[j][4] |= 1;
-			if(pix & 0x04) rows[j][5] |= 1;
-			if(pix & 0x02) rows[j][6] |= 1;
-			if(pix & 0x01) rows[j][7] |= 1;
-		}
-		
-		for(u32 j = 0; j < 8; j++){
-			const u8 pix = *ptr;
-			ptr++;
-			
-			if(pix & 0x80) rows[j][0] |= 2;
-			if(pix & 0x40) rows[j][1] |= 2;
-			if(pix & 0x20) rows[j][2] |= 2;
-			if(pix & 0x10) rows[j][3] |= 2;
-			if(pix & 0x08) rows[j][4] |= 2;
-			if(pix & 0x04) rows[j][5] |= 2;
-			if(pix & 0x02) rows[j][6] |= 2;
-			if(pix & 0x01) rows[j][7] |= 2;
-		}
-		
-		// Copy over
-		for (u32 j = 0; j < 8; j++){
-			memcpy(pdata + (row + j) * w + col, &rows[j][0], 8);
-		}
-	}
-
-	// Write
-	for(u32 i = 0; i < h; i++) png_write_row(png_ptr, pdata + i * w);
-	
-	png_write_end(png_ptr, NULL);
-	free(pdata);
-
-	png_destroy_info_struct(png_ptr, &info);
-	png_destroy_write_struct(&png_ptr, NULL);
+static void byte_to_row(u8 byte, u8 bit, u8 row[]){
+	if(byte & 0x80) row[0] |= bit;
+	if(byte & 0x40) row[1] |= bit;
+	if(byte & 0x20) row[2] |= bit;
+	if(byte & 0x10) row[3] |= bit;
+	if(byte & 0x08) row[4] |= bit;
+	if(byte & 0x04) row[5] |= bit;
+	if(byte & 0x02) row[6] |= bit;
+	if(byte & 0x01) row[7] |= bit;
 }
 
 int main(int argc, char *argv[]){
-	if(argc != 4) die("Usage: %s palette infile.chr outfile.png\n", argv[0]);
+	SLIB_ASSERT_HARD(argc == 4, "Usage: %s palette infile.chr outfile.png", argv[0]);
 	
 	FILE *infile = fopen(argv[2], "r");
-	if(!infile) die("Can't open file\n");
+	SLIB_ASSERT_HARD(infile, "Can't open input file '%s'.", argv[2]);
 	
 	FILE *outfile = fopen(argv[3], "w");
-	if(!outfile) die("Can't open output file '%s'\n", argv[3]);
+	SLIB_ASSERT_HARD(outfile, "Can't open output file '%s'", argv[3]);
 	
 	struct stat st;
 	fstat(fileno(infile), &st);
-	if (st.st_size % 16 || !st.st_size) die("Unaligned CHR file?\n");
+	SLIB_ASSERT_HARD(st.st_size > 0 && st.st_size%16 == 0, "Unaligned CHR file?");
 	
-	u8 *data = calloc(st.st_size, 1);
-	fread(data, st.st_size, 1, infile);
+	u8 *chr_data = alloca(st.st_size);
+	fread(chr_data, st.st_size, 1, infile);
 	
 	u8 pal[4];
 	sscanf(argv[1], "%02hhx %02hhx %02hhx %02hhx", pal + 0, pal + 1, pal + 2, pal + 3);
 	
-	savepng(outfile, data, st.st_size / 16, pal);
+	// savepng(outfile, chr_data, st.st_size / 16, pal);
+	uint tile_count = st.st_size/16;
+	
+	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	SLIB_ASSERT_HARD(png_ptr, "PNG error");
+	
+	png_infop info = png_create_info_struct(png_ptr);
+	SLIB_ASSERT_HARD(info, "PNG error");
+	
+	if(setjmp(png_jmpbuf(png_ptr))) SLIB_ABORT("PNG error");
+	
+	uint w = 128;
+	uint h = 8*(tile_count + 15)/16;
+	
+	png_init_io(png_ptr, outfile);
+	png_set_IHDR(png_ptr, info, w, h, 2, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	
+	png_set_PLTE(png_ptr, info, (png_color[]){
+		NES_PALETTE[pal[0]],
+		NES_PALETTE[pal[1]],
+		NES_PALETTE[pal[2]],
+		NES_PALETTE[pal[3]]
+	}, 4);
+	
+	png_write_info(png_ptr, info);
+	png_set_packing(png_ptr);
+	
+	u8 *pixels = alloca(w*h);
+	bzero(pixels, w*h);
+	
+	for(uint i = 0; i < tile_count; i++){
+		const u8 *tile_bytes = chr_data + 16*i;
+		
+		uint row = 8*(i/16);
+		uint col = 8*(i%16);
+		u8 *tile_pixels = pixels + col + w*row;
+		
+		for(uint j = 0; j < 8; j++){
+			byte_to_row(tile_bytes[j + 0], 1, tile_pixels + w*j);
+			byte_to_row(tile_bytes[j + 8], 2, tile_pixels + w*j);
+		}
+	}
+
+	for(uint i = 0; i < h; i++) png_write_row(png_ptr, pixels + i * w);
+	
+	png_write_end(png_ptr, NULL);
+
+	png_destroy_info_struct(png_ptr, &info);
+	png_destroy_write_struct(&png_ptr, NULL);
 	
 	return EXIT_SUCCESS;
 }

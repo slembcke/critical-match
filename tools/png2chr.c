@@ -30,10 +30,8 @@ int main(int argc, char **argv){
 	uint rows = image.h/8;
 	uint cols = image.w/8;
 	
-	SLIB_LOG("%ux%u png to %u tiles.", image.w, image.h, rows * cols);
-	
-	for(u32 r = 0; r < image.h/8; r++) {
-		for(u32 c = 0; c < image.w/8; c++) {
+	for(uint r = 0; r < image.h/8; r++) {
+		for(uint c = 0; c < image.w/8; c++) {
 			const u8 *pixels = image.pixels + 8*(c + r*image.w);
 			u8 tile[16] = {};
 			tile_to_chr(pixels, image.w, tile);

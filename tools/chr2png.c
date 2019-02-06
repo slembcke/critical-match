@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
 	fseek(infile, 0, SEEK_END);
 	uint size = ftell(infile);
 	fseek(infile, 0, SEEK_SET);
-	SLIB_ASSERT_HARD(size > 0 && size%16 == 0, "Unaligned CHR file?");
+	SLIB_ASSERT_HARD(size > 0 && size%16 == 0, "File size not a multiple of 16?");
 	
 	u8 *chr_data = alloca(size);
 	fread(chr_data, size, 1, infile);

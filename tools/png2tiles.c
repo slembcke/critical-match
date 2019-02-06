@@ -1,50 +1,28 @@
-#include <stdint.h>
-
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
+#include <alloca.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "shared.h"
 
-typedef uint8_t u8;
-
-typedef struct {
-	u8 r, g, b, a;
-} Pixel;
-
-#define TILE_SIZE 8
-
-typedef struct{
-	Pixel pixels[TILE_SIZE*TILE_SIZE];
-} Tile;
-
-typedef struct {
-	int width, height, stride;
-	Pixel *pixels;
-} Image;
-
-static void blit_tile(Tile *tile, Image *image, unsigned x, unsigned y){
-	Pixel *origin = image->pixels + x + y*image->stride;
+int main(int argc, char **argv){
+	SLIB_ASSERT_HARD(argc == 3, "Usage: %s infile outfile", argv[0]);
 	
-	for(unsigned row = 0; row < TILE_SIZE; row++){
-		memcpy(tile->pixels + row*TILE_SIZE, origin + row*image->stride, sizeof(Pixel)*TILE_SIZE);
+	FILE *infile = fopen(argv[1], "r");
+	SLIB_ASSERT_HARD(infile, "Can't open input file '%s'", argv[1]);
+	
+	FILE *outfile = fopen(argv[2], "w");
+	SLIB_ASSERT_HARD(outfile, "Can't open output file '%s'", argv[2]);
+	
+	Image image = read_png(infile);
+	uint rows = image.h/8;
+	uint cols = image.w/8;
+	uint tile_count = rows*cols;
+	
+	for(uint r = 0; r < image.h/8; r++) {
+		for(uint c = 0; c < image.w/8; c++) {
+			const u8 *pixels = image.pixels + 8*(c + r*image.w);
+			// ... TODO
+		}
 	}
-}
-
-int main(void){
-	Image image;
 	
-	int channels;
-	image.pixels = (Pixel *)stbi_load("gfx/bg.png", &image.width, &image.height, &channels, 4);
-	printf("%d x %d @ %d channels\n", image.width, image.height, channels);
-	
-	Tile a, b;
-	blit_tile(&a, &image, 0, 0);
-	blit_tile(&a, &image, 8, 0);
-	
-	printf("%d\n", memcmp(a.pixels, b.pixels, sizeof(Tile)));
-	
-	printf("Tile count: %d", 12);
 	return EXIT_SUCCESS;
 }

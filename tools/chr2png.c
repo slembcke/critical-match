@@ -15,14 +15,13 @@ static const png_color NES_PALETTE[] = {
 	{236, 238, 236}, {168, 204, 236}, {188, 188, 236}, {212, 178, 236}, {236, 174, 236}, {236, 174, 212}, {236, 180, 176}, {228, 196, 144}, {204, 210, 120}, {180, 222, 120}, {168, 226, 144}, {152, 226, 180}, {160, 214, 228}, {160, 162, 160}, {  0,   0,   0}, {  0,   0,   0},
 };
 
-static void byte_to_row(u8 byte, u8 bit, u8 row[]){
-	if(bit == 1){
-		u64 foo = (byte * 0x8040201008040201) >> 7;
-		*(u64 *)row |= foo & 0x0101010101010101;
-	} else {
-		u64 foo = (byte * 0x8040201008040201) >> 6;
-		*(u64 *)row |= foo & 0x0202020202020202;
-	}
+// Convert the two chr bytes for a row into a run of indexed pixels.
+static u64 bytes_to_row(u8 byte0, u8 byte1){
+	// For each byte, copy in 9 bit intervals, shift into place and mask.
+	return (0
+		| (((byte0 * 0x8040201008040201) >> 7) & 0x0101010101010101)
+		| (((byte1 * 0x8040201008040201) >> 6) & 0x0202020202020202)
+	);
 }
 
 int main(int argc, char *argv[]){
@@ -34,18 +33,16 @@ int main(int argc, char *argv[]){
 	FILE *outfile = fopen(argv[3], "w");
 	SLIB_ASSERT_HARD(outfile, "Can't open output file '%s'", argv[3]);
 	
-	struct stat st;
-	fstat(fileno(infile), &st);
-	SLIB_ASSERT_HARD(st.st_size > 0 && st.st_size%16 == 0, "Unaligned CHR file?");
+	fseek(infile, 0, SEEK_END);
+	uint size = ftell(infile);
+	fseek(infile, 0, SEEK_SET);
+	SLIB_ASSERT_HARD(size > 0 && size%16 == 0, "Unaligned CHR file?");
 	
-	u8 *chr_data = alloca(st.st_size);
-	fread(chr_data, st.st_size, 1, infile);
+	u8 *chr_data = alloca(size);
+	fread(chr_data, size, 1, infile);
 	
 	u8 pal[4];
 	sscanf(argv[1], "%02hhx %02hhx %02hhx %02hhx", pal + 0, pal + 1, pal + 2, pal + 3);
-	
-	// savepng(outfile, chr_data, st.st_size / 16, pal);
-	uint tile_count = st.st_size/16;
 	
 	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	SLIB_ASSERT_HARD(png_ptr, "PNG error");
@@ -55,18 +52,13 @@ int main(int argc, char *argv[]){
 	
 	if(setjmp(png_jmpbuf(png_ptr))) SLIB_ABORT("PNG error");
 	
+	uint tile_count = size/16;
 	uint w = 128;
 	uint h = 8*(tile_count + 15)/16;
 	
 	png_init_io(png_ptr, outfile);
 	png_set_IHDR(png_ptr, info, w, h, 2, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-	
-	png_set_PLTE(png_ptr, info, (png_color[]){
-		NES_PALETTE[pal[0]],
-		NES_PALETTE[pal[1]],
-		NES_PALETTE[pal[2]],
-		NES_PALETTE[pal[3]]
-	}, 4);
+	png_set_PLTE(png_ptr, info, (png_color[]){NES_PALETTE[pal[0]], NES_PALETTE[pal[1]], NES_PALETTE[pal[2]], NES_PALETTE[pal[3]]}, 4);
 	
 	png_write_info(png_ptr, info);
 	png_set_packing(png_ptr);
@@ -75,15 +67,10 @@ int main(int argc, char *argv[]){
 	bzero(pixels, w*h);
 	
 	for(uint i = 0; i < tile_count; i++){
-		const u8 *tile_bytes = chr_data + 16*i;
-		
-		uint row = 8*(i/16);
-		uint col = 8*(i%16);
-		u8 *tile_pixels = pixels + col + w*row;
-		
-		for(uint j = 0; j < 8; j++){
-			byte_to_row(tile_bytes[j + 0], 1, tile_pixels + w*j);
-			byte_to_row(tile_bytes[j + 8], 2, tile_pixels + w*j);
+		const u8 *tile_data = chr_data + 16*i;
+		uint row = 8*(i/16), col = 8*(i%16);
+		for(uint y = 0; y < 8; y++){
+			*(u64 *)(pixels + col + w*(row + y)) = bytes_to_row(tile_data[y], tile_data[y + 8]);
 		}
 	}
 

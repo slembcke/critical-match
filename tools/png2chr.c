@@ -10,30 +10,18 @@ typedef struct {
 	u8 *pixels;
 } Image;
 
-typedef struct {
-	u8 bytes[16];
-} Tile;
-
 // Convert a row of 8 pixels to a CHR byte.
-static inline uint row_to_chr(const u8 *row, u8 bit){
-	return (0
-			| ((row[0] & bit) << 7) | ((row[1] & bit) << 6) | ((row[2] & bit) << 5) | ((row[3] & bit) << 4)
-			| ((row[4] & bit) << 3) | ((row[5] & bit) << 2) | ((row[6] & bit) << 1) | ((row[7] & bit) << 0)
-	);
-
+static inline u8 row_to_chr(const void *pixels, uint shift){
+	// Load 64 bits / 8 bytes for the whole row of the tile.
+	// Shift so the bit we want is in the top bit of each byte and mask.
+	// Mod 511 (2**9 - 1) selects each bit per 9 bit sequence to collect them into a byte.
+	// In combinatino with the earlier shift, this reverses the byte -> bit mapping.
+	return ((*(u64 *)pixels << shift) & 0x8080808080808080) % 511;
 }
 
-static Tile tile_to_chr(const u8 *pixels, uint stride){
-	return (Tile){{
-		row_to_chr(pixels + 0*stride, 1) >> 0, row_to_chr(pixels + 1*stride, 1) >> 0,
-		row_to_chr(pixels + 2*stride, 1) >> 0, row_to_chr(pixels + 3*stride, 1) >> 0,
-		row_to_chr(pixels + 4*stride, 1) >> 0, row_to_chr(pixels + 5*stride, 1) >> 0,
-		row_to_chr(pixels + 6*stride, 1) >> 0, row_to_chr(pixels + 7*stride, 1) >> 0,
-		row_to_chr(pixels + 0*stride, 2) >> 1, row_to_chr(pixels + 1*stride, 2) >> 1,
-		row_to_chr(pixels + 2*stride, 2) >> 1, row_to_chr(pixels + 3*stride, 2) >> 1,
-		row_to_chr(pixels + 4*stride, 2) >> 1, row_to_chr(pixels + 5*stride, 2) >> 1,
-		row_to_chr(pixels + 6*stride, 2) >> 1, row_to_chr(pixels + 7*stride, 2) >> 1,
-	}};
+static void tile_to_chr(const u8 *pixels, uint stride, u8 tile[]){
+	for(uint i = 0; i < 8; i++) tile[i + 0] = row_to_chr(pixels + i*stride, 7);
+	for(uint i = 0; i < 8; i++) tile[i + 8] = row_to_chr(pixels + i*stride, 6);
 }
 
 int main(int argc, char **argv){
@@ -83,7 +71,8 @@ int main(int argc, char **argv){
 	for(u32 r = 0; r < image.h/8; r++) {
 		for(u32 c = 0; c < image.w/8; c++) {
 			const u8 *pixels = image.pixels + 8*(c + r*image.w);
-			Tile tile = tile_to_chr(pixels, image.w);
+			u8 tile[16] = {};
+			tile_to_chr(pixels, image.w, tile);
 			fwrite(&tile, sizeof(tile), 1, outfile);
 		}
 	}

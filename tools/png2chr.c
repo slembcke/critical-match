@@ -26,10 +26,7 @@ int main(int argc, char **argv){
 	FILE *outfile = fopen(argv[2], "w");
 	SLIB_ASSERT_HARD(outfile, "Can't open output file '%s'", argv[2]);
 	
-	Image image = read_png(infile);
-	uint rows = image.h/8;
-	uint cols = image.w/8;
-	
+	Image image = read_png(infile);	
 	for(uint r = 0; r < image.h/8; r++) {
 		for(uint c = 0; c < image.w/8; c++) {
 			const u8 *pixels = image.pixels + 8*(c + r*image.w);

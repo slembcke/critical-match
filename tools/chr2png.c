@@ -16,14 +16,13 @@ static const png_color NES_PALETTE[] = {
 };
 
 static void byte_to_row(u8 byte, u8 bit, u8 row[]){
-	if(byte & 0x80) row[0] |= bit;
-	if(byte & 0x40) row[1] |= bit;
-	if(byte & 0x20) row[2] |= bit;
-	if(byte & 0x10) row[3] |= bit;
-	if(byte & 0x08) row[4] |= bit;
-	if(byte & 0x04) row[5] |= bit;
-	if(byte & 0x02) row[6] |= bit;
-	if(byte & 0x01) row[7] |= bit;
+	if(bit == 1){
+		u64 foo = (byte * 0x8040201008040201) >> 7;
+		*(u64 *)row |= foo & 0x0101010101010101;
+	} else {
+		u64 foo = (byte * 0x8040201008040201) >> 6;
+		*(u64 *)row |= foo & 0x0202020202020202;
+	}
 }
 
 int main(int argc, char *argv[]){

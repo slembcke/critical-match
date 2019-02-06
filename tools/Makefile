@@ -9,7 +9,7 @@ clean:
 
 slib.o: slib.h
 
-png2chr: png2chr.o slib.o
+png2chr: png2chr.o slib.o shared.o
 	$(CC) -o $@ $^ $(CFLAGS) -lpng
 
 chr2png: chr2png.o slib.o

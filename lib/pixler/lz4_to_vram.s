@@ -17,10 +17,16 @@
 
 .proc ram_to_vram
 	; Set the VRAM address.
-	lda	dst+1
-	sta	PPU_VRAM_ADDR
+	ldx	dst+1
+	stx	PPU_VRAM_ADDR
 	lda	dst+0
 	sta	PPU_VRAM_ADDR
+	
+	; add run_length+0
+	; sta dst+0
+	; txa
+	; adc run_length+1
+	; sta dst+1
 	
 	ldx run_length+0
 	@loop:
@@ -49,11 +55,10 @@
 .endproc
 
 .proc vram_to_vram
-	ldy run_length+0
+	ldx run_length+0
 	
 	@loop:
-		; lda	run_length+0
-		tya
+		txa
 		ora	run_length+1
 		bne	:+
 			rts
@@ -66,8 +71,8 @@
 		sta	PPU_VRAM_ADDR
 		
 		; Read twice, the first value is garbage.
-		ldx	PPU_VRAM_IO
-		ldx	PPU_VRAM_IO
+		ldy	PPU_VRAM_IO
+		ldy	PPU_VRAM_IO
 		
 		; Set destination address.
 		lda	dst+1
@@ -76,7 +81,7 @@
 		sta	PPU_VRAM_ADDR
 		
 		; Write byte.
-		stx	PPU_VRAM_IO
+		sty	PPU_VRAM_IO
 		
 		; Increment pointers.
 		inc	back_src+0
@@ -90,11 +95,11 @@
 		:
 		
 		; Decrement counter.
-		tya
+		txa
 		bne :+
 			dec run_length+1
 		:
-		dey
+		dex
 		
 		jmp @loop
 .endproc

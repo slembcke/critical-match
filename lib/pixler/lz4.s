@@ -1,10 +1,6 @@
-;
-; Lauri Kasanen, 6 Jun 2017
-; (C) Mega Cat Studios
-; An optimized LZ4 decompressor
-;
-
-; Modified by slembcke to support decompressing to either RAM or VRAM.
+; Originally based on some lz4 code by Lauri Kasanen and Shiru.
+; I went through and rewrote the whole thing for size,
+; and I don't think there is much left of the original code.
 
 .macpack generic
 .include "zeropage.inc"
@@ -53,7 +49,7 @@ px_lz4_dst_to_dst: jmp $FFFC
 	@loop:
 	; Read and save token
 	jsr px_lz4_read_src
-	sta token
+	pha
 	
 	; Decode literal count from token upper nibble.
 	lsr a
@@ -78,9 +74,9 @@ px_lz4_dst_to_dst: jmp $FFFC
 	sta offset+1
 	
 	; Terminate if offset is 0.
-	lda offset+0
-	ora offset+1
+	ora offset+0
 	bne :+
+		pla
 		rts
 	:
 	
@@ -93,11 +89,11 @@ px_lz4_dst_to_dst: jmp $FFFC
 	sta back_src+1
 	
 	; Decode backref length from token lower nibble.
-	lda token
+	pla
 	and #$0F
 	add #4
 	sta run_length+0
-	ldx #0
+	; ldx #0 ; x is zeroed by px_lz4_src_to_dst
 	stx run_length+1
 	
 	; Check if we have to consume additional length bytes.

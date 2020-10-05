@@ -409,8 +409,8 @@ void main(void){
 	px_addr(NT_ADDR(2, 0, 0));
 	px_fill(32*30, 0x00);
 	
-	music_init(MUSIC);
-	sound_init(SOUNDS);
+	music_init(&MUSIC);
+	sound_init(&SOUNDS);
 	
 	// debug_chr();
 	main_menu();

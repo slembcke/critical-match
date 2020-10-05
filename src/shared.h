@@ -10,9 +10,9 @@ extern u8 ix, iy, idx;
 
 extern u8 joy0, joy1;
 
-typedef struct {} AudioChunk;
-extern const AudioChunk MUSIC[];
-extern const AudioChunk SOUNDS[];
+typedef struct AudioChunk AudioChunk;
+extern const AudioChunk MUSIC;
+extern const AudioChunk SOUNDS;
 
 void music_init(const AudioChunk *music);
 void music_play(u8 song);
@@ -101,7 +101,8 @@ void player_draw(void);
 void player_draw_blocks(void);
 void player_draw_grapple(void);
 
-typedef struct {} GameState;
+// TODO is a sentinel type for state machine functions a dumb idea...?
+typedef struct {u8 _;} GameState;
 
 // Defined by cc65
 extern const unsigned char _hextab[];

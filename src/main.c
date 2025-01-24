@@ -34,7 +34,15 @@ u8 PATH_X[] = {168, 168, 170, 170, 172, 172, 174, 174, 176, 176, 178, 178, 180, 
 u8 PATH_Y[] = {114, 113, 113, 114, 114, 114, 115, 115, 116, 115, 115, 116, 116, 116, 117, 117, 118, 118, 119, 119, 121, 122, 122, 123, 125, 125, 126, 126, 128, 129, 129, 130, 132, 132, 133, 134, 135, 135, 136, 137, 138, 138, 139, 140, 141, 141, 142, 143, 144, 144, 144, 144, 144, 144, 145, 145, 145, 145, 145, 146, 146, 146, 146, 146, 147, 146, 146, 146, 146, 146, 145, 145, 145, 145, 145, 144, 144, 144, 144, 144, 144, 143, 143, 142, 142, 141, 141, 140, 140, 140, 139, 139, 138, 138, 137, 137, 137, 136, 135, 135, 134, 134, 133, 133, 132, 131, 131, 130, 130, 129, 129, 128, 128, 127, 126, 125, 125, 124, 123, 122, 122, 121, 120, 119, 119, 118, 117, 116, 116, 114, 114, 113, 113, 111, 111, 110, 110, 108, 108, 107, 107, 105, 105, 104, 104, 102, 102, 101, 101, 100, 99, 98, 98, 97, 97, 95, 95, 94, 94, 93, 93, 91, 90, 89, 88, 87, 87, 86, 85, 84, 83, 83, 82, 81, 80, 79, 79, 78, 78, 78, 77, 77, 77, 76, 76, 76, 75, 75, 75, 74, 74, 74, 75, 74, 74, 74, 75, 75, 75, 76, 76, 76, 77, 77, 77, 78, 78, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 112, 112, 112, 113, 113, 113, 114, 114, 114, 115, 115, 115, 116, 116, 116};
 
 
+typedef struct {
+	u8 value, prev, press, release;
+} Gamepad;
+
+Gamepad pad0;
+
 void main(void){
+	joy_install(nes_stdjoy_joy);
+	
 	// Set the palette.
 	waitvsync();
 	px_addr(PAL_ADDR);
@@ -57,6 +65,17 @@ void main(void){
 
 	while(true){
 		static s8 offset;
+		static u8 digit = 5;
+		
+		pad0.prev = pad0.value;
+		pad0.value = joy_read(0);
+		pad0.press = pad0.value & (pad0.value ^ pad0.prev);
+		pad0.release = pad0.prev & (pad0.value ^ pad0.prev);
+		
+		if(JOY_SELECT(pad0.value)){
+			if(JOY_UP(pad0.press)) digit++;
+			if(JOY_DOWN(pad0.press)) digit--;
+		}
 		
 		offset = BOB[px_ticks & (sizeof(BOB) - 1)];
 		PX.scroll_y = 480 + (int)offset;
@@ -66,26 +85,26 @@ void main(void){
 		px_spr(168, 113 - offset, 0x20, 0xE0);
 		
 		// DEBUG_PROFILE_START();
-		px_spr(PATH_X[(px_ticks - 0x00) & 0xFF], PATH_Y[(px_ticks - 0x00) & 0xFF] - offset, 0x00, 0xF0); // G
-		px_spr(PATH_X[(px_ticks - 0x08) & 0xFF], PATH_Y[(px_ticks - 0x08) & 0xFF] - offset, 0x00, 0xF1); // l
-		px_spr(PATH_X[(px_ticks - 0x10) & 0xFF], PATH_Y[(px_ticks - 0x10) & 0xFF] - offset, 0x00, 0xF2); // o
-		px_spr(PATH_X[(px_ticks - 0x18) & 0xFF], PATH_Y[(px_ticks - 0x18) & 0xFF] - offset, 0x00, 0xF3); // b
-		px_spr(PATH_X[(px_ticks - 0x20) & 0xFF], PATH_Y[(px_ticks - 0x20) & 0xFF] - offset, 0x00, 0xF4); // a
-		px_spr(PATH_X[(px_ticks - 0x28) & 0xFF], PATH_Y[(px_ticks - 0x28) & 0xFF] - offset, 0x00, 0xF1); // l
+		px_spr(PATH_X[(px_ticks - 0x00) & 0xFF], PATH_Y[(px_ticks - 0x00) & 0xFF] - offset, 0x00, 0xE1); // G
+		px_spr(PATH_X[(px_ticks - 0x08) & 0xFF], PATH_Y[(px_ticks - 0x08) & 0xFF] - offset, 0x00, 0xE2); // l
+		px_spr(PATH_X[(px_ticks - 0x10) & 0xFF], PATH_Y[(px_ticks - 0x10) & 0xFF] - offset, 0x00, 0xE3); // o
+		px_spr(PATH_X[(px_ticks - 0x18) & 0xFF], PATH_Y[(px_ticks - 0x18) & 0xFF] - offset, 0x00, 0xE4); // b
+		px_spr(PATH_X[(px_ticks - 0x20) & 0xFF], PATH_Y[(px_ticks - 0x20) & 0xFF] - offset, 0x00, 0xE5); // a
+		px_spr(PATH_X[(px_ticks - 0x28) & 0xFF], PATH_Y[(px_ticks - 0x28) & 0xFF] - offset, 0x00, 0xE6); // l
 		
-		px_spr(PATH_X[(px_ticks - 0x38) & 0xFF], PATH_Y[(px_ticks - 0x38) & 0xFF] - offset, 0x00, 0xF0); // G
-		px_spr(PATH_X[(px_ticks - 0x40) & 0xFF], PATH_Y[(px_ticks - 0x40) & 0xFF] - offset, 0x00, 0xF4); // a
-		px_spr(PATH_X[(px_ticks - 0x48) & 0xFF], PATH_Y[(px_ticks - 0x48) & 0xFF] - offset, 0x00, 0xF5); // m
-		px_spr(PATH_X[(px_ticks - 0x50) & 0xFF], PATH_Y[(px_ticks - 0x50) & 0xFF] - offset, 0x00, 0xF6); // e
+		px_spr(PATH_X[(px_ticks - 0x38) & 0xFF], PATH_Y[(px_ticks - 0x38) & 0xFF] - offset, 0x00, 0xE7); // G
+		px_spr(PATH_X[(px_ticks - 0x40) & 0xFF], PATH_Y[(px_ticks - 0x40) & 0xFF] - offset, 0x00, 0xE8); // a
+		px_spr(PATH_X[(px_ticks - 0x48) & 0xFF], PATH_Y[(px_ticks - 0x48) & 0xFF] - offset, 0x00, 0xE9); // m
+		px_spr(PATH_X[(px_ticks - 0x50) & 0xFF], PATH_Y[(px_ticks - 0x50) & 0xFF] - offset, 0x00, 0xEA); // e
 		
-		px_spr(PATH_X[(px_ticks - 0x60) & 0xFF], PATH_Y[(px_ticks - 0x60) & 0xFF] - offset, 0x00, 0xF7); // J
-		px_spr(PATH_X[(px_ticks - 0x68) & 0xFF], PATH_Y[(px_ticks - 0x68) & 0xFF] - offset, 0x00, 0xF4); // a
-		px_spr(PATH_X[(px_ticks - 0x70) & 0xFF], PATH_Y[(px_ticks - 0x70) & 0xFF] - offset, 0x00, 0xF5); // m
+		px_spr(PATH_X[(px_ticks - 0x60) & 0xFF], PATH_Y[(px_ticks - 0x60) & 0xFF] - offset, 0x00, 0xEB); // J
+		px_spr(PATH_X[(px_ticks - 0x68) & 0xFF], PATH_Y[(px_ticks - 0x68) & 0xFF] - offset, 0x00, 0xEC); // a
+		px_spr(PATH_X[(px_ticks - 0x70) & 0xFF], PATH_Y[(px_ticks - 0x70) & 0xFF] - offset, 0x00, 0xED); // m
 		
-		px_spr(PATH_X[(px_ticks - 0x80) & 0xFF], PATH_Y[(px_ticks - 0x80) & 0xFF] - offset, 0x00, 0xF8); // 2
-		px_spr(PATH_X[(px_ticks - 0x88) & 0xFF], PATH_Y[(px_ticks - 0x88) & 0xFF] - offset, 0x00, 0xF9); // 0
-		px_spr(PATH_X[(px_ticks - 0x90) & 0xFF], PATH_Y[(px_ticks - 0x90) & 0xFF] - offset, 0x00, 0xFA); // 2
-		px_spr(PATH_X[(px_ticks - 0x98) & 0xFF], PATH_Y[(px_ticks - 0x98) & 0xFF] - offset, 0x00, 0xFB); // 0
+		px_spr(PATH_X[(px_ticks - 0x80) & 0xFF], PATH_Y[(px_ticks - 0x80) & 0xFF] - offset, 0x00, 0xF2); // 2
+		px_spr(PATH_X[(px_ticks - 0x88) & 0xFF], PATH_Y[(px_ticks - 0x88) & 0xFF] - offset, 0x00, 0xF0); // 0
+		px_spr(PATH_X[(px_ticks - 0x90) & 0xFF], PATH_Y[(px_ticks - 0x90) & 0xFF] - offset, 0x00, 0xF2); // 2
+		px_spr(PATH_X[(px_ticks - 0x98) & 0xFF], PATH_Y[(px_ticks - 0x98) & 0xFF] - offset, 0x00, 0xF0 + digit); // X
 		// DEBUG_PROFILE_END();
 		
 		px_spr_end();

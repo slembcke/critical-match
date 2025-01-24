@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <nes.h>
+#include <joystick.h>
 
 // Convince vscode to ignore cc65 features.
 #ifndef __CC65__

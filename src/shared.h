@@ -8,12 +8,11 @@ extern u8 ix, iy, idx;
 #pragma zpsym("iy");
 #pragma zpsym("idx");
 
-typedef struct {} AudioChunk;
-extern const AudioChunk MUSIC[];
-extern const AudioChunk SOUNDS[];
+extern const u8 MUSIC[];
+extern const u8 SOUNDS[];
 
-void music_init(const AudioChunk *music);
-void sound_init(const AudioChunk *sounds);
+void music_init(const u8 *music);
+void sound_init(const u8 *sounds);
 void music_play(u8 song);
 void music_pause();
 void music_stop();
@@ -28,8 +27,6 @@ enum {
 };
 
 void sound_play(u16 sound);
-
-typedef struct {} GameState;
 
 #ifdef DEBUG
 	#define DEBUG_PROFILE_START() px_profile_start()

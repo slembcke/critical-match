@@ -106,7 +106,7 @@ $(ROM): ld65.cfg $(OBJS)
 	xxd -r $< > $@
 
 %.bin: %.tmx
-	python tools/tmx2bin.py $< > $@
+	python2 tools/tmx2bin.py $< > $@
 
 %.lz4: %.bin tools/lz4x
 	tools/lz4x -f9 $< $@

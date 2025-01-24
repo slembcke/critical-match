@@ -18,9 +18,9 @@ static const u8 PALETTE[] = {
 	CLR_BG, 0x00, 0x00, 0x00,
 };
 
-static GameState main_menu(void);
+static void main_menu(void);
 static void pause(void);
-static GameState game_over(void);
+static void game_over(void);
 
 // n = 256; [int(round(16*math.sin(2.0*math.pi*i/float(n)))) for i in range(n)]
 static const s8 BOB[] = {0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11, 11, 10, 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 6, 6, 6, 5, 5, 5, 4, 4, 4, 3, 3, 2, 2, 2, 1, 1, 0, 0, 0, -1, -1, -2, -2, -2, -3, -3, -4, -4, -4, -5, -5, -5, -6, -6, -6, -7, -7, -8, -8, -8, -9, -9, -9, -10, -10, -10, -10, -11, -11, -11, -12, -12, -12, -12, -13, -13, -13, -13, -14, -14, -14, -14, -14, -14, -15, -15, -15, -15, -15, -15, -15, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -16, -15, -15, -15, -15, -15, -15, -15, -14, -14, -14, -14, -14, -14, -13, -13, -13, -13, -12, -12, -12, -12, -11, -11, -11, -10, -10, -10, -10, -9, -9, -9, -8, -8, -8, -7, -7, -6, -6, -6, -5, -5, -5, -4, -4, -4, -3, -3, -2, -2, -2, -1, -1, 0};
@@ -59,7 +59,7 @@ void main(void){
 		static s8 offset;
 		
 		offset = BOB[px_ticks & (sizeof(BOB) - 1)];
-		PX.scroll_y = 480 + offset;
+		PX.scroll_y = 480 + (int)offset;
 		
 		// Blocker sprites.
 		px_spr( 80, 116 - offset, 0x20, 0xE0);
@@ -84,8 +84,8 @@ void main(void){
 		
 		px_spr(PATH_X[(px_ticks - 0x80) & 0xFF], PATH_Y[(px_ticks - 0x80) & 0xFF] - offset, 0x00, 0xF8); // 2
 		px_spr(PATH_X[(px_ticks - 0x88) & 0xFF], PATH_Y[(px_ticks - 0x88) & 0xFF] - offset, 0x00, 0xF9); // 0
-		px_spr(PATH_X[(px_ticks - 0x90) & 0xFF], PATH_Y[(px_ticks - 0x90) & 0xFF] - offset, 0x00, 0xF8); // 2
-		px_spr(PATH_X[(px_ticks - 0x98) & 0xFF], PATH_Y[(px_ticks - 0x98) & 0xFF] - offset, 0x00, 0xF9); // 0
+		px_spr(PATH_X[(px_ticks - 0x90) & 0xFF], PATH_Y[(px_ticks - 0x90) & 0xFF] - offset, 0x00, 0xFA); // 2
+		px_spr(PATH_X[(px_ticks - 0x98) & 0xFF], PATH_Y[(px_ticks - 0x98) & 0xFF] - offset, 0x00, 0xFB); // 0
 		// DEBUG_PROFILE_END();
 		
 		px_spr_end();
